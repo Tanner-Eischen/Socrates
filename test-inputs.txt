@@ -1,0 +1,8 @@
+1
+I need help
+subtract 5 from both sides
+2x = 8
+divide by 2
+x = 4
+validate
+quit

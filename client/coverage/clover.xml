@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1762289245715" clover="3.2.0">
+  <project timestamp="1762289245715" name="All files">
+    <metrics statements="99" coveredstatements="98" conditionals="41" coveredconditionals="39" methods="30" coveredmethods="30" elements="170" coveredelements="167" complexity="0" loc="99" ncloc="99" packages="3" files="6" classes="6"/>
+    <package name="src">
+      <metrics statements="28" coveredstatements="28" conditionals="6" coveredconditionals="6" methods="9" coveredmethods="9"/>
+      <file name="AuthContext.tsx" path="C:\Users\tanne\Gauntlet\SocraTeach\client\src\AuthContext.tsx">
+        <metrics statements="22" coveredstatements="22" conditionals="4" coveredconditionals="4" methods="8" coveredmethods="8"/>
+        <line num="18" count="4" type="stmt"/>
+        <line num="21" count="64" type="stmt"/>
+        <line num="22" count="64" type="stmt"/>
+        <line num="24" count="64" type="stmt"/>
+        <line num="26" count="30" type="stmt"/>
+        <line num="27" count="30" type="cond" truecount="2" falsecount="0"/>
+        <line num="28" count="3" type="stmt"/>
+        <line num="29" count="2" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="3" type="stmt"/>
+        <line num="33" count="27" type="stmt"/>
+        <line num="37" count="64" type="stmt"/>
+        <line num="38" count="6" type="stmt"/>
+        <line num="39" count="3" type="stmt"/>
+        <line num="40" count="3" type="stmt"/>
+        <line num="43" count="64" type="stmt"/>
+        <line num="44" count="3" type="stmt"/>
+        <line num="45" count="3" type="stmt"/>
+        <line num="48" count="64" type="stmt"/>
+        <line num="56" count="149" type="stmt"/>
+        <line num="57" count="149" type="cond" truecount="2" falsecount="0"/>
+        <line num="58" count="147" type="stmt"/>
+      </file>
+      <file name="api.ts" path="C:\Users\tanne\Gauntlet\SocraTeach\client\src\api.ts">
+        <metrics statements="6" coveredstatements="6" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="2" type="stmt"/>
+        <line num="11" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="14" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.pages">
+      <metrics statements="67" coveredstatements="66" conditionals="35" coveredconditionals="33" methods="20" coveredmethods="20"/>
+      <file name="Login.tsx" path="C:\Users\tanne\Gauntlet\SocraTeach\client\src\pages\Login.tsx">
+        <metrics statements="17" coveredstatements="17" conditionals="6" coveredconditionals="6" methods="2" coveredmethods="2"/>
+        <line num="6" count="23" type="stmt"/>
+        <line num="7" count="23" type="stmt"/>
+        <line num="8" count="23" type="stmt"/>
+        <line num="9" count="23" type="stmt"/>
+        <line num="11" count="23" type="stmt"/>
+        <line num="12" count="5" type="stmt"/>
+        <line num="13" count="5" type="stmt"/>
+        <line num="14" count="5" type="stmt"/>
+        <line num="16" count="5" type="stmt"/>
+        <line num="17" count="5" type="stmt"/>
+        <line num="18" count="5" type="stmt"/>
+        <line num="20" count="5" type="stmt"/>
+        <line num="21" count="5" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="24" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="30" count="23" type="stmt"/>
+      </file>
+      <file name="Problems.tsx" path="C:\Users\tanne\Gauntlet\SocraTeach\client\src\pages\Problems.tsx">
+        <metrics statements="13" coveredstatements="13" conditionals="8" coveredconditionals="8" methods="6" coveredmethods="6"/>
+        <line num="18" count="23" type="stmt"/>
+        <line num="19" count="23" type="stmt"/>
+        <line num="20" count="23" type="stmt"/>
+        <line num="21" count="23" type="stmt"/>
+        <line num="23" count="23" type="stmt"/>
+        <line num="24" count="8" type="stmt"/>
+        <line num="25" count="5" type="stmt"/>
+        <line num="26" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="27" count="7" type="stmt"/>
+        <line num="30" count="23" type="cond" truecount="2" falsecount="0"/>
+        <line num="31" count="16" type="stmt"/>
+        <line num="38" count="7" type="stmt"/>
+        <line num="75" count="4" type="stmt"/>
+      </file>
+      <file name="Session.tsx" path="C:\Users\tanne\Gauntlet\SocraTeach\client\src\pages\Session.tsx">
+        <metrics statements="37" coveredstatements="36" conditionals="21" coveredconditionals="19" methods="12" coveredmethods="12"/>
+        <line num="13" count="89" type="stmt"/>
+        <line num="14" count="89" type="stmt"/>
+        <line num="15" count="89" type="stmt"/>
+        <line num="16" count="89" type="stmt"/>
+        <line num="17" count="89" type="stmt"/>
+        <line num="18" count="89" type="stmt"/>
+        <line num="19" count="89" type="stmt"/>
+        <line num="20" count="89" type="stmt"/>
+        <line num="21" count="89" type="stmt"/>
+        <line num="23" count="89" type="stmt"/>
+        <line num="25" count="10" type="stmt"/>
+        <line num="26" count="9" type="stmt"/>
+        <line num="27" count="9" type="stmt"/>
+        <line num="30" count="9" type="stmt"/>
+        <line num="37" count="9" type="stmt"/>
+        <line num="39" count="9" type="stmt"/>
+        <line num="47" count="89" type="stmt"/>
+        <line num="48" count="25" type="cond" truecount="3" falsecount="1"/>
+        <line num="49" count="0" type="stmt"/>
+        <line num="53" count="89" type="stmt"/>
+        <line num="54" count="4" type="cond" truecount="3" falsecount="1"/>
+        <line num="56" count="4" type="stmt"/>
+        <line num="62" count="4" type="stmt"/>
+        <line num="63" count="4" type="stmt"/>
+        <line num="64" count="4" type="stmt"/>
+        <line num="66" count="4" type="stmt"/>
+        <line num="68" count="4" type="stmt"/>
+        <line num="75" count="4" type="stmt"/>
+        <line num="81" count="2" type="stmt"/>
+        <line num="83" count="4" type="stmt"/>
+        <line num="87" count="89" type="cond" truecount="2" falsecount="0"/>
+        <line num="88" count="20" type="stmt"/>
+        <line num="95" count="69" type="stmt"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="121" count="77" type="stmt"/>
+        <line num="151" count="54" type="stmt"/>
+        <line num="152" count="55" type="cond" truecount="3" falsecount="0"/>
+      </file>
+    </package>
+    <package name="src.test">
+      <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="utils.tsx" path="C:\Users\tanne\Gauntlet\SocraTeach\client\src\test\utils.tsx">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="6" count="25" type="stmt"/>
+        <line num="15" count="4" type="stmt"/>
+        <line num="22" count="4" type="stmt"/>
+        <line num="38" count="4" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

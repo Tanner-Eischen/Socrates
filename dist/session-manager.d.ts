@@ -1,0 +1,44 @@
+import { SessionMetadata, SessionPerformance, StudentProfile, SessionResumption, SessionSummary, InterruptionPoint } from './types';
+export declare class SessionManager {
+    private static instance;
+    private activeSessions;
+    private readonly MAX_ACTIVE_SESSIONS;
+    private readonly SESSION_TIMEOUT_MS;
+    private adaptiveController;
+    private constructor();
+    static getInstance(): SessionManager;
+    createSession(problemData: any, studentProfile?: StudentProfile, parentSessionId?: string): Promise<string>;
+    resumeSession(sessionId: string): Promise<SessionResumption>;
+    saveSessionProgress(sessionId: string, conversationUpdate: any, performanceUpdate?: Partial<SessionPerformance>): Promise<void>;
+    handleSessionInterruption(sessionId: string, interruptionReason: string, currentContext: any): Promise<InterruptionPoint>;
+    completeSession(sessionId: string, finalPerformance: SessionPerformance, learningOutcomes: string[]): Promise<SessionSummary>;
+    getResumableSessions(): Promise<SessionMetadata[]>;
+    generateSessionAnalytics(timeRange?: number): Promise<any>;
+    private generateSessionId;
+    private createDefaultProfile;
+    private estimateSteps;
+    private estimateDuration;
+    private getTypeMultiplier;
+    private extractTags;
+    private generateSessionGoals;
+    private generateContextSummary;
+    private generateResumptionSuggestions;
+    private captureCurrentContext;
+    private extractKeyInsights;
+    private generateResumptionHints;
+    private captureCriticalState;
+    private assessGoalAchievement;
+    private calculateContinuityScore;
+    private generatePostSessionRecommendations;
+    private updateSessionHistory;
+    private updateSessionAnalytics;
+    private logSessionEvent;
+    private estimateRemainingTime;
+    private calculateAverageDuration;
+    private calculateAverageContinuityScore;
+    private analyzeMostCommonInterruptions;
+    private analyzeSessionPatterns;
+    private calculateSessionLengthTrend;
+}
+export declare const sessionManager: SessionManager;
+//# sourceMappingURL=session-manager.d.ts.map
