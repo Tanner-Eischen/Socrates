@@ -40,15 +40,15 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg">
-        <header className="sticky top-0 z-10 border-b border-white/5 bg-bg/80 backdrop-blur">
+      <div className="min-h-screen bg-slate-900">
+        <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
           <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white">SocraTeach</h1>
+            <h1 className="text-xl font-bold text-gray-100">SocraTeach</h1>
           </div>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-white">Welcome back!</h2>
+            <h2 className="text-3xl font-bold text-gray-100">Welcome back!</h2>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
             {[1, 2, 3, 4].map((i) => (
@@ -56,7 +56,7 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-white">Recent Sessions</h3>
+            <h3 className="text-xl font-semibold text-gray-100">Recent Sessions</h3>
             {[1, 2, 3].map((i) => (
               <SessionCardSkeleton key={i} />
             ))}
@@ -67,24 +67,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-slate-900 text-gray-100">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-bg/80 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">SocraTeach</h1>
+          <h1 className="text-xl font-bold text-gray-100">SocraTeach</h1>
           <div className="flex items-center gap-4">
             <Link
-              to="/problems"
-              className="text-sm text-slate-300 hover:text-white"
+              to="/new"
+              className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm transition"
             >
-              Browse Problems
+              New Session
             </Link>
-            <span className="text-sm text-slate-400">
+            <span className="text-sm text-gray-300">
               {user?.name || user?.email}
             </span>
             <button
               onClick={logout}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 text-sm transition"
             >
               Logout
             </button>
@@ -97,48 +97,48 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-white">
+            <h2 className="text-3xl font-bold text-gray-100">
               Welcome back, {user?.name?.split(' ')[0] || 'there'}!
             </h2>
-            <p className="mt-2 text-slate-400">
+            <p className="mt-2 text-gray-400">
               Here's your learning progress overview
             </p>
           </div>
           <Link
-            to="/submit-problem"
-            className="rounded-xl bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/90 flex items-center gap-2"
+            to="/new"
+            className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-500 flex items-center gap-2 transition"
           >
             <span className="text-xl">✏️</span>
-            Submit Problem
+            New Session
           </Link>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div className="rounded-2xl border border-white/5 bg-surface p-6">
-            <div className="text-sm text-slate-400">Total Sessions</div>
-            <div className="mt-2 text-3xl font-bold text-white">
+          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
+            <div className="text-sm text-gray-400">Total Sessions</div>
+            <div className="mt-2 text-3xl font-bold text-gray-100">
               {stats?.totalSessions || 0}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-surface p-6">
-            <div className="text-sm text-slate-400">Problems Completed</div>
-            <div className="mt-2 text-3xl font-bold text-white">
+          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
+            <div className="text-sm text-gray-400">Problems Completed</div>
+            <div className="mt-2 text-3xl font-bold text-gray-100">
               {stats?.completedProblems || 0}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-surface p-6">
-            <div className="text-sm text-slate-400">Time Spent</div>
-            <div className="mt-2 text-3xl font-bold text-white">
+          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
+            <div className="text-sm text-gray-400">Time Spent</div>
+            <div className="mt-2 text-3xl font-bold text-gray-100">
               {Math.round((stats?.totalTimeSpent || 0) / 60)}h
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-surface p-6">
-            <div className="text-sm text-slate-400">Avg. Accuracy</div>
-            <div className="mt-2 text-3xl font-bold text-primary">
+          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
+            <div className="text-sm text-gray-400">Avg. Accuracy</div>
+            <div className="mt-2 text-3xl font-bold text-green-400">
               {stats?.averageAccuracy || 0}%
             </div>
           </div>
@@ -147,32 +147,32 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Recent Sessions */}
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-white">
+            <h3 className="mb-4 text-xl font-semibold text-gray-100">
               Recent Sessions
             </h3>
             <div className="space-y-3">
               {recentSessions.length === 0 ? (
-                <div className="rounded-2xl border border-white/5 bg-surface p-6 text-center text-slate-400">
+                <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6 text-center text-gray-400">
                   No sessions yet. Start learning!
                 </div>
               ) : (
                 recentSessions.map((session) => (
                   <div
                     key={session.id}
-                    className="rounded-2xl border border-white/5 bg-surface p-4 flex items-center justify-between hover:border-primary/30 transition"
+                    className="rounded-2xl border border-slate-800 bg-slate-800 p-4 flex items-center justify-between hover:border-green-500/50 transition"
                   >
                     <div className="flex-1">
-                      <div className="font-medium text-white">
+                      <div className="font-medium text-gray-100">
                         {session.problemTitle || 'Untitled Problem'}
                       </div>
-                      <div className="mt-1 text-sm text-slate-400">
+                      <div className="mt-1 text-sm text-gray-400">
                         {session.interactionCount} interactions • {' '}
                         <span className={
                           session.status === 'completed' 
                             ? 'text-green-400' 
                             : session.status === 'active'
-                            ? 'text-primary'
-                            : 'text-slate-400'
+                            ? 'text-green-400'
+                            : 'text-gray-500'
                         }>
                           {session.status}
                         </span>
@@ -181,7 +181,7 @@ export default function Dashboard() {
                     {session.status === 'active' && (
                       <Link
                         to={`/session/${session.id}`}
-                        className="rounded-lg bg-primary/10 border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+                        className="rounded-lg bg-green-600/20 border border-green-700/40 px-4 py-2 text-sm font-medium text-green-300 hover:bg-green-600/30 transition"
                       >
                         Resume
                       </Link>
@@ -194,38 +194,23 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-white">
+            <h3 className="mb-4 text-xl font-semibold text-gray-100">
               Quick Actions
             </h3>
             <div className="space-y-3">
               <Link
+                to="/new"
+                className="rounded-2xl border border-slate-800 bg-slate-800 p-4 block hover:border-green-500/50 transition"
+              >
+                <div className="font-medium text-gray-100">Start New Session</div>
+                <div className="mt-1 text-sm text-gray-400">Ask a question or upload a problem image</div>
+              </Link>
+              <Link
                 to="/problems"
-                className="block rounded-2xl border border-white/5 bg-surface p-6 hover:border-primary/30 transition"
+                className="rounded-2xl border border-slate-800 bg-slate-800 p-4 block hover:border-green-500/50 transition"
               >
-                <div className="font-semibold text-white">Browse Problems</div>
-                <div className="mt-2 text-sm text-slate-400">
-                  Explore available learning problems
-                </div>
-              </Link>
-
-              <Link
-                to="/analytics"
-                className="block rounded-2xl border border-white/5 bg-surface p-6 hover:border-primary/30 transition"
-              >
-                <div className="font-semibold text-white">View Analytics</div>
-                <div className="mt-2 text-sm text-slate-400">
-                  Track your learning progress
-                </div>
-              </Link>
-
-              <Link
-                to="/profile"
-                className="block rounded-2xl border border-white/5 bg-surface p-6 hover:border-primary/30 transition"
-              >
-                <div className="font-semibold text-white">Edit Profile</div>
-                <div className="mt-2 text-sm text-slate-400">
-                  Manage your account settings
-                </div>
+                <div className="font-medium text-gray-100">Browse Problem Bank</div>
+                <div className="mt-1 text-sm text-gray-400">Explore curated practice questions</div>
               </Link>
             </div>
           </div>

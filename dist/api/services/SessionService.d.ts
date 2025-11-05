@@ -18,7 +18,7 @@ export interface Interaction {
     id: string;
     sessionId: string;
     userId: string;
-    type: 'question' | 'answer' | 'hint' | 'feedback' | 'voice' | 'image';
+    type: 'question' | 'answer' | 'hint' | 'feedback' | 'voice' | 'image' | 'student_response' | 'enhanced_student_response' | 'enhanced_tutor_response';
     content: string;
     metadata: Record<string, any>;
     timestamp: Date;
@@ -35,7 +35,7 @@ export interface CreateSessionData {
 export interface CreateInteractionData {
     sessionId: string;
     userId: string;
-    type: 'question' | 'answer' | 'hint' | 'feedback' | 'voice' | 'image';
+    type: 'question' | 'answer' | 'hint' | 'feedback' | 'voice' | 'image' | 'student_response' | 'enhanced_student_response' | 'enhanced_tutor_response';
     content: string;
     metadata?: Record<string, any>;
     processingTime?: number;

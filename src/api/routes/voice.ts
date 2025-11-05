@@ -151,7 +151,7 @@ router.post('/speech-to-text',
       }
 
       // Track speech-to-text usage
-      await AnalyticsService.trackEvent({
+      AnalyticsService.trackEvent({
         userId: req.user!.id,
         sessionId: value.sessionId,
         eventType: 'voice_speech_to_text',
@@ -192,7 +192,7 @@ router.post('/speech-to-text',
       });
 
       // Track failed conversion
-      await AnalyticsService.trackEvent({
+      AnalyticsService.trackEvent({
         userId: req.user!.id,
         sessionId: value.sessionId,
         eventType: 'voice_speech_to_text_failed',
@@ -296,7 +296,7 @@ router.post('/text-to-speech',
       // Optionally save a voice interaction if a session is provided in future
 
       // Track text-to-speech usage
-      await AnalyticsService.trackEvent({
+      AnalyticsService.trackEvent({
         userId: req.user!.id,
         eventType: 'voice_text_to_speech',
         eventData: {
@@ -336,7 +336,7 @@ router.post('/text-to-speech',
       });
 
       // Track failed conversion
-      await AnalyticsService.trackEvent({
+      AnalyticsService.trackEvent({
         userId: req.user!.id,
         eventType: 'voice_text_to_speech_failed',
         eventData: {

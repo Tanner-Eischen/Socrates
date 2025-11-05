@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+// Load environment variables for OpenAI, etc.
+try {
+  require('dotenv').config();
+} catch (_) {}
+
+// Try running TypeScript directly if ts-node is available; otherwise fall back to built JS
+try {
+  require('ts-node/register/transpile-only');
+  require('../src/cli/index');
+} catch (e) {
+  try {
+    require('../dist/cli/index.js');
+  } catch (e2) {
+    console.error('Unable to launch SocraTeach CLI. Build the project or install ts-node.');
+    console.error('Tried: src/cli via ts-node and dist/cli build output.');
+    process.exit(1);
+  }
+}
+
+

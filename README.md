@@ -22,6 +22,56 @@
 
 ## Quick Start
 
+### CLI (Tutor) — Live Socratic Chat (Text + Image)
+
+```bash
+# 1) Ensure your OpenAI key is set (project-level .env or shell env)
+echo OPENAI_API_KEY=your-openai-api-key-here > .env
+
+# 2) Install dependencies
+npm install
+
+# 3A) Use the CLI locally without global link
+node ./bin/socrateach --help
+
+# 3B) Or create a global alias (makes `tutor` available)
+npm link
+tutor --help
+```
+
+Common commands:
+
+```bash
+# Interactive chat (text)
+tutor chat --problem "Solve 2x + 5 = 13" --difficulty beginner
+
+# Interactive chat (image)
+tutor chat --image ./samples/linear1.png
+
+# One-shot run (first tutor response + compliance)
+tutor run --problem-id 0
+
+# Scripted demo (live tutor responses)
+tutor demo --scenario algebra-beginner
+
+# Problem bank utilities
+tutor problems list
+tutor problems show 0
+```
+
+In-chat commands during `tutor chat`:
+
+```text
+:attach <imagePath>            # Attach an image; extracts text and adds as context
+:difficulty <level>            # Switch difficulty: beginner|intermediate|advanced
+:quit                          # Exit the session
+```
+
+Notes:
+- The CLI uses live OpenAI calls (no mocks), so responses vary run-to-run.
+- `OPENAI_API_KEY` must be available in `.env` or the environment.
+- Windows PowerShell works out-of-the-box; no TTY tricks required.
+
 ### Backend Setup
 
 ```bash
@@ -187,14 +237,16 @@ npm run test:ui
 
 ### Backend Validation
 ```bash
-# Run Socratic engine validation
-npx ts-node src/validation-test.ts
+# CLI one-shot sanity test
+tutor run --problem "Solve 2x + 5 = 13"
 
-# Test Day 2 features (parsing, classification)
-npx ts-node src/test-day2-features.ts
+# Interactive chat
+tutor chat --problem "Explain the slope of y = 2x + 1" --difficulty intermediate
 
-# Demo conversation and reporting
-npx ts-node src/demo-test.ts
+# Scripted demos (live)
+tutor demo --scenario algebra-beginner
+tutor demo --scenario geometry-intermediate
+tutor demo --scenario calculus-advanced
 ```
 
 ## API Endpoints
@@ -283,6 +335,58 @@ DATABASE_URL=your_db_url
 # CORS
 CORS_ORIGIN=http://localhost:5173
 ```
+
+## CLI Measurement & Analytics
+
+The CLI showcases the Socratic method and provides simple, interpretable measurements:
+
+- **Socratic compliance**: Detects direct answers via `containsDirectAnswer(response)`.
+  - Shown in `tutor run` and summarized in `tutor demo` as “Direct answers detected” and PASS/FAIL.
+- **Question type distribution**: Which Socratic question types were used (clarification, assumptions, evidence, perspective, implications, meta_questioning).
+- **Depth metrics**: Current and maximum depth reached in the inquiry (1–5 scale).
+- **Concepts explored**: Topics inferred from the conversation (algebra, geometry, calculus, etc.).
+- **Confidence progression**: Sequence of inferred student confidence values across turns.
+- **Engagement score**: Heuristic combining depth and response dynamics.
+
+Example `tutor demo` summary:
+
+```text
+=== Demo Summary ===
+Direct answers detected: 0
+Socratic compliance: PASSED
+Question types: clarification, assumptions, evidence, perspective
+Average depth: 3
+Concepts explored: algebra
+Total interactions: 10
+```
+
+Tips to improve compliance if failures occur:
+- Re-run (live model variability). 
+- Adjust problem phrasing to avoid prompting direct numeric solutions.
+- Lower difficulty (`:difficulty beginner`) to increase scaffolding when the student struggles.
+
+## CLI Scenarios & Images
+
+Scripted demo files live in `fixtures/scripts/`:
+- `algebra-beginner.json`
+- `geometry-intermediate.json`
+- `calculus-advanced.json`
+
+You can create your own by following the same JSON shape:
+
+```json
+{
+  "name": "my-scenario",
+  "problem": "Explain why the sum of two even numbers is even.",
+  "difficulty": "intermediate",
+  "turns": [
+    "I'm not sure where to start.",
+    "Even numbers are multiples of 2, right?"
+  ]
+}
+```
+
+Image intake is supported in `tutor chat` using `--image` at start or `:attach <path>` mid-session. The CLI will extract text with the available image/text processors and inject it as context for the next Socratic turn.
 
 ## License
 

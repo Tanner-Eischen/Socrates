@@ -158,7 +158,7 @@ router.patch('/profile',
     const updatedUser = await UserService.updateProfile(req.user!.id, value);
 
     // Track profile update
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'profile_updated',
       eventData: {
@@ -265,7 +265,7 @@ router.get('/',
     });
 
     // Track admin user list access
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'admin_users_accessed',
       eventData: {
@@ -331,7 +331,7 @@ router.get('/:id',
     delete (userProfile as any).passwordHash;
 
     // Track admin user access
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'admin_user_accessed',
       eventData: {
@@ -432,7 +432,7 @@ router.patch('/:id',
     const updatedUser = await UserService.updateProfile(req.params.id, value);
 
     // Track admin user update
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'admin_user_updated',
       eventData: {
@@ -508,7 +508,7 @@ router.post('/:id/deactivate',
     await UserService.deactivate(req.params.id);
 
     // Track user deactivation
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'admin_user_deactivated',
       eventData: {
@@ -662,7 +662,7 @@ router.get('/:id/analytics',
     );
 
     // Track analytics access
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'user_analytics_accessed',
       eventData: {
@@ -720,7 +720,7 @@ router.get('/stats',
     };
 
     // Track stats access
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'admin_stats_accessed',
       eventData: {

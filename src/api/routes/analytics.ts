@@ -75,7 +75,7 @@ router.post('/track',
     }
 
     const event = await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+      userId: req.user?.id || 'demo-user',
       sessionId: value.sessionId,
       eventType: value.eventType,
       eventData: value.eventData || {},
@@ -83,8 +83,10 @@ router.post('/track',
       userAgent: req.get('User-Agent'),
     });
 
+    // Event may be null if database is unavailable
     return res.status(201).json({
       success: true,
+      message: event ? 'Analytics event tracked successfully' : 'Analytics event tracking attempted (database unavailable)',
       data: event,
     });
   })
@@ -276,9 +278,9 @@ router.get('/events',
       filteredEvents = filteredEvents.filter(event => event.sessionId === value.sessionId);
     }
 
-    // Track analytics access
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track analytics access (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'analytics_events_accessed',
       eventData: {
         filters: {
@@ -375,9 +377,9 @@ router.get('/system',
 
     const systemMetrics = await AnalyticsService.getSystemMetrics(timeRange);
 
-    // Track system analytics access
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track system analytics access (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'system_analytics_accessed',
       eventData: {
         timeframe: value.timeframe,
@@ -496,9 +498,9 @@ router.get('/behavior',
 
     const behaviorAnalysis = await AnalyticsService.getUserBehaviorPatterns(userId);
 
-    // Track behavior analysis access
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track behavior analysis access (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'behavior_analysis_accessed',
       eventData: {
         targetUserId: userId,
@@ -579,8 +581,8 @@ router.get('/dashboard',
       };
     }
 
-    // Track dashboard access
-    await AnalyticsService.trackEvent({
+    // Track dashboard access (non-blocking)
+    AnalyticsService.trackEvent({
       userId,
       eventType: 'dashboard_accessed',
       eventData: {
@@ -682,9 +684,9 @@ router.get('/export',
       filteredEvents = filteredEvents.filter(event => event.userId === userId);
     }
 
-    // Track export
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track export (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'analytics_exported',
       eventData: {
         format,

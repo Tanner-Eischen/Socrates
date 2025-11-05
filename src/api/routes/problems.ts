@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { AnalyticsService } from '../services/AnalyticsService';
-import { authenticate, requireRole, AuthenticatedRequest } from '../middleware/auth';
+import { authenticate, requireRole, optionalAuthMiddleware, AuthenticatedRequest } from '../middleware/auth';
 import { rateLimiter } from '../middleware/rateLimiter';
 import { asyncHandler } from '../middleware/errorHandler';
 import { logger } from '../middleware/logger';
@@ -251,9 +251,9 @@ router.get('/',
         : problemWithoutSolution;
     });
 
-    // Track problem browsing
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track problem browsing (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'problems_browsed',
       eventData: {
         filters: { type, difficulty, category, tags: tagsQuery, search },
@@ -261,7 +261,7 @@ router.get('/',
       },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent'),
-    });
+    }).catch(err => logger.warn('Analytics tracking failed', { error: err }));
 
     return res.json({
       success: true,
@@ -316,9 +316,9 @@ router.get('/:id',
       ? problem 
       : { ...problem, solution: undefined };
 
-    // Track problem view
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track problem view (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'problem_viewed',
       eventData: {
         problemId: problem.id,
@@ -327,7 +327,7 @@ router.get('/:id',
       },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent'),
-    });
+    }).catch(err => logger.warn('Analytics tracking failed', { error: err }));
 
     logger.info('Problem viewed via API', {
       problemId: problem.id,
@@ -434,9 +434,9 @@ router.post('/',
 
     mockProblems.push(newProblem);
 
-    // Track problem creation
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track problem creation (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'problem_created',
       eventData: {
         problemId: newProblem.id,
@@ -446,7 +446,7 @@ router.post('/',
       },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent'),
-    });
+    }).catch(err => logger.warn('Analytics tracking failed', { error: err }));
 
     logger.info('Problem created via API', {
       problemId: newProblem.id,
@@ -562,9 +562,9 @@ router.patch('/:id',
 
     const updatedProblem = mockProblems[problemIndex];
 
-    // Track problem update
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track problem update (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'problem_updated',
       eventData: {
         problemId: updatedProblem.id,
@@ -572,7 +572,7 @@ router.patch('/:id',
       },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent'),
-    });
+    }).catch(err => logger.warn('Analytics tracking failed', { error: err }));
 
     logger.info('Problem updated via API', {
       problemId: updatedProblem.id,
@@ -630,9 +630,9 @@ router.delete('/:id',
     mockProblems[problemIndex].isActive = false;
     mockProblems[problemIndex].updatedAt = new Date();
 
-    // Track problem deletion
-    await AnalyticsService.trackEvent({
-      userId: req.user!.id,
+    // Track problem deletion (non-blocking)
+    AnalyticsService.trackEvent({
+      userId: req.user?.id || 'demo-user',
       eventType: 'problem_deleted',
       eventData: {
         problemId: deletedProblem.id,
@@ -640,7 +640,7 @@ router.delete('/:id',
       },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent'),
-    });
+    }).catch(err => logger.warn('Analytics tracking failed', { error: err }));
 
     logger.info('Problem deleted via API', {
       problemId: deletedProblem.id,
@@ -745,13 +745,13 @@ router.get('/tags',
  *         description: Unauthorized
  */
 router.post('/submit',
-  authenticate,
+  optionalAuthMiddleware,
   upload.single('problemImage'),
   rateLimiter,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { problemText } = req.body;
     const problemImage = req.file;
-    const userId = req.user!.id;
+    const userId = req.user?.id || 'demo-user';
 
     // Must provide either text or image
     if (!problemText && !problemImage) {
@@ -789,8 +789,8 @@ router.post('/submit',
         );
       }
 
-      // Track problem submission
-      await AnalyticsService.trackEvent({
+      // Track problem submission (non-blocking)
+      AnalyticsService.trackEvent({
         userId,
         eventType: 'problem_submitted',
         eventData: {
@@ -799,7 +799,7 @@ router.post('/submit',
           difficulty: submittedProblem.parsedProblem.difficulty,
           submissionMethod: problemImage ? 'image' : 'text',
         },
-      });
+      }).catch(err => logger.warn('Analytics tracking failed', { error: err }));
 
       return res.json({
         success: true,

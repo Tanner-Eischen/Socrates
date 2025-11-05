@@ -1,0 +1,14 @@
+{
+  "name": "geometry-intermediate",
+  "problem": "Find the area of a triangle with base 10 cm and height 7 cm",
+  "difficulty": "intermediate",
+  "turns": [
+    "Is it just 10 times 7? That would be 70?",
+    "Actually, I think triangles are different. But I can't remember the formula exactly.",
+    "Maybe it's half of that? So 35? But I'm not sure why.",
+    "I think the formula involves base and height, but I'm mixing it up with rectangle area.",
+    "So it's (1/2) × base × height? That would be 35 cm²? I think that's it!"
+  ]
+}
+
+

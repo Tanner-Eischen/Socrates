@@ -40,8 +40,15 @@ class DatabaseService {
             });
         }
         catch (error) {
-            logger_1.logger.error('Failed to initialize database connection pool', { error });
-            throw error;
+            logger_1.logger.warn('Failed to initialize database connection pool', {
+                error: {
+                    code: error.code,
+                    message: error.message,
+                },
+            });
+            logger_1.logger.info('Database not available - using in-memory storage fallback for authentication');
+            // Don't re-throw - allow the app to start with in-memory storage
+            this.isInitialized = true; // Mark as initialized to prevent retry
         }
     }
     /**

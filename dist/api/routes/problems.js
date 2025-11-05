@@ -649,10 +649,10 @@ router.get('/tags', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHan
  *       401:
  *         description: Unauthorized
  */
-router.post('/submit', auth_1.authenticate, upload.single('problemImage'), rateLimiter_1.rateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+router.post('/submit', auth_1.optionalAuthMiddleware, upload.single('problemImage'), rateLimiter_1.rateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { problemText } = req.body;
     const problemImage = req.file;
-    const userId = req.user.id;
+    const userId = req.user?.id || 'demo-user';
     // Must provide either text or image
     if (!problemText && !problemImage) {
         return res.status(400).json({
@@ -689,7 +689,7 @@ router.post('/submit', auth_1.authenticate, upload.single('problemImage'), rateL
                 difficulty: submittedProblem.parsedProblem.difficulty,
                 submissionMethod: problemImage ? 'image' : 'text',
             },
-        });
+        }).catch(err => logger_1.logger.warn('Analytics tracking failed', { error: err }));
         return res.json({
             success: true,
             message: 'Problem submitted and parsed successfully',

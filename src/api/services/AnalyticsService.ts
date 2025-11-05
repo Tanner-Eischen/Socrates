@@ -50,9 +50,9 @@ export class AnalyticsService {
   private static db = DatabaseService;
 
   /**
-   * Track an analytics event
+   * Track an analytics event (gracefully handles database unavailability)
    */
-  static async trackEvent(eventData: CreateEventData): Promise<AnalyticsEvent> {
+  static async trackEvent(eventData: CreateEventData): Promise<AnalyticsEvent | null> {
     try {
       const eventId = uuidv4();
       const now = new Date();
@@ -93,9 +93,21 @@ export class AnalyticsService {
         ipAddress: event.ip_address,
         userAgent: event.user_agent,
       };
-    } catch (error) {
-      logger.error('Error tracking analytics event', { error, eventData });
-      throw error;
+    } catch (error: any) {
+      // If database is not available, log warning and return null instead of throwing
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('not available') || 
+          error?.code === 'ECONNREFUSED' ||
+          error?.code === 'ENOTFOUND') {
+        logger.debug('Analytics event not tracked (database unavailable)', { 
+          eventType: eventData.eventType, 
+          userId: eventData.userId 
+        });
+        return null;
+      }
+      // For other errors, log and return null (don't throw)
+      logger.warn('Error tracking analytics event', { error: error?.message || error, eventData });
+      return null;
     }
   }
 

@@ -14,7 +14,7 @@ export interface DatabaseConfig {
 }
 
 export class DatabaseService {
-  private static pool: Pool;
+  private static pool: Pool | null = null;
   private static isInitialized = false;
 
   /**
@@ -57,9 +57,16 @@ export class DatabaseService {
         logger.error('Unexpected error on idle client', { error: err });
       });
 
-    } catch (error) {
-      logger.error('Failed to initialize database connection pool', { error });
-      throw error;
+    } catch (error: any) {
+      logger.warn('Failed to initialize database connection pool', {
+        error: {
+          code: error.code,
+          message: error.message,
+        },
+      });
+      logger.info('Database not available - using in-memory storage fallback for authentication');
+      // Don't re-throw - allow the app to start with in-memory storage
+      this.isInitialized = true; // Mark as initialized to prevent retry
     }
   }
 
@@ -69,6 +76,14 @@ export class DatabaseService {
   static async query(text: string, params?: any[]): Promise<QueryResult> {
     if (!this.isInitialized) {
       await this.initialize();
+    }
+
+    // If pool is not available (database connection failed), throw a helpful error
+    if (!this.pool) {
+      logger.warn('Database query attempted but database is not available', {
+        query: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+      });
+      throw new Error('Database is not available. Sessions cannot be persisted without a database connection.');
     }
 
     const start = Date.now();
@@ -102,6 +117,10 @@ export class DatabaseService {
   static async getClient(): Promise<PoolClient> {
     if (!this.isInitialized) {
       await this.initialize();
+    }
+
+    if (!this.pool) {
+      throw new Error('Database is not available. Cannot get client without a database connection.');
     }
 
     return await this.pool.connect();
@@ -155,9 +174,9 @@ export class DatabaseService {
     }
 
     return {
-      totalCount: this.pool.totalCount,
-      idleCount: this.pool.idleCount,
-      waitingCount: this.pool.waitingCount,
+      totalCount: this.pool?.totalCount || 0,
+      idleCount: this.pool?.idleCount || 0,
+      waitingCount: this.pool?.waitingCount || 0,
     };
   }
 

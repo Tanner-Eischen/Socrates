@@ -1,44 +1,123 @@
-import { SessionMetadata, SessionPerformance, StudentProfile, SessionResumption, SessionSummary, InterruptionPoint } from './types';
+import { SocraticQuestionType, EnhancedMessage, EnhancedStudentProfile } from './socratic-engine';
+export interface Session {
+    id: string;
+    userId: string;
+    problemId?: string;
+    problemText: string;
+    problemType: string;
+    difficultyLevel: number;
+    status: 'active' | 'completed' | 'paused' | 'abandoned';
+    startTime: Date;
+    endTime?: Date;
+    totalDuration?: number;
+    interactionCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+    maxDepthReached: number;
+    questionTypesUsed: SocraticQuestionType[];
+    conceptsExplored: string[];
+    averageConfidenceLevel: number;
+    useEnhancedEngine: boolean;
+}
+export interface Interaction {
+    id: string;
+    sessionId: string;
+    type: 'question' | 'answer' | 'hint' | 'feedback' | 'voice' | 'image' | 'student_response' | 'enhanced_student_response' | 'enhanced_tutor_response';
+    content: string;
+    metadata?: {
+        questionType?: SocraticQuestionType;
+        depthLevel?: number;
+        targetedConcepts?: string[];
+        confidenceLevel?: number;
+        responseTime?: number;
+        shouldDeepenInquiry?: boolean;
+        effectiveness?: number;
+        misconceptions?: string[];
+    };
+    processingTime?: number;
+    confidenceScore?: number;
+    timestamp: Date;
+    userId: string;
+}
+export interface SessionProgress {
+    conversation: EnhancedMessage[];
+    currentProblem: string;
+    difficulty: any;
+    strugglingTurns: number;
+    depthTracker?: {
+        currentDepth: number;
+        maxDepthReached: number;
+        conceptualConnections: string[];
+    };
+}
 export declare class SessionManager {
     private static instance;
-    private activeSessions;
-    private readonly MAX_ACTIVE_SESSIONS;
-    private readonly SESSION_TIMEOUT_MS;
-    private adaptiveController;
+    private sessions;
+    private interactions;
+    private engines;
     private constructor();
     static getInstance(): SessionManager;
-    createSession(problemData: any, studentProfile?: StudentProfile, parentSessionId?: string): Promise<string>;
-    resumeSession(sessionId: string): Promise<SessionResumption>;
-    saveSessionProgress(sessionId: string, conversationUpdate: any, performanceUpdate?: Partial<SessionPerformance>): Promise<void>;
-    handleSessionInterruption(sessionId: string, interruptionReason: string, currentContext: any): Promise<InterruptionPoint>;
-    completeSession(sessionId: string, finalPerformance: SessionPerformance, learningOutcomes: string[]): Promise<SessionSummary>;
-    getResumableSessions(): Promise<SessionMetadata[]>;
-    generateSessionAnalytics(timeRange?: number): Promise<any>;
+    createSession(data: {
+        userId: string;
+        problemId?: string;
+        problemText: string;
+        problemType: string;
+        difficultyLevel?: number;
+        useEnhancedEngine?: boolean;
+    }): Promise<Session>;
+    getSession(sessionId: string): Promise<Session | null>;
+    updateSession(sessionId: string, updates: Partial<Session>): Promise<Session | null>;
+    addInteraction(sessionId: string, interaction: Omit<Interaction, 'id' | 'sessionId' | 'timestamp'>): Promise<Interaction>;
+    addEnhancedInteraction(sessionId: string, data: {
+        type: string;
+        content: string;
+        confidenceLevel?: number;
+        metadata?: any;
+        processingTime?: number;
+        userId: string;
+    }): Promise<{
+        interaction: Interaction;
+        tutorResponse?: string;
+        analytics?: any;
+    }>;
+    getSessionInteractions(sessionId: string): Promise<Interaction[]>;
+    saveSessionProgress(sessionId: string, progress: SessionProgress): Promise<void>;
+    generateSessionAnalytics(sessionId: string): Promise<{
+        questionTypesUsed: string[];
+        questionTypeDistribution: Record<string, number>;
+        averageDepth: number;
+        currentDepth: number;
+        conceptsExplored: string[];
+        confidenceProgression: number[];
+        engagementScore: number;
+        totalInteractions: number;
+        metacognitivePrompts: number;
+    } | null>;
+    getMetacognitivePrompt(sessionId: string, category: string): Promise<string | null>;
+    private updateSessionEnhancedMetrics;
+    listUserSessions(userId: string, options?: {
+        status?: string;
+        limit?: number;
+        offset?: number;
+        useEnhancedEngine?: boolean;
+    }): Promise<{
+        sessions: Session[];
+        total: number;
+        hasMore: boolean;
+    }>;
+    completeSession(sessionId: string): Promise<Session | null>;
+    deleteSession(sessionId: string): Promise<boolean>;
+    getSessionStats(userId?: string): Promise<{
+        totalSessions: number;
+        activeSessions: number;
+        completedSessions: number;
+        averageSessionDuration: number;
+        enhancedSessionsUsed: number;
+        averageDepthReached: number;
+    }>;
+    initializeEngineForSession(sessionId: string, studentProfile?: EnhancedStudentProfile): Promise<void>;
     private generateSessionId;
-    private createDefaultProfile;
-    private estimateSteps;
-    private estimateDuration;
-    private getTypeMultiplier;
-    private extractTags;
-    private generateSessionGoals;
-    private generateContextSummary;
-    private generateResumptionSuggestions;
-    private captureCurrentContext;
-    private extractKeyInsights;
-    private generateResumptionHints;
-    private captureCriticalState;
-    private assessGoalAchievement;
-    private calculateContinuityScore;
-    private generatePostSessionRecommendations;
-    private updateSessionHistory;
-    private updateSessionAnalytics;
-    private logSessionEvent;
-    private estimateRemainingTime;
-    private calculateAverageDuration;
-    private calculateAverageContinuityScore;
-    private analyzeMostCommonInterruptions;
-    private analyzeSessionPatterns;
-    private calculateSessionLengthTrend;
+    private generateInteractionId;
 }
 export declare const sessionManager: SessionManager;
 //# sourceMappingURL=session-manager.d.ts.map

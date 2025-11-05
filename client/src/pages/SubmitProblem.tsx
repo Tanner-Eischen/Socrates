@@ -29,8 +29,9 @@ export default function SubmitProblem() {
       
       // Navigate to create session with submitted problem
       navigate(`/session/new?submittedProblemId=${result.data.id}`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to process problem');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(message || 'Failed to process problem');
     } finally {
       setLoading(false);
     }
@@ -75,8 +76,9 @@ export default function SubmitProblem() {
       
       // Navigate to create session with submitted problem
       navigate(`/session/new?submittedProblemId=${result.data.id}`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to process image');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(message || 'Failed to process image');
     } finally {
       setLoading(false);
     }
@@ -260,9 +262,7 @@ export default function SubmitProblem() {
 
         {/* Info Note */}
         <div className="mt-8 rounded-xl bg-white/5 border border-white/10 p-4 text-sm text-slate-400">
-          <strong className="text-slate-300">💡 Tip:</strong> Our AI will analyze your problem and guide you
-          through solving it step-by-step using the Socratic method. The better you describe your problem,
-          the more helpful the guidance will be!
+          <strong className="text-slate-300"></strong> 
         </div>
       </main>
     </div>

@@ -48,6 +48,21 @@ export const verifyToken = (token: string): JWTPayload => {
 export const authMiddleware: RequestHandler = (req, res, next) => {
   const authReq = req as AuthenticatedRequest;
   try {
+    // Development mode: Bypass authentication with mock user
+    if (process.env.NODE_ENV === 'development') {
+      authReq.user = {
+        id: 'dev-user-123',
+        email: 'dev@example.com',
+        name: 'Dev User',
+        role: 'student',
+      };
+      logger.info('Development mode: Authentication bypassed', {
+        url: authReq.url,
+        method: authReq.method,
+      });
+      return next();
+    }
+
     const authHeader = authReq.headers.authorization;
     
     if (!authHeader) {

@@ -1,4 +1,4 @@
-import { ParsedProblem } from '../../types';
+import { ParsedProblem } from '../../problem-parser';
 export interface SubmittedProblem {
     id: string;
     userId: string;

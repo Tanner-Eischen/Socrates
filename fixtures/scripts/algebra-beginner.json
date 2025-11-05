@@ -1,0 +1,14 @@
+{
+  "name": "algebra-beginner",
+  "problem": "Solve 2x + 5 = 13",
+  "difficulty": "beginner",
+  "turns": [
+    "I don't know... maybe x is 8?",
+    "Wait, that doesn't seem right. I'm confused about what to do.",
+    "Oh, so I should do something to both sides? But I'm not sure what operation.",
+    "Subtract 5 from both sides? So 2x = 8? Is that right?",
+    "Now I have 2x = 8. Do I divide? I think x = 4, but I'm not completely sure."
+  ]
+}
+
+

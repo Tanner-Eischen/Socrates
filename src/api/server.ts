@@ -172,8 +172,8 @@ class SocraTeachServer {
     
     // Protected routes (auth required)
     apiRouter.use('/users', authMiddleware, userRoutes);
-    apiRouter.use('/sessions', authMiddleware, sessionRoutes);
-    apiRouter.use('/problems', authMiddleware, problemRoutes);
+    apiRouter.use('/sessions', sessionRoutes); // Auth handled by optionalAuthMiddleware in routes
+    apiRouter.use('/problems', problemRoutes); // Auth handled by optionalAuthMiddleware in routes
     apiRouter.use('/analytics', authMiddleware, analyticsRoutes);
     apiRouter.use('/collaboration', authMiddleware, collaborationRoutes);
     apiRouter.use('/voice', authMiddleware, voiceRoutes);

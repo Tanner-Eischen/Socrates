@@ -144,7 +144,7 @@ router.post('/sessions',
     });
 
     // Track session creation
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_session_created',
       eventData: {
@@ -263,7 +263,7 @@ router.get('/sessions',
     }
 
     // Track session browsing
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_sessions_browsed',
       eventData: {
@@ -346,7 +346,7 @@ router.get('/sessions/:id',
     };
 
     // Track session view
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_session_viewed',
       eventData: {
@@ -466,7 +466,7 @@ router.patch('/sessions/:id',
     const updatedSession = await CollaborationService.updateStatus(req.params.id, value.status);
 
     // Track session update
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_session_updated',
       eventData: {
@@ -543,7 +543,7 @@ router.post('/sessions/:id/join',
     });
 
     // Track session join
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_session_joined',
       eventData: {
@@ -604,7 +604,7 @@ router.post('/sessions/:id/leave',
     await CollaborationService.leaveSession(req.params.id, req.user!.id);
 
     // Track session leave
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_session_left',
       eventData: {
@@ -711,7 +711,7 @@ router.post('/sessions/:id/messages',
     });
 
     // Track message sent
-    await AnalyticsService.trackEvent({
+    AnalyticsService.trackEvent({
       userId: req.user!.id,
       eventType: 'collaboration_message_sent',
       eventData: {

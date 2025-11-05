@@ -34,6 +34,20 @@ exports.verifyToken = verifyToken;
 const authMiddleware = (req, res, next) => {
     const authReq = req;
     try {
+        // Development mode: Bypass authentication with mock user
+        if (process.env.NODE_ENV === 'development') {
+            authReq.user = {
+                id: 'dev-user-123',
+                email: 'dev@example.com',
+                name: 'Dev User',
+                role: 'student',
+            };
+            logger_1.logger.info('Development mode: Authentication bypassed', {
+                url: authReq.url,
+                method: authReq.method,
+            });
+            return next();
+        }
         const authHeader = authReq.headers.authorization;
         if (!authHeader) {
             logger_1.auditLogger.warn('Authentication attempt without token', {

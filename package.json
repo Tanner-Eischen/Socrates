@@ -3,10 +3,14 @@
   "version": "4.0.0",
   "description": "Production-ready multi-modal Socratic learning platform with real-time collaboration and advanced analytics",
   "main": "dist/index.js",
+  "bin": {
+    "tutor": "bin/socrateach",
+    "socrateach": "bin/socrateach"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/cli-tester.js",
-    "dev": "ts-node src/cli-tester.ts",
+    "dev": "ts-node src/api/index.ts",
     "test": "ts-node src/cli-tester.ts",
     "watch": "nodemon --exec ts-node src/cli-tester.ts",
     "api": "node dist/api/index.js",
@@ -41,6 +45,7 @@
   },
   "homepage": "https://github.com/Tanner-Eischen/SocraTeach#readme",
   "dependencies": {
+    "commander": "^11.1.0",
     "@types/node": "^24.10.0",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",

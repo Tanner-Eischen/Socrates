@@ -1,0 +1,14 @@
+{
+  "name": "calculus-advanced",
+  "problem": "Given f(x) = x^3 - 3x, find the critical points and determine local extrema.",
+  "difficulty": "advanced",
+  "turns": [
+    "I know I need the derivative, but I'm not sure what to do with it after.",
+    "The derivative is... let me think... 3x^2 - 3? I think that's right.",
+    "Now I need to set it equal to zero? So 3x^2 - 3 = 0 means x^2 = 1?",
+    "So x = 1 or -1. But what do I do now? I forget the next step.",
+    "Oh right, I need to check if they're max or min. Can I use the second derivative?"
+  ]
+}
+
+

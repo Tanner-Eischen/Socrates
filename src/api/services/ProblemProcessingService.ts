@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ProblemParser } from '../../problem-parser';
+import { ProblemParser, ParsedProblem } from '../../problem-parser';
 import { ImageProcessor } from '../../image-processor';
-import { ParsedProblem } from '../../types';
 import { logger } from '../middleware/logger';
 
 export interface SubmittedProblem {

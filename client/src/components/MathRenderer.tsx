@@ -4,9 +4,10 @@ import katex from 'katex';
 interface MathRendererProps {
   content: string;
   className?: string;
+  textColor?: string; // For chalkboard theme
 }
 
-export default function MathRenderer({ content, className = '' }: MathRendererProps) {
+export default function MathRenderer({ content, className = '', textColor = '' }: MathRendererProps) {
   // Parse content for math expressions
   const parseContent = (text: string) => {
     const parts: Array<{ type: 'text' | 'math', content: string, display: boolean }> = [];
@@ -60,7 +61,7 @@ export default function MathRenderer({ content, className = '' }: MathRendererPr
     <div className={className}>
       {parts.map((part, index) => {
         if (part.type === 'text') {
-          return <span key={index}>{part.content}</span>;
+          return <span key={index} className={textColor}>{part.content}</span>;
         }
         
         try {
@@ -70,17 +71,22 @@ export default function MathRenderer({ content, className = '' }: MathRendererPr
             output: 'html',
           });
           
+          // Inject chalk color into KaTeX output if needed
+          const styledHtml = textColor 
+            ? html.replace(/<span/g, `<span class="${textColor}"`)
+            : html;
+          
           return (
             <span
               key={index}
-              dangerouslySetInnerHTML={{ __html: html }}
-              className={part.display ? 'block my-4' : 'inline'}
+              dangerouslySetInnerHTML={{ __html: styledHtml }}
+              className={`${part.display ? 'block my-4' : 'inline'} ${textColor}`}
             />
           );
         } catch (error) {
           console.error('KaTeX rendering error:', error);
           return (
-            <span key={index} className="text-red-400">
+            <span key={index} className={`text-red-400 ${textColor}`}>
               [Math Error: {part.content}]
             </span>
           );
