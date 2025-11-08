@@ -55,8 +55,9 @@ export function registerChatCommand(program: Command) {
     .option('--problem-id <id>', 'Index into the problem bank (0-based)')
     .option('-i, --image <path>', 'Start from an image containing the problem')
     .option('-s, --student <path>', 'JSON student profile file')
+    .option('--strict-socratic', 'Enable strict Socratic compliance mode (auto-retry on direct answers)')
     .action(async (opts) => {
-      const engine = new SocraticEngine();
+      const engine = new SocraticEngine(undefined, opts.strictSocratic || false);
       const sessionId = `cli-${Date.now()}`;
       const student = loadStudentProfile(opts.student);
       engine.initializeSession(sessionId, student);
@@ -187,6 +188,61 @@ export function registerChatCommand(program: Command) {
               // eslint-disable-next-line no-console
               console.error(e?.message || String(e));
             }
+            continue;
+          }
+
+          // Probe commands
+          if (input === ':probe teachback' || input.startsWith(':probe teachback ')) {
+            // eslint-disable-next-line no-console
+            console.log('🔍 Triggering teach-back probe...');
+            const concepts = engine.getDepthTracker().conceptualConnections;
+            const lastConcept = concepts[concepts.length - 1] || 'the concept we just discussed';
+            const probePrompt = `Can you explain ${lastConcept} in your own words? On a scale from 0-1, how confident are you in explaining this? Reply with 'confidence: <0-1>' then your explanation.`;
+            
+            const tutorResp = await engine.respondToStudent(probePrompt);
+            const history = engine.getConversationHistory();
+            const lastMsg = history[history.length - 1];
+            const isCheck = lastMsg?.isUnderstandingCheck || false;
+            
+            // eslint-disable-next-line no-console
+            console.log(isCheck ? formatUnderstandingCheck(tutorResp) : formatTutor(tutorResp));
+            continue;
+          }
+
+          if (input === ':probe transfer' || input.startsWith(':probe transfer ')) {
+            // eslint-disable-next-line no-console
+            console.log('🔄 Triggering transfer challenge probe...');
+            const concepts = engine.getDepthTracker().conceptualConnections;
+            const lastConcept = concepts[concepts.length - 1] || 'algebra';
+            const difficulty = engine.getCurrentDifficulty();
+            const challenge = engine.generateTransferChallenge(lastConcept, difficulty);
+            
+            const probePrompt = `${challenge.prompt} On a scale from 0-1, how confident are you in answering this? Reply with 'confidence: <0-1>' then answer.`;
+            
+            const tutorResp = await engine.respondToStudent(probePrompt);
+            const history = engine.getConversationHistory();
+            const lastMsg = history[history.length - 1];
+            const isCheck = lastMsg?.isUnderstandingCheck || false;
+            
+            // eslint-disable-next-line no-console
+            console.log(isCheck ? formatUnderstandingCheck(tutorResp) : formatTutor(tutorResp));
+            continue;
+          }
+
+          if (input === ':probe question' || input.startsWith(':probe question ')) {
+            // eslint-disable-next-line no-console
+            console.log('❓ Triggering question generation probe...');
+            const concepts = engine.getDepthTracker().conceptualConnections;
+            const lastConcept = concepts[concepts.length - 1] || 'the concept we just discussed';
+            const probePrompt = `Ask me a question about ${lastConcept} that would challenge a classmate. On a scale from 0-1, how confident are you in asking a good question? Reply with 'confidence: <0-1>' then your question.`;
+            
+            const tutorResp = await engine.respondToStudent(probePrompt);
+            const history = engine.getConversationHistory();
+            const lastMsg = history[history.length - 1];
+            const isCheck = lastMsg?.isUnderstandingCheck || false;
+            
+            // eslint-disable-next-line no-console
+            console.log(isCheck ? formatUnderstandingCheck(tutorResp) : formatTutor(tutorResp));
             continue;
           }
 

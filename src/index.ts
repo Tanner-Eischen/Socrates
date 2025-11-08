@@ -1,4 +1,4 @@
-// Main entry point for SocraTeach modules
+// Main entry point for Socrates modules
 // This helps with IDE module resolution
 
 // Core engine exports

@@ -37,12 +37,13 @@ export function registerDemoCommand(program: Command) {
     .description('Run a scripted demo (live tutor responses)')
     .option('--scenario <name>', 'algebra-beginner | geometry-intermediate | calculus-advanced')
     .option('--script <path>', 'Path to a demo script JSON')
+    .option('--strict-socratic', 'Enable strict Socratic compliance mode (auto-retry on direct answers)')
     .action(async (opts) => {
       if (!opts.scenario && !opts.script) throw new Error('Provide --scenario or --script');
       const scriptPath = opts.script || resolveScenarioPath(opts.scenario);
       const script = loadScript(scriptPath);
 
-      const engine = new SocraticEngine();
+      const engine = new SocraticEngine(undefined, opts.strictSocratic || false);
       engine.initializeSession(`cli-demo-${Date.now()}`);
       // Difficulty is now automatically detected and adjusted by the engine
 
@@ -92,6 +93,7 @@ export function registerDemoCommand(program: Command) {
       const understandingChecks = engine.getUnderstandingCheckInfo();
       const difficulty = engine.getCurrentDifficulty();
       const sessionPerf = engine.getSessionPerformance();
+      const learningGains = engine.computeSessionLearningGains();
       
       // eslint-disable-next-line no-console
       console.log('\n=== End of Interaction Assessment ===');
@@ -114,6 +116,22 @@ export function registerDemoCommand(program: Command) {
         // eslint-disable-next-line no-console
         console.log(`  Average Confidence After Checks: ${(understandingChecks.averageConfidenceAfterCheck * 100).toFixed(0)}%`);
       }
+      
+      // eslint-disable-next-line no-console
+      console.log(`\n🎯 Behavioral Learning Metrics:`);
+      // eslint-disable-next-line no-console
+      console.log(`  Transfer Success Rate: ${(learningGains.transferSuccessRate * 100).toFixed(1)}%`);
+      if (learningGains.teachBackScores.length > 0) {
+        const avgTeachBack = learningGains.teachBackScores.reduce((sum, score) => sum + score, 0) / learningGains.teachBackScores.length;
+        // eslint-disable-next-line no-console
+        console.log(`  Avg Teach-Back Score: ${avgTeachBack.toFixed(2)}/4.0`);
+      }
+      // eslint-disable-next-line no-console
+      console.log(`  Avg Reasoning Score: ${learningGains.reasoningScoreAvg.toFixed(2)}/4.0`);
+      // eslint-disable-next-line no-console
+      console.log(`  Calibration Error: ${learningGains.calibrationErrorAvg.toFixed(3)}`);
+      // eslint-disable-next-line no-console
+      console.log(`  Breakthrough Moments: ${learningGains.breakthroughs}`);
       
       // eslint-disable-next-line no-console
       console.log(`\n⚠️  Flags:`);

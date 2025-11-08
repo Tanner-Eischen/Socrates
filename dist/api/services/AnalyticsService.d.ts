@@ -41,9 +41,9 @@ export interface CreateEventData {
 export declare class AnalyticsService {
     private static db;
     /**
-     * Track an analytics event
+     * Track an analytics event (gracefully handles database unavailability)
      */
-    static trackEvent(eventData: CreateEventData): Promise<AnalyticsEvent>;
+    static trackEvent(eventData: CreateEventData): Promise<AnalyticsEvent | null>;
     /**
      * Get learning analytics for a user
      */

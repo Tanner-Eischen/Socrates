@@ -190,7 +190,7 @@ export default function Chat() {
         {/* Minimal Header */}
         <header className="px-6 py-3 flex items-center justify-between border-b border-white/10">
           <h1 className="text-xl font-semibold text-yellow-200" style={{ fontFamily: 'serif', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-            SocraTeach
+            Socrates
           </h1>
           <div className="flex items-center gap-3">
             <span className="text-sm text-yellow-100">{user?.name || user?.email}</span>

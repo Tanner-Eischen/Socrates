@@ -6,7 +6,7 @@ interface ChalkboardProps {
 
 export default function Chalkboard({ children }: ChalkboardProps) {
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#8B6914]">
+    <div className="fixed top-0 left-0 right-0 bottom-0 h-screen w-screen overflow-hidden bg-[#8B6914] z-0">
       {/* Wooden Frame - Top */}
       <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#8B6914] to-[#6B5010] z-10 border-b-2 border-[#5A4110] shadow-lg"></div>
       

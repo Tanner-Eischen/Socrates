@@ -43,6 +43,12 @@ export interface CreateInteractionData {
 }
 export declare class SessionService {
     private static db;
+    private static inMemorySessions;
+    private static inMemoryInteractions;
+    /**
+     * Check if database is available
+     */
+    private static isDatabaseAvailable;
     /**
      * Create a new learning session
      */

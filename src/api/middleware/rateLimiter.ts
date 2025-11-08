@@ -50,7 +50,7 @@ const rateLimiterConfig = {
 // Create rate limiter using Redis if initialized; fall back to memory otherwise
 const createRateLimiter = (config: any) => {
   try {
-    const existingRedisClient = (global as any).socrateachRedisClient;
+    const existingRedisClient = (global as any).socratesRedisClient;
     const storeClient = existingRedisClient || getRedisClient();
     return new RateLimiterRedis({
       storeClient,

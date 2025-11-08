@@ -56,67 +56,172 @@ interface Problem {
   updatedAt: Date;
   createdBy: string;
   isActive: boolean;
+  isAssessment: boolean; // New: Marks if this is a learning assessment
+  prerequisites?: string[]; // New: IDs of prerequisite assessments
+  expectedAnswer?: string; // New: Expected answer format for assessments
 }
 
 // Mock data - replace with actual database queries
 const mockProblems: Problem[] = [
+  // Math - Algebra Fundamentals
   {
-    id: '1',
-    title: 'Quadratic Equation Solver',
-    description: 'Solve the quadratic equation: x² - 5x + 6 = 0',
+    id: 'math-linear-1',
+    title: 'Linear Equations Basics',
+    description: 'Solve for x: 3x + 7 = 22',
     type: 'math',
-    difficultyLevel: 3,
-    tags: ['algebra', 'quadratic', 'equations'],
-    category: 'Mathematics',
-    estimatedTime: 15,
-    hints: [
-      'Try factoring the quadratic expression',
-      'Look for two numbers that multiply to 6 and add to -5',
-      'Use the quadratic formula if factoring is difficult'
-    ],
-    solution: 'x = 2 or x = 3',
+    difficultyLevel: 1,
+    tags: ['algebra', 'linear', 'equations', 'basics'],
+    category: 'Math - Algebra',
+    estimatedTime: 5,
+    hints: ['What operation can you use to isolate x?', 'Remember to do the same thing to both sides'],
+    solution: 'x = 5',
+    expectedAnswer: '5',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     createdBy: 'system',
     isActive: true,
+    isAssessment: true,
+    prerequisites: [],
   },
   {
-    id: '2',
-    title: 'Binary Search Implementation',
-    description: 'Implement a binary search algorithm to find an element in a sorted array',
-    type: 'programming',
-    difficultyLevel: 4,
-    tags: ['algorithms', 'search', 'binary-search'],
-    category: 'Computer Science',
-    estimatedTime: 30,
+    id: 'math-quad-1',
+    title: 'Quadratic Equations',
+    description: 'Solve the quadratic equation: x² - 5x + 6 = 0',
+    type: 'math',
+    difficultyLevel: 3,
+    tags: ['algebra', 'quadratic', 'equations'],
+    category: 'Math - Algebra',
+    estimatedTime: 10,
     hints: [
-      'Start with the middle element',
-      'Compare the target with the middle element',
-      'Eliminate half of the search space in each iteration'
+      'Try factoring the quadratic expression',
+      'Look for two numbers that multiply to 6 and add to -5',
     ],
+    solution: 'x = 2 or x = 3',
+    expectedAnswer: 'x = 2, x = 3',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['math-linear-1'],
+  },
+  // Math - Geometry
+  {
+    id: 'math-geo-1',
+    title: 'Area of a Rectangle',
+    description: 'Find the area of a rectangle with length 8 cm and width 5 cm.',
+    type: 'math',
+    difficultyLevel: 1,
+    tags: ['geometry', 'area', 'rectangle'],
+    category: 'Math - Geometry',
+    estimatedTime: 5,
+    hints: ['What formula calculates the area of a rectangle?'],
+    solution: '40 cm²',
+    expectedAnswer: '40',
     createdAt: new Date('2024-01-02'),
     updatedAt: new Date('2024-01-02'),
     createdBy: 'system',
     isActive: true,
+    isAssessment: true,
+    prerequisites: [],
   },
   {
-    id: '3',
-    title: 'Photosynthesis Process',
-    description: 'Explain the process of photosynthesis and its importance in the ecosystem',
+    id: 'math-geo-2',
+    title: 'Pythagorean Theorem',
+    description: 'A right triangle has legs of length 3 and 4. Find the length of the hypotenuse.',
+    type: 'math',
+    difficultyLevel: 2,
+    tags: ['geometry', 'pythagorean', 'triangles'],
+    category: 'Math - Geometry',
+    estimatedTime: 10,
+    hints: ['Remember: a² + b² = c²', 'The hypotenuse is the longest side'],
+    solution: '5',
+    expectedAnswer: '5',
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['math-geo-1'],
+  },
+  // Science - Physics
+  {
+    id: 'sci-phys-1',
+    title: 'Speed and Distance',
+    description: 'A car travels at 60 mph for 2.5 hours. How far does it travel?',
     type: 'science',
     difficultyLevel: 2,
-    tags: ['biology', 'photosynthesis', 'plants'],
-    category: 'Biology',
-    estimatedTime: 20,
-    hints: [
-      'Think about what plants need to make their own food',
-      'Consider the role of sunlight, water, and carbon dioxide',
-      'What are the products of photosynthesis?'
-    ],
+    tags: ['physics', 'motion', 'speed'],
+    category: 'Science - Physics',
+    estimatedTime: 8,
+    hints: ['Distance = Speed × Time', 'Make sure your units match'],
+    solution: '150 miles',
+    expectedAnswer: '150',
     createdAt: new Date('2024-01-03'),
     updatedAt: new Date('2024-01-03'),
     createdBy: 'system',
     isActive: true,
+    isAssessment: true,
+    prerequisites: [],
+  },
+  {
+    id: 'sci-phys-2',
+    title: 'Velocity Concepts',
+    description: 'If you\'re running at constant speed on a treadmill, is your position changing? Explain the concept of velocity.',
+    type: 'science',
+    difficultyLevel: 2,
+    tags: ['physics', 'velocity', 'motion'],
+    category: 'Science - Physics',
+    estimatedTime: 10,
+    hints: ['Think about the difference between speed and velocity', 'Consider position relative to different reference frames'],
+    solution: 'Velocity is speed with direction. On a treadmill, your position relative to the room doesn\'t change even though you\'re moving.',
+    createdAt: new Date('2024-01-03'),
+    updatedAt: new Date('2024-01-03'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['sci-phys-1'],
+  },
+  // Science - Biology
+  {
+    id: 'sci-bio-1',
+    title: 'Cell Structure',
+    description: 'What is the powerhouse of the cell and what does it do?',
+    type: 'science',
+    difficultyLevel: 1,
+    tags: ['biology', 'cells', 'organelles'],
+    category: 'Science - Biology',
+    estimatedTime: 5,
+    hints: ['This organelle produces energy', 'It\'s often called the "powerhouse"'],
+    solution: 'Mitochondria - produces ATP (energy) for the cell',
+    expectedAnswer: 'mitochondria',
+    createdAt: new Date('2024-01-04'),
+    updatedAt: new Date('2024-01-04'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: [],
+  },
+  {
+    id: 'sci-bio-2',
+    title: 'Photosynthesis',
+    description: 'What are the reactants and products of photosynthesis?',
+    type: 'science',
+    difficultyLevel: 2,
+    tags: ['biology', 'photosynthesis', 'plants'],
+    category: 'Science - Biology',
+    estimatedTime: 10,
+    hints: [
+      'Think about what plants need to make their own food',
+      'What do plants release that we breathe?'
+    ],
+    solution: 'Reactants: CO2 + H2O + Light Energy. Products: Glucose + O2',
+    createdAt: new Date('2024-01-04'),
+    updatedAt: new Date('2024-01-04'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['sci-bio-1'],
   },
 ];
 
@@ -200,7 +305,7 @@ const updateProblemSchema = Joi.object({
  *         description: Unauthorized
  */
 router.get('/', 
-  authenticate, 
+  optionalAuthMiddleware, 
   rateLimiter, 
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
@@ -246,7 +351,7 @@ router.get('/',
     // Remove solution from response for non-admin users
     const responseProblems = paginatedProblems.map(p => {
       const { solution, ...problemWithoutSolution } = p;
-      return req.user!.role === 'admin' || req.user!.role === 'tutor' 
+      return (req.user?.role === 'admin' || req.user?.role === 'tutor')
         ? p 
         : problemWithoutSolution;
     });
@@ -814,7 +919,7 @@ router.post('/submit',
           metadata: submittedProblem.parsedProblem.metadata,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error processing problem submission', {
         error,
         userId,
@@ -822,10 +927,9 @@ router.post('/submit',
         hasText: !!problemText,
       });
 
-      return res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Failed to process problem',
-      });
+      // Let the error handler middleware handle the error
+      // It will format the response appropriately
+      throw error;
     }
   })
 );

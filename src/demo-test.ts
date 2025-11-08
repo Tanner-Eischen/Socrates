@@ -1,4 +1,4 @@
-// Automated demonstration of SocraTeach Day 1 Socratic methodology
+// Automated demonstration of Socrates Day 1 Socratic methodology
 import { SocraticEngine } from './socratic-engine';
 import { TEST_PROBLEMS, PROBLEM_DESCRIPTIONS } from './problem-bank';
 
@@ -12,7 +12,7 @@ interface TestResult {
 }
 
 async function demonstrateSocraticEngine() {
-  console.log('🎓 SocraTeach Day 1 - Socratic Engine Demonstration');
+  console.log('🎓 Socrates Day 1 - Socratic Engine Demonstration');
   console.log('==================================================\n');
   
   console.log('📋 Testing Core Functionality:');

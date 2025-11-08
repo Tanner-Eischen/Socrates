@@ -104,72 +104,69 @@ export default function Collaboration() {
 
   if (!currentRoom) {
     return (
-      <div className="min-h-screen bg-bg">
-        <header className="sticky top-0 z-10 border-b border-white/5 bg-bg/80 backdrop-blur">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+        <header className="sticky top-0 z-10 border-b-2 border-amber-200 bg-white/80 backdrop-blur">
           <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-white">SocraTeach</h1>
-              <Link to="/dashboard" className="text-sm text-slate-300 hover:text-white">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">Socrates</h1>
+              <Link to="/dashboard" className="text-sm text-gray-600 hover:text-amber-700 transition-colors">
                 ← Dashboard
               </Link>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className={`h-2 w-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
-                <span className="text-xs text-slate-400">
+                <div className={`h-2 w-2 rounded-full ${connected ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                <span className="text-xs text-gray-600">
                   {connected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
-              <button onClick={logout} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5">
-                Logout
-              </button>
             </div>
           </div>
         </header>
 
         <main className="mx-auto max-w-5xl px-4 py-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-white">Collaboration</h2>
-            <p className="mt-2 text-slate-400">Work together with other students in real-time</p>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">Collaboration</h2>
+            <p className="mt-2 text-gray-600">Work together with other students in real-time</p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2">
             {/* Create Room */}
-            <div className="rounded-2xl border border-white/5 bg-surface p-8">
-              <h3 className="mb-4 text-xl font-semibold text-white">Create a Room</h3>
-              <p className="mb-6 text-slate-400">Start a new collaboration session</p>
+            <div className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-8 shadow-lg">
+              <h3 className="mb-4 text-xl font-semibold text-gray-900">Create a Room</h3>
+              <p className="mb-6 text-gray-600">Start a new collaboration session</p>
               <button
                 onClick={createRoom}
                 disabled={!connected}
-                className="w-full rounded-xl bg-primary p-3 font-semibold text-black hover:bg-primary/90 disabled:opacity-50"
+                className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 p-3 font-semibold text-white shadow-md transition-all disabled:opacity-50"
               >
                 Create Room
               </button>
               {roomCode && (
-                <div className="mt-4 rounded-xl bg-white/5 p-4 text-center">
-                  <div className="text-sm text-slate-400">Room Code</div>
-                  <div className="mt-1 text-2xl font-bold text-primary">{roomCode}</div>
-                  <div className="mt-2 text-xs text-slate-500">Share this code with others to join</div>
+                <div className="mt-4 rounded-xl bg-amber-50 border-2 border-amber-200 p-4 text-center">
+                  <div className="text-sm text-gray-600 font-medium">Room Code</div>
+                  <div className="mt-1 text-2xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">{roomCode}</div>
+                  <div className="mt-2 text-xs text-gray-500">Share this code with others to join</div>
                 </div>
               )}
             </div>
 
             {/* Join Room */}
-            <div className="rounded-2xl border border-white/5 bg-surface p-8">
-              <h3 className="mb-4 text-xl font-semibold text-white">Join a Room</h3>
-              <p className="mb-6 text-slate-400">Enter a room code to join</p>
+            <div className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-8 shadow-lg">
+              <h3 className="mb-4 text-xl font-semibold text-gray-900">Join a Room</h3>
+              <p className="mb-6 text-gray-600">Enter a room code to join</p>
               <div className="space-y-3">
                 <input
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                   placeholder="Enter room code"
-                  className="w-full rounded-xl bg-bg border border-white/10 p-3 text-center text-xl font-mono text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                  className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-center text-xl font-mono text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   maxLength={6}
                 />
                 <button
                   onClick={joinRoom}
                   disabled={!connected || !roomCode.trim()}
-                  className="w-full rounded-xl bg-primary/10 border border-primary/30 p-3 font-semibold text-primary hover:bg-primary/20 disabled:opacity-50"
+                  className="w-full rounded-xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 p-3 font-semibold text-amber-700 transition-all disabled:opacity-50"
                 >
                   Join Room
                 </button>
@@ -182,16 +179,16 @@ export default function Collaboration() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-bg">
-      <header className="border-b border-white/5 bg-surface px-4 py-3">
+    <div className="flex h-screen flex-col bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+      <header className="border-b-2 border-amber-200 bg-white/80 backdrop-blur px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={leaveRoom} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5">
+            <button onClick={leaveRoom} className="rounded-lg border-2 border-amber-200 px-3 py-1.5 text-sm text-gray-700 hover:bg-amber-50 transition-all">
               ← Leave Room
             </button>
             <div>
-              <div className="text-sm text-slate-400">Room Code</div>
-              <div className="font-mono font-bold text-white">{currentRoom}</div>
+              <div className="text-sm text-gray-600 font-medium">Room Code</div>
+              <div className="font-mono font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">{currentRoom}</div>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -199,40 +196,37 @@ export default function Collaboration() {
               {participants.slice(0, 3).map((p) => (
                 <div
                   key={p.id}
-                  className="h-8 w-8 rounded-full bg-primary/20 border-2 border-surface flex items-center justify-center text-xs font-semibold text-primary"
+                  className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white flex items-center justify-center text-xs font-semibold text-white shadow-md"
                   title={p.name}
                 >
                   {p.name.charAt(0).toUpperCase()}
                 </div>
               ))}
               {participants.length > 3 && (
-                <div className="h-8 w-8 rounded-full bg-white/5 border-2 border-surface flex items-center justify-center text-xs text-slate-400">
+                <div className="h-8 w-8 rounded-full bg-amber-100 border-2 border-white flex items-center justify-center text-xs text-amber-700 font-semibold shadow-md">
                   +{participants.length - 3}
                 </div>
               )}
             </div>
-            <button onClick={logout} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5">
-              Logout
-            </button>
           </div>
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-slate-400">
+          <div className="flex h-full items-center justify-center text-gray-500">
             No messages yet. Start the conversation!
           </div>
         ) : (
           messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.userId === user?.id ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] rounded-2xl p-4 ${
+              <div className={`max-w-[70%] rounded-2xl p-4 shadow-md ${
                 msg.userId === user?.id
-                  ? 'bg-primary/10 border border-primary/30'
-                  : 'bg-surface border border-white/5'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
+                  : 'bg-white border-2 border-amber-200'
               }`}>
-                <div className="text-xs text-slate-400 mb-1">{msg.userName}</div>
-                <div className="text-white">{msg.content}</div>
+                <div className={`text-xs font-medium mb-1 ${msg.userId === user?.id ? 'text-amber-100' : 'text-gray-600'}`}>{msg.userName}</div>
+                <div className={msg.userId === user?.id ? 'text-white' : 'text-gray-900'}>{msg.content}</div>
               </div>
             </div>
           ))
@@ -240,7 +234,7 @@ export default function Collaboration() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-white/5 bg-surface p-4">
+      <div className="border-t-2 border-amber-200 bg-white/80 backdrop-blur p-4">
         <div className="flex gap-2">
           <input
             value={input}
@@ -248,12 +242,12 @@ export default function Collaboration() {
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
             placeholder="Type a message..."
             disabled={!connected}
-            className="flex-1 rounded-xl bg-bg border border-white/10 p-3 text-white placeholder:text-slate-500 focus:border-primary focus:outline-none disabled:opacity-50"
+            className="flex-1 rounded-xl bg-white border-2 border-amber-200 p-3 text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none disabled:opacity-50"
           />
           <button
             onClick={sendMessage}
             disabled={!connected || !input.trim()}
-            className="rounded-xl bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/90 disabled:opacity-50"
+            className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-6 py-3 font-semibold text-white shadow-md transition-all disabled:opacity-50"
           >
             Send
           </button>

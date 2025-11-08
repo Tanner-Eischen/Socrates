@@ -1,17 +1,21 @@
 {
-  "name": "socrateach",
+  "name": "socrates",
   "version": "4.0.0",
   "description": "Production-ready multi-modal Socratic learning platform with real-time collaboration and advanced analytics",
   "main": "dist/index.js",
   "bin": {
-    "tutor": "bin/socrateach",
-    "socrateach": "bin/socrateach"
+    "tutor": "bin/socrates",
+    "socrates": "bin/socrates"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/cli-tester.js",
     "dev": "ts-node src/api/index.ts",
     "test": "ts-node src/cli-tester.ts",
+    "test:problem-types": "ts-node src/test/problem-types-test.ts",
+    "test:context": "ts-node src/test/context-validation.ts",
+    "test:adaptive": "ts-node src/test/adaptive-difficulty-test.ts",
+    "test:all": "ts-node src/test/run-all-tests.ts",
     "watch": "nodemon --exec ts-node src/cli-tester.ts",
     "api": "node dist/api/index.js",
     "api:dev": "ts-node src/api/index.ts",
@@ -29,7 +33,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tanner-Eischen/SocraTeach.git"
+    "url": "git+https://github.com/Tanner-Eischen/Socrates.git"
   },
   "keywords": [
     "education",
@@ -41,9 +45,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Tanner-Eischen/SocraTeach/issues"
+    "url": "https://github.com/Tanner-Eischen/Socrates/issues"
   },
-  "homepage": "https://github.com/Tanner-Eischen/SocraTeach#readme",
+  "homepage": "https://github.com/Tanner-Eischen/Socrates#readme",
   "dependencies": {
     "commander": "^11.1.0",
     "@types/node": "^24.10.0",

@@ -18,7 +18,7 @@ interface DatabaseConfig extends PoolConfig {
 const defaultConfig: DatabaseConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'socrateach',
+  database: process.env.DB_NAME || 'socrates',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
   max: parseInt(process.env.DB_MAX_CONNECTIONS || '20'),
@@ -354,7 +354,7 @@ export const seedInitialData = async (pool: Pool): Promise<void> => {
     // Check if admin user already exists
     const adminCheck = await client.query(
       'SELECT id FROM users WHERE email = $1',
-      ['admin@socrateach.com']
+      ['admin@socrates.com']
     );
 
     if (adminCheck.rows.length === 0) {
@@ -366,7 +366,7 @@ export const seedInitialData = async (pool: Pool): Promise<void> => {
         INSERT INTO users (email, password_hash, role)
         VALUES ($1, $2, $3)
         RETURNING id
-      `, ['admin@socrateach.com', adminPassword, 'admin']);
+      `, ['admin@socrates.com', adminPassword, 'admin']);
 
       const adminId = adminResult.rows[0].id;
 
@@ -379,7 +379,7 @@ export const seedInitialData = async (pool: Pool): Promise<void> => {
         'System',
         'Administrator',
         'System Admin',
-        'SocraTeach system administrator'
+        'Socrates system administrator'
       ]);
 
       logger.info('Admin user created', { adminId });

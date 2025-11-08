@@ -30,11 +30,6 @@ export declare class ConflictError extends Error {
     code: string;
     constructor(message?: string);
 }
-export declare class RateLimitError extends Error {
-    statusCode: number;
-    code: string;
-    constructor(message?: string);
-}
 export declare class InternalServerError extends Error {
     statusCode: number;
     code: string;
@@ -44,6 +39,28 @@ export declare class ServiceUnavailableError extends Error {
     statusCode: number;
     code: string;
     constructor(message?: string);
+}
+export declare class ImageProcessingError extends Error {
+    statusCode: number;
+    code: string;
+    constructor(message?: string);
+}
+export declare class LLMServiceError extends Error {
+    retryable: boolean;
+    statusCode: number;
+    code: string;
+    constructor(message?: string, retryable?: boolean);
+}
+export declare class NetworkError extends Error {
+    statusCode: number;
+    code: string;
+    constructor(message?: string);
+}
+export declare class RateLimitError extends Error {
+    retryAfter?: number | undefined;
+    statusCode: number;
+    code: string;
+    constructor(message?: string, retryAfter?: number | undefined);
 }
 export declare const errorHandler: (err: ApiError, req: Request, res: Response, next: NextFunction) => void;
 export declare const asyncHandler: (fn: Function) => (req: Request, res: Response, next: NextFunction) => void;

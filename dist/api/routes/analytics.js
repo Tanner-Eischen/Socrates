@@ -5,11 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AnalyticsService_1 = require("../services/AnalyticsService");
+const SessionService_1 = require("../services/SessionService");
 const auth_1 = require("../middleware/auth");
 const rateLimiter_1 = require("../middleware/rateLimiter");
 const errorHandler_1 = require("../middleware/errorHandler");
 const logger_1 = require("../middleware/logger");
 const joi_1 = __importDefault(require("joi"));
+const socratic_engine_1 = require("../../socratic-engine");
 const router = (0, express_1.Router)();
 // Validation schemas
 const trackEventSchema = joi_1.default.object({
@@ -72,15 +74,17 @@ router.post('/track', auth_1.authenticate, rateLimiter_1.analyticsRateLimiter, (
         });
     }
     const event = await AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user.id,
+        userId: req.user?.id || 'demo-user',
         sessionId: value.sessionId,
         eventType: value.eventType,
         eventData: value.eventData || {},
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
     });
+    // Event may be null if database is unavailable
     return res.status(201).json({
         success: true,
+        message: event ? 'Analytics event tracked successfully' : 'Analytics event tracking attempted (database unavailable)',
         data: event,
     });
 }));
@@ -246,9 +250,9 @@ router.get('/events', auth_1.authenticate, (0, auth_1.requireRole)(['admin', 'tu
     if (value.sessionId) {
         filteredEvents = filteredEvents.filter(event => event.sessionId === value.sessionId);
     }
-    // Track analytics access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user.id,
+    // Track analytics access (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
+        userId: req.user?.id || 'demo-user',
         eventType: 'analytics_events_accessed',
         eventData: {
             filters: {
@@ -335,9 +339,9 @@ router.get('/system', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), r
     };
     const timeRange = buildTimeRange(value.timeframe, value.startDate, value.endDate);
     const systemMetrics = await AnalyticsService_1.AnalyticsService.getSystemMetrics(timeRange);
-    // Track system analytics access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user.id,
+    // Track system analytics access (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
+        userId: req.user?.id || 'demo-user',
         eventType: 'system_analytics_accessed',
         eventData: {
             timeframe: value.timeframe,
@@ -436,9 +440,9 @@ router.get('/behavior', auth_1.authenticate, (0, auth_1.requireRole)(['admin', '
         });
     }
     const behaviorAnalysis = await AnalyticsService_1.AnalyticsService.getUserBehaviorPatterns(userId);
-    // Track behavior analysis access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user.id,
+    // Track behavior analysis access (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
+        userId: req.user?.id || 'demo-user',
         eventType: 'behavior_analysis_accessed',
         eventData: {
             targetUserId: userId,
@@ -509,8 +513,8 @@ router.get('/dashboard', auth_1.authenticate, rateLimiter_1.analyticsRateLimiter
             role: 'student',
         };
     }
-    // Track dashboard access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    // Track dashboard access (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId,
         eventType: 'dashboard_accessed',
         eventData: {
@@ -595,9 +599,9 @@ router.get('/export', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), r
     if (userId) {
         filteredEvents = filteredEvents.filter(event => event.userId === userId);
     }
-    // Track export
-    await AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user.id,
+    // Track export (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
+        userId: req.user?.id || 'demo-user',
         eventType: 'analytics_exported',
         eventData: {
             format,
@@ -631,6 +635,222 @@ router.get('/export', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), r
                 timestamp: new Date().toISOString(),
                 recordCount: filteredEvents.length,
             },
+        });
+    }
+}));
+/**
+ * @swagger
+ * /api/v1/sessions/{id}/journey:
+ *   get:
+ *     summary: Get learning journey timeline for a session
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID
+ *     responses:
+ *       200:
+ *         description: Journey timeline retrieved successfully
+ *       404:
+ *         description: Session not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/sessions/:id/journey', auth_1.authenticate, (0, auth_1.requireOwnership)('session'), rateLimiter_1.analyticsRateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    const session = await SessionService_1.SessionService.findById(id);
+    if (!session) {
+        return res.status(404).json({
+            success: false,
+            message: 'Session not found',
+        });
+    }
+    const interactions = await SessionService_1.SessionService.getInteractions(id);
+    try {
+        // Initialize engine and replay conversation
+        const engine = new socratic_engine_1.SocraticEngine();
+        engine.initializeSession(id);
+        await engine.startProblem(session.problemText);
+        // Replay interactions to rebuild state
+        for (const interaction of interactions) {
+            if (interaction.type === 'enhanced_student_response' || interaction.type === 'question' || interaction.type === 'student_response') {
+                await engine.respondToStudent(interaction.content);
+            }
+        }
+        // Get conversation history
+        const conversation = engine.getConversationHistory();
+        // Build timeline
+        const timeline = conversation
+            .filter(msg => msg.role !== 'system')
+            .map((msg, index) => {
+            const turn = Math.floor(index / 2) + 1;
+            return {
+                turn,
+                questionType: msg.questionType || 'unknown',
+                depth: msg.depthLevel || 1,
+                confidence: msg.studentConfidence || 0,
+                confidenceDelta: msg.confidenceDelta,
+                teachBackScore: msg.teachBackScore,
+                transferSuccess: msg.transferAttempt?.success,
+                reasoningScore: msg.reasoningScore,
+                breakthrough: msg.breakthroughMoment || false
+            };
+        })
+            .filter(entry => entry.questionType !== 'unknown' || entry.depth > 0);
+        return res.json({
+            success: true,
+            data: timeline,
+        });
+    }
+    catch (error) {
+        logger_1.logger.error('Failed to generate journey timeline', {
+            userId: req.user?.id,
+            sessionId: id,
+            error,
+        });
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to generate journey timeline',
+        });
+    }
+}));
+/**
+ * @swagger
+ * /api/v1/sessions/{id}/compliance:
+ *   get:
+ *     summary: Get Socratic compliance metrics for a session
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID
+ *     responses:
+ *       200:
+ *         description: Compliance metrics retrieved successfully
+ *       404:
+ *         description: Session not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/sessions/:id/compliance', auth_1.authenticate, (0, auth_1.requireOwnership)('session'), rateLimiter_1.analyticsRateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    const session = await SessionService_1.SessionService.findById(id);
+    if (!session) {
+        return res.status(404).json({
+            success: false,
+            message: 'Session not found',
+        });
+    }
+    const interactions = await SessionService_1.SessionService.getInteractions(id);
+    try {
+        // Initialize engine and replay conversation
+        const engine = new socratic_engine_1.SocraticEngine();
+        engine.initializeSession(id);
+        await engine.startProblem(session.problemText);
+        // Replay interactions to rebuild state
+        for (const interaction of interactions) {
+            if (interaction.type === 'enhanced_student_response' || interaction.type === 'question' || interaction.type === 'student_response') {
+                await engine.respondToStudent(interaction.content);
+            }
+        }
+        // Get compliance metrics
+        const complianceMetrics = engine.getSocraticComplianceMetrics();
+        return res.json({
+            success: true,
+            data: complianceMetrics,
+        });
+    }
+    catch (error) {
+        logger_1.logger.error('Failed to generate compliance metrics', {
+            userId: req.user?.id,
+            sessionId: id,
+            error,
+        });
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to generate compliance metrics',
+        });
+    }
+}));
+/**
+ * @swagger
+ * /api/v1/analytics/session/{id}/report:
+ *   get:
+ *     summary: Get aggregated learning metrics report for a session
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID
+ *     responses:
+ *       200:
+ *         description: Learning report retrieved successfully
+ *       404:
+ *         description: Session not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/session/:id/report', auth_1.authenticate, (0, auth_1.requireOwnership)('session'), rateLimiter_1.analyticsRateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    const session = await SessionService_1.SessionService.findById(id);
+    if (!session) {
+        return res.status(404).json({
+            success: false,
+            message: 'Session not found',
+        });
+    }
+    const interactions = await SessionService_1.SessionService.getInteractions(id);
+    try {
+        // Initialize engine and replay conversation
+        const engine = new socratic_engine_1.SocraticEngine();
+        engine.initializeSession(id);
+        await engine.startProblem(session.problemText);
+        // Replay interactions to rebuild state
+        for (const interaction of interactions) {
+            if (interaction.type === 'enhanced_student_response' || interaction.type === 'question' || interaction.type === 'student_response') {
+                await engine.respondToStudent(interaction.content);
+            }
+        }
+        // Get learning gains
+        const learningGains = engine.computeSessionLearningGains();
+        return res.json({
+            success: true,
+            data: {
+                transferSuccessRate: learningGains.transferSuccessRate,
+                avgTeachBackScore: learningGains.teachBackScores.length > 0
+                    ? learningGains.teachBackScores.reduce((sum, score) => sum + score, 0) / learningGains.teachBackScores.length
+                    : 0,
+                avgReasoningScore: learningGains.reasoningScoreAvg,
+                calibrationErrorAvg: learningGains.calibrationErrorAvg,
+                depthTrajectory: learningGains.depthTrajectory,
+                breakthroughs: learningGains.breakthroughs
+            },
+        });
+    }
+    catch (error) {
+        logger_1.logger.error('Failed to generate learning report', {
+            userId: req.user?.id,
+            sessionId: id,
+            error,
+        });
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to generate learning report',
         });
     }
 }));

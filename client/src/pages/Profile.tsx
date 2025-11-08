@@ -71,63 +71,37 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-bg/80 backdrop-blur">
-        <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-white">SocraTeach</h1>
-            <Link
-              to="/dashboard"
-              className="text-sm text-slate-300 hover:text-white"
-            >
-              ← Dashboard
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400">
-              {user?.name || user?.email}
-            </span>
-            <button
-              onClick={logout}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       {/* Content */}
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-white">Profile Settings</h2>
-          <p className="mt-2 text-slate-400">Manage your account information</p>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">Profile Settings</h2>
+          <p className="mt-2 text-gray-600">Manage your account information</p>
         </div>
 
         {success && (
-          <div className="mb-6 rounded-xl bg-green-500/10 border border-green-500/20 p-4 text-green-400">
+          <div className="mb-6 rounded-xl bg-emerald-50 border-2 border-emerald-200 p-4 text-emerald-700">
             {success}
           </div>
         )}
 
         {error && (
-          <div className="mb-6 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-red-400">
+          <div className="mb-6 rounded-xl bg-red-50 border-2 border-red-200 p-4 text-red-700">
             {error}
           </div>
         )}
 
         <div className="space-y-6">
           {/* Profile Information */}
-          <div className="rounded-2xl border border-white/5 bg-surface p-6">
+          <div className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-gray-900">
                 Profile Information
               </h3>
               {!editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+                  className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
                 >
                   Edit Profile
                 </button>
@@ -137,7 +111,7 @@ export default function Profile() {
             {editing ? (
               <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm text-slate-300 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-2">
                     Full Name
                   </label>
                   <input
@@ -146,12 +120,12 @@ export default function Profile() {
                     type="text"
                     required
                     defaultValue={user?.name}
-                    className="w-full rounded-xl bg-bg border border-white/10 p-3 text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm text-slate-300 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
                     Email
                   </label>
                   <input
@@ -160,7 +134,7 @@ export default function Profile() {
                     type="email"
                     required
                     defaultValue={user?.email}
-                    className="w-full rounded-xl bg-bg border border-white/10 p-3 text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
 
@@ -168,14 +142,14 @@ export default function Profile() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="rounded-lg bg-primary px-6 py-2 font-semibold text-black hover:bg-primary/90 disabled:opacity-50"
+                    className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-6 py-2 font-semibold text-white shadow-md transition-all disabled:opacity-50"
                   >
                     {loading ? 'Saving...' : 'Save Changes'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditing(false)}
-                    className="rounded-lg border border-white/10 px-6 py-2 text-sm text-slate-300 hover:bg-white/5"
+                    className="rounded-lg border-2 border-amber-200 px-6 py-2 text-sm text-gray-700 hover:bg-amber-50 transition-all"
                   >
                     Cancel
                   </button>
@@ -184,31 +158,31 @@ export default function Profile() {
             ) : (
               <div className="space-y-3">
                 <div>
-                  <div className="text-sm text-slate-400">Name</div>
-                  <div className="text-white">{user?.name}</div>
+                  <div className="text-sm font-medium text-gray-600">Name</div>
+                  <div className="text-gray-900 font-medium">{user?.name}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-slate-400">Email</div>
-                  <div className="text-white">{user?.email}</div>
+                  <div className="text-sm font-medium text-gray-600">Email</div>
+                  <div className="text-gray-900 font-medium">{user?.email}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-slate-400">Role</div>
-                  <div className="text-white capitalize">{user?.role}</div>
+                  <div className="text-sm font-medium text-gray-600">Role</div>
+                  <div className="text-gray-900 font-medium capitalize">{user?.role}</div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Change Password */}
-          <div className="rounded-2xl border border-white/5 bg-surface p-6">
+          <div className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-gray-900">
                 Change Password
               </h3>
               {!changingPassword && (
                 <button
                   onClick={() => setChangingPassword(true)}
-                  className="rounded-lg border border-white/10 px-4 py-2 text-sm text-slate-300 hover:bg-white/5"
+                  className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
                 >
                   Change Password
                 </button>
@@ -218,7 +192,7 @@ export default function Profile() {
             {changingPassword && (
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
-                  <label htmlFor="currentPassword" className="block text-sm text-slate-300 mb-2">
+                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-900 mb-2">
                     Current Password
                   </label>
                   <input
@@ -226,12 +200,12 @@ export default function Profile() {
                     name="currentPassword"
                     type="password"
                     required
-                    className="w-full rounded-xl bg-bg border border-white/10 p-3 text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="newPassword" className="block text-sm text-slate-300 mb-2">
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-900 mb-2">
                     New Password
                   </label>
                   <input
@@ -240,12 +214,12 @@ export default function Profile() {
                     type="password"
                     required
                     minLength={6}
-                    className="w-full rounded-xl bg-bg border border-white/10 p-3 text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm text-slate-300 mb-2">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
                     Confirm New Password
                   </label>
                   <input
@@ -254,7 +228,7 @@ export default function Profile() {
                     type="password"
                     required
                     minLength={6}
-                    className="w-full rounded-xl bg-bg border border-white/10 p-3 text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
 
@@ -262,14 +236,14 @@ export default function Profile() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="rounded-lg bg-primary px-6 py-2 font-semibold text-black hover:bg-primary/90 disabled:opacity-50"
+                    className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-6 py-2 font-semibold text-white shadow-md transition-all disabled:opacity-50"
                   >
                     {loading ? 'Changing...' : 'Change Password'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setChangingPassword(false)}
-                    className="rounded-lg border border-white/10 px-6 py-2 text-sm text-slate-300 hover:bg-white/5"
+                    className="rounded-lg border-2 border-amber-200 px-6 py-2 text-sm text-gray-700 hover:bg-amber-50 transition-all"
                   >
                     Cancel
                   </button>

@@ -58,15 +58,6 @@ export class ConflictError extends Error {
   }
 }
 
-export class RateLimitError extends Error {
-  statusCode = 429;
-  code = 'RATE_LIMIT_EXCEEDED';
-  
-  constructor(message: string = 'Rate limit exceeded') {
-    super(message);
-    this.name = 'RateLimitError';
-  }
-}
 
 export class InternalServerError extends Error {
   statusCode = 500;
@@ -88,6 +79,46 @@ export class ServiceUnavailableError extends Error {
   }
 }
 
+export class ImageProcessingError extends Error {
+  statusCode = 422;
+  code = 'IMAGE_PROCESSING_ERROR';
+  
+  constructor(message: string = 'Failed to process image') {
+    super(message);
+    this.name = 'ImageProcessingError';
+  }
+}
+
+export class LLMServiceError extends Error {
+  statusCode = 503;
+  code = 'LLM_SERVICE_ERROR';
+  
+  constructor(message: string = 'AI service temporarily unavailable', public retryable: boolean = true) {
+    super(message);
+    this.name = 'LLMServiceError';
+  }
+}
+
+export class NetworkError extends Error {
+  statusCode = 504;
+  code = 'NETWORK_ERROR';
+  
+  constructor(message: string = 'Network request timed out') {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
+
+export class RateLimitError extends Error {
+  statusCode = 429;
+  code = 'RATE_LIMIT_EXCEEDED';
+  
+  constructor(message: string = 'Rate limit exceeded. Please try again later', public retryAfter?: number) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
 // Error response interface
 interface ErrorResponse {
   error: string;
@@ -97,6 +128,8 @@ interface ErrorResponse {
   timestamp: string;
   correlationId?: string;
   stack?: string;
+  retryable?: boolean;
+  retryAfter?: number;
 }
 
 // Main error handler middleware
@@ -112,6 +145,9 @@ export const errorHandler = (
   let code = err.code || 'INTERNAL_SERVER_ERROR';
 
   // Handle specific error types
+  let retryable: boolean | undefined;
+  let retryAfter: number | undefined;
+  
   if (err.name === 'ValidationError') {
     statusCode = 400;
     code = 'VALIDATION_ERROR';
@@ -131,6 +167,30 @@ export const errorHandler = (
     statusCode = 400;
     code = 'INVALID_JSON';
     message = 'Invalid JSON in request body';
+  } else if (err.name === 'ImageProcessingError') {
+    statusCode = err.statusCode || 422;
+    code = 'IMAGE_PROCESSING_ERROR';
+    message = err.message || 'Failed to process image. Please ensure the image is clear and contains readable text.';
+  } else if (err.name === 'LLMServiceError') {
+    statusCode = err.statusCode || 503;
+    code = 'LLM_SERVICE_ERROR';
+    message = err.message || 'AI service is temporarily unavailable. Please try again in a moment.';
+    retryable = (err as LLMServiceError).retryable;
+  } else if (err.name === 'NetworkError' || err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
+    statusCode = 504;
+    code = 'NETWORK_ERROR';
+    message = 'Network request timed out. Please check your connection and try again.';
+  } else if (err.name === 'RateLimitError' || (err as any).response?.status === 429) {
+    statusCode = 429;
+    code = 'RATE_LIMIT_EXCEEDED';
+    message = err.message || 'Too many requests. Please wait a moment before trying again.';
+    retryAfter = (err as RateLimitError).retryAfter || 
+                 (err as any).response?.headers?.['retry-after'] || 
+                 60;
+  } else if (err.message?.includes('OpenAI') || err.message?.includes('API key')) {
+    statusCode = 503;
+    code = 'LLM_SERVICE_ERROR';
+    message = 'AI service configuration error. Please contact support.';
   }
 
   // Create error response
@@ -141,6 +201,14 @@ export const errorHandler = (
     timestamp: new Date().toISOString(),
     correlationId: (req as any).correlationId,
   };
+  
+  if (retryable !== undefined) {
+    errorResponse.retryable = retryable;
+  }
+  
+  if (retryAfter !== undefined) {
+    errorResponse.retryAfter = retryAfter;
+  }
 
   // Add details for validation errors
   if (err.details) {

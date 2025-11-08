@@ -146,7 +146,7 @@ router.patch('/profile', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, err
     }
     const updatedUser = await UserService_1.UserService.updateProfile(req.user.id, value);
     // Track profile update
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'profile_updated',
         eventData: {
@@ -238,7 +238,7 @@ router.get('/', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), rateLim
         return userWithoutPassword;
     });
     // Track admin user list access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'admin_users_accessed',
         eventData: {
@@ -294,7 +294,7 @@ router.get('/:id', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), rate
     const userProfile = { ...user };
     delete userProfile.passwordHash;
     // Track admin user access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'admin_user_accessed',
         eventData: {
@@ -385,7 +385,7 @@ router.patch('/:id', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), ra
     // Update user profile
     const updatedUser = await UserService_1.UserService.updateProfile(req.params.id, value);
     // Track admin user update
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'admin_user_updated',
         eventData: {
@@ -449,7 +449,7 @@ router.post('/:id/deactivate', auth_1.authenticate, (0, auth_1.requireRole)(['ad
     }
     await UserService_1.UserService.deactivate(req.params.id);
     // Track user deactivation
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'admin_user_deactivated',
         eventData: {
@@ -579,7 +579,7 @@ router.get('/:id/analytics', auth_1.authenticate, (0, auth_1.requireRole)(['admi
     }
     const analytics = await AnalyticsService_1.AnalyticsService.getUserAnalytics(req.params.id, { start, end });
     // Track analytics access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'user_analytics_accessed',
         eventData: {
@@ -628,7 +628,7 @@ router.get('/stats', auth_1.authenticate, (0, auth_1.requireRole)(['admin']), ra
         }).length,
     };
     // Track stats access
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'admin_stats_accessed',
         eventData: {

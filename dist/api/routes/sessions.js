@@ -14,6 +14,90 @@ const logger_1 = require("../middleware/logger");
 const joi_1 = __importDefault(require("joi"));
 const socratic_engine_1 = require("../../socratic-engine"); // ADDED FOR ENHANCED FEATURES
 const router = (0, express_1.Router)();
+// This would normally fetch from database - for now, inline the assessment problems
+const mockProblems = [
+    {
+        id: 'math-linear-1',
+        title: 'Linear Equations Basics',
+        description: 'Solve for x: 3x + 7 = 22',
+        type: 'math',
+        difficultyLevel: 1,
+        isAssessment: true,
+        prerequisites: [],
+        expectedAnswer: '5',
+    },
+    {
+        id: 'math-quad-1',
+        title: 'Quadratic Equations',
+        description: 'Solve the quadratic equation: x² - 5x + 6 = 0',
+        type: 'math',
+        difficultyLevel: 3,
+        isAssessment: true,
+        prerequisites: ['math-linear-1'],
+        expectedAnswer: 'x = 2, x = 3',
+    },
+    {
+        id: 'math-geo-1',
+        title: 'Area of a Rectangle',
+        description: 'Find the area of a rectangle with length 8 cm and width 5 cm.',
+        type: 'math',
+        difficultyLevel: 1,
+        isAssessment: true,
+        prerequisites: [],
+        expectedAnswer: '40',
+    },
+    {
+        id: 'math-geo-2',
+        title: 'Pythagorean Theorem',
+        description: 'A right triangle has legs of length 3 and 4. Find the length of the hypotenuse.',
+        type: 'math',
+        difficultyLevel: 2,
+        isAssessment: true,
+        prerequisites: ['math-geo-1'],
+        expectedAnswer: '5',
+    },
+    {
+        id: 'sci-phys-1',
+        title: 'Speed and Distance',
+        description: 'A car travels at 60 mph for 2.5 hours. How far does it travel?',
+        type: 'science',
+        difficultyLevel: 2,
+        isAssessment: true,
+        prerequisites: [],
+        expectedAnswer: '150',
+    },
+    {
+        id: 'sci-phys-2',
+        title: 'Velocity Concepts',
+        description: 'If you\'re running at constant speed on a treadmill, is your position changing? Explain the concept of velocity.',
+        type: 'science',
+        difficultyLevel: 2,
+        isAssessment: true,
+        prerequisites: ['sci-phys-1'],
+    },
+    {
+        id: 'sci-bio-1',
+        title: 'Cell Structure',
+        description: 'What is the powerhouse of the cell and what does it do?',
+        type: 'science',
+        difficultyLevel: 1,
+        isAssessment: true,
+        prerequisites: [],
+        expectedAnswer: 'mitochondria',
+    },
+    {
+        id: 'sci-bio-2',
+        title: 'Photosynthesis',
+        description: 'What are the reactants and products of photosynthesis?',
+        type: 'science',
+        difficultyLevel: 2,
+        isAssessment: true,
+        prerequisites: ['sci-bio-1'],
+    },
+];
+function getProblemById(problemId) {
+    return mockProblems.find(p => p.id === problemId);
+}
 // Validation schemas
 const createSessionSchema = joi_1.default.object({
     problemId: joi_1.default.string().optional(),
@@ -142,8 +226,8 @@ router.post('/', auth_1.optionalAuthMiddleware, rateLimiter_1.rateLimiter, (0, e
         userId: req.user?.id || 'demo-user',
         ...sessionData,
     });
-    // Track session creation
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    // Track session creation (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user?.id || 'demo-user',
         sessionId: session.id,
         eventType: 'session_created',
@@ -154,7 +238,7 @@ router.post('/', auth_1.optionalAuthMiddleware, rateLimiter_1.rateLimiter, (0, e
         },
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),
-    });
+    }).catch(err => logger_1.logger.warn('Analytics tracking failed', { error: err }));
     logger_1.logger.info('Session created successfully', {
         userId: req.user?.id || 'demo-user',
         sessionId: session.id,
@@ -200,7 +284,7 @@ router.get('/:id', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHand
         });
     }
     // Ensure user owns the session or is admin
-    if (session.userId !== req.user.id && req.user.role !== 'admin') {
+    if (session.userId !== (req.user?.id || 'demo-user') && req.user?.role !== 'admin') {
         return res.status(403).json({
             success: false,
             message: 'Access denied',
@@ -247,7 +331,7 @@ router.get('/:id', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHand
  */
 router.get('/', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { status, limit = 20, offset = 0 } = req.query;
-    const sessions = await SessionService_1.SessionService.findByUserId(req.user.id, Number(limit), Number(offset));
+    const sessions = await SessionService_1.SessionService.findByUserId(req.user?.id || 'demo-user', Number(limit), Number(offset));
     return res.json({
         success: true,
         data: sessions,
@@ -315,8 +399,8 @@ router.patch('/:id', auth_1.authenticate, (0, auth_1.requireOwnership)('session'
     }
     // Track session completion
     if (value.status === 'completed') {
-        await AnalyticsService_1.AnalyticsService.trackEvent({
-            userId: req.user.id,
+        AnalyticsService_1.AnalyticsService.trackEvent({
+            userId: req.user?.id || 'demo-user',
             sessionId: id,
             eventType: 'session_completed',
             eventData: {
@@ -325,10 +409,10 @@ router.patch('/:id', auth_1.authenticate, (0, auth_1.requireOwnership)('session'
             },
             ipAddress: req.ip,
             userAgent: req.get('user-agent'),
-        });
+        }).catch(err => logger_1.logger.warn('Analytics tracking failed', { error: err }));
     }
     logger_1.logger.info('Session status updated', {
-        userId: req.user.id,
+        userId: req.user?.id || 'demo-user',
         sessionId: id,
         newStatus: value.status,
     });
@@ -394,12 +478,12 @@ router.post('/:id/interactions', auth_1.authenticate, (0, auth_1.requireOwnershi
     }
     const interaction = await SessionService_1.SessionService.addInteraction({
         sessionId: id,
-        userId: req.user.id,
+        userId: req.user?.id || 'demo-user',
         ...value,
     });
-    // Track interaction
-    await AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user.id,
+    // Track interaction (non-blocking)
+    AnalyticsService_1.AnalyticsService.trackEvent({
+        userId: req.user?.id || 'demo-user',
         sessionId: id,
         eventType: 'interaction_added',
         eventData: {
@@ -408,7 +492,7 @@ router.post('/:id/interactions', auth_1.authenticate, (0, auth_1.requireOwnershi
         },
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),
-    });
+    }).catch(err => logger_1.logger.warn('Analytics tracking failed', { error: err }));
     return res.status(201).json({
         success: true,
         message: 'Interaction added successfully',
@@ -514,11 +598,55 @@ router.post('/:id/enhanced-interactions', auth_1.optionalAuthMiddleware, rateLim
     }
     try {
         // Initialize enhanced Socratic engine
-        const engine = new socratic_engine_1.SocraticEngine();
+        // Check for strict mode header
+        const strictMode = req.headers['x-strict-socratic'] === 'true' ||
+            process.env.STRICT_SOCRATIC_MODE === 'true';
+        const engine = new socratic_engine_1.SocraticEngine(undefined, strictMode);
         // Initialize session with problem
         engine.initializeSession(id);
-        await engine.startProblem(session.problemText);
-        // Get tutor response using enhanced engine
+        // Check if this session is using an assessment problem
+        let problem;
+        if (session.problemId) {
+            problem = getProblemById(session.problemId);
+        }
+        if (problem && problem.isAssessment) {
+            // Start in assessment mode with expected answer
+            await engine.startAssessmentProblem(session.problemText, problem.expectedAnswer);
+            logger_1.logger.info('Started session in assessment mode', {
+                sessionId: id,
+                problemId: problem.id,
+                hasExpectedAnswer: !!problem.expectedAnswer
+            });
+        }
+        else {
+            // Start in normal tutoring mode
+            await engine.startProblem(session.problemText);
+        }
+        // CRITICAL FIX: Restore conversation history from database
+        const existingInteractions = await SessionService_1.SessionService.getInteractions(id);
+        if (existingInteractions.length > 0) {
+            // Build conversation history from stored interactions
+            const conversationHistory = [];
+            for (const interaction of existingInteractions) {
+                if (interaction.type === 'enhanced_student_response' || interaction.type === 'student_response') {
+                    conversationHistory.push({
+                        role: 'user',
+                        content: interaction.content,
+                        timestamp: interaction.timestamp
+                    });
+                }
+                else if (interaction.type === 'enhanced_tutor_response' || interaction.type === 'answer') {
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: interaction.content,
+                        timestamp: interaction.timestamp
+                    });
+                }
+            }
+            // Restore conversation into engine (no API calls, just rebuilding state)
+            engine.restoreConversationHistory(conversationHistory);
+        }
+        // Get tutor response using enhanced engine with full context
         const tutorResponse = await engine.respondToStudent(value.content);
         // Get enhanced metadata from engine
         const analytics = engine.generateAnalytics();
@@ -557,8 +685,8 @@ router.post('/:id/enhanced-interactions', auth_1.optionalAuthMiddleware, rateLim
             },
             processingTime: 0,
         });
-        // Track enhanced interaction
-        await AnalyticsService_1.AnalyticsService.trackEvent({
+        // Track enhanced interaction (non-blocking)
+        AnalyticsService_1.AnalyticsService.trackEvent({
             userId: req.user?.id || 'demo-user',
             sessionId: id,
             eventType: 'enhanced_interaction',
@@ -577,6 +705,10 @@ router.post('/:id/enhanced-interactions', auth_1.optionalAuthMiddleware, rateLim
             questionType: currentQuestionType,
             depthLevel: depthTracker.currentDepth,
         });
+        // Check if this was an assessment and it's now complete
+        const wasAssessment = problem && problem.isAssessment;
+        const assessmentComplete = wasAssessment && !engine.isInAssessmentMode();
+        const assessmentCorrect = assessmentComplete && tutorResponse.includes('✅ Correct');
         return res.status(201).json({
             success: true,
             message: 'Enhanced interaction processed successfully',
@@ -584,6 +716,10 @@ router.post('/:id/enhanced-interactions', auth_1.optionalAuthMiddleware, rateLim
             questionType: currentQuestionType,
             depthLevel: depthTracker.currentDepth,
             targetedConcepts: depthTracker.conceptualConnections.slice(-3),
+            // Assessment mode information
+            isAssessmentMode: engine.isInAssessmentMode(),
+            assessmentComplete,
+            assessmentCorrect,
             // Flags - only show when relevant
             flags: {
                 struggling: isStruggling,
@@ -607,7 +743,7 @@ router.post('/:id/enhanced-interactions', auth_1.optionalAuthMiddleware, rateLim
     }
     catch (engineError) {
         logger_1.logger.error('Enhanced interaction failed', {
-            userId: req.user.id,
+            userId: req.user?.id || 'demo-user',
             sessionId: id,
             error: engineError,
         });
@@ -697,7 +833,7 @@ router.get('/:id/socratic-analytics', auth_1.authenticate, (0, auth_1.requireOwn
     }
     catch (error) {
         logger_1.logger.error('Failed to generate Socratic analytics', {
-            userId: req.user.id,
+            userId: req.user?.id || 'demo-user',
             sessionId: id,
             error,
         });
@@ -772,7 +908,7 @@ router.post('/:id/metacognitive-prompt', auth_1.authenticate, (0, auth_1.require
     }
     catch (error) {
         logger_1.logger.error('Failed to generate metacognitive prompt', {
-            userId: req.user.id,
+            userId: req.user?.id || 'demo-user',
             sessionId: id,
             category,
             error,
@@ -812,7 +948,7 @@ router.delete('/:id', auth_1.authenticate, (0, auth_1.requireOwnership)('session
     try {
         await SessionService_1.SessionService.delete(id);
         logger_1.logger.info('Session deleted', {
-            userId: req.user.id,
+            userId: req.user?.id || 'demo-user',
             sessionId: id,
         });
         return res.json({

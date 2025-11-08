@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api from '../api';
 import { DashboardStatSkeleton, SessionCardSkeleton } from '../components/SkeletonLoader';
+import { Clock, Target, TrendingUp, BookOpen, Sparkles, ArrowRight } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 
 interface DashboardStats {
   totalSessions: number;
@@ -20,7 +24,7 @@ interface RecentSession {
 }
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,25 +42,27 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900">
-        <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-          <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-bold text-gray-100">SocraTeach</h1>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+        <main className="mx-auto max-w-7xl px-8 py-12">
+          <div className="mb-12">
+            <h2 className="text-4xl font-bold">Welcome back!</h2>
           </div>
-        </header>
-        <main className="mx-auto max-w-7xl px-4 py-8">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-100">Welcome back!</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
             {[1, 2, 3, 4].map((i) => (
               <DashboardStatSkeleton key={i} />
             ))}
           </div>
-          <div className="space-y-3">
-            <h3 className="text-xl font-semibold text-gray-100">Recent Sessions</h3>
+          <div className="space-y-4">
+            <h3 className="text-2xl font-semibold">Recent Sessions</h3>
             {[1, 2, 3].map((i) => (
               <SessionCardSkeleton key={i} />
             ))}
@@ -67,151 +73,206 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-gray-100">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-100">SocraTeach</h1>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/new"
-              className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm transition"
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+      <main className="mx-auto max-w-7xl px-8 py-12">
+        {/* Hero Section */}
+        <div className="mb-12">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-amber-700 font-medium mb-2">{getGreeting()},</p>
+              <h1 className="text-5xl font-bold mb-3">
+                <span className="bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">
+                  {user?.name?.split(' ')[0] || 'there'}
+                </span>
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Ready to continue your learning journey?
+              </p>
+            </div>
+            <Button
+              asChild
+              size="lg"
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all"
             >
-              New Session
-            </Link>
-            <span className="text-sm text-gray-300">
-              {user?.name || user?.email}
-            </span>
-            <button
-              onClick={logout}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 text-sm transition"
-            >
-              Logout
-            </button>
+              <Link to="/new" className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                New Session
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
           </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-100">
-              Welcome back, {user?.name?.split(' ')[0] || 'there'}!
-            </h2>
-            <p className="mt-2 text-gray-400">
-              Here's your learning progress overview
-            </p>
-          </div>
-          <Link
-            to="/new"
-            className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-500 flex items-center gap-2 transition"
-          >
-            <span className="text-xl">✏️</span>
-            New Session
-          </Link>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
-            <div className="text-sm text-gray-400">Total Sessions</div>
-            <div className="mt-2 text-3xl font-bold text-gray-100">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
+          {/* Total Sessions */}
+          <Card className="p-6 border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Sessions</div>
+            <div className="mt-2 text-4xl font-bold text-gray-900 tabular-nums">
               {stats?.totalSessions || 0}
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
-            <div className="text-sm text-gray-400">Problems Completed</div>
-            <div className="mt-2 text-3xl font-bold text-gray-100">
+          {/* Problems Completed */}
+          <Card className="p-6 border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Problems Solved</div>
+            <div className="mt-2 text-4xl font-bold text-gray-900 tabular-nums">
               {stats?.completedProblems || 0}
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
-            <div className="text-sm text-gray-400">Time Spent</div>
-            <div className="mt-2 text-3xl font-bold text-gray-100">
-              {Math.round((stats?.totalTimeSpent || 0) / 60)}h
+          {/* Time Spent */}
+          <Card className="p-6 border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
             </div>
-          </div>
+            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Time Invested</div>
+            <div className="mt-2 text-4xl font-bold text-gray-900 tabular-nums">
+              {Math.round((stats?.totalTimeSpent || 0) / 60)}
+              <span className="text-2xl text-gray-600 ml-1">hrs</span>
+            </div>
+          </Card>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6">
-            <div className="text-sm text-gray-400">Avg. Accuracy</div>
-            <div className="mt-2 text-3xl font-bold text-green-400">
+          {/* Avg Accuracy */}
+          <Card className="p-6 border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Accuracy</div>
+            <div className="mt-2 text-4xl font-bold text-emerald-600 tabular-nums">
               {stats?.averageAccuracy || 0}%
             </div>
-          </div>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Recent Sessions */}
-          <div>
-            <h3 className="mb-4 text-xl font-semibold text-gray-100">
-              Recent Sessions
-            </h3>
-            <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Recent Sessions - 2 columns */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-semibold text-gray-900">
+                Recent Sessions
+              </h3>
+              <Link to="/analytics" className="text-amber-700 hover:text-amber-800 text-sm font-medium flex items-center gap-1">
+                View all
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="space-y-4">
               {recentSessions.length === 0 ? (
-                <div className="rounded-2xl border border-slate-800 bg-slate-800 p-6 text-center text-gray-400">
-                  No sessions yet. Start learning!
-                </div>
-              ) : (
-                recentSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="rounded-2xl border border-slate-800 bg-slate-800 p-4 flex items-center justify-between hover:border-green-500/50 transition"
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-100">
-                        {session.problemTitle || 'Untitled Problem'}
-                      </div>
-                      <div className="mt-1 text-sm text-gray-400">
-                        {session.interactionCount} interactions • {' '}
-                        <span className={
-                          session.status === 'completed' 
-                            ? 'text-green-400' 
-                            : session.status === 'active'
-                            ? 'text-green-400'
-                            : 'text-gray-500'
-                        }>
-                          {session.status}
-                        </span>
-                      </div>
-                    </div>
-                    {session.status === 'active' && (
-                      <Link
-                        to={`/session/${session.id}`}
-                        className="rounded-lg bg-green-600/20 border border-green-700/40 px-4 py-2 text-sm font-medium text-green-300 hover:bg-green-600/30 transition"
-                      >
-                        Resume
-                      </Link>
-                    )}
+                <Card className="p-8 border-2 border-amber-200 bg-white/80 backdrop-blur-sm text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+                    <BookOpen className="w-8 h-8 text-amber-600" />
                   </div>
+                  <p className="text-gray-600 mb-4">No sessions yet</p>
+                  <Link
+                    to="/new"
+                    className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 font-medium"
+                  >
+                    Start your first session
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </Card>
+              ) : (
+                recentSessions.map((session, index) => (
+                  <Card
+                    key={session.id}
+                    className="p-5 border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 mb-1 truncate">
+                          {session.problemTitle || 'Untitled Problem'}
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <Target className="w-4 h-4" />
+                            {session.interactionCount} interactions
+                          </span>
+                          <span className="w-1 h-1 rounded-full bg-gray-400" />
+                          <Badge variant={session.status === 'completed' ? 'success' : session.status === 'active' ? 'default' : 'secondary'}>
+                            {session.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      {session.status === 'active' && (
+                        <Button
+                          asChild
+                          size="sm"
+                          className="ml-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+                        >
+                          <Link to={`/session/${session.id}`} className="flex items-center gap-2">
+                            Resume
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
                 ))
               )}
             </div>
           </div>
 
-          {/* Quick Actions */}
+          {/* Quick Actions - 1 column */}
           <div>
-            <h3 className="mb-4 text-xl font-semibold text-gray-100">
-              Quick Actions
+            <h3 className="mb-6 text-2xl font-semibold text-gray-900">
+              Quick Start
             </h3>
-            <div className="space-y-3">
-              <Link
-                to="/new"
-                className="rounded-2xl border border-slate-800 bg-slate-800 p-4 block hover:border-green-500/50 transition"
-              >
-                <div className="font-medium text-gray-100">Start New Session</div>
-                <div className="mt-1 text-sm text-gray-400">Ask a question or upload a problem image</div>
-              </Link>
-              <Link
-                to="/problems"
-                className="rounded-2xl border border-slate-800 bg-slate-800 p-4 block hover:border-green-500/50 transition"
-              >
-                <div className="font-medium text-gray-100">Browse Problem Bank</div>
-                <div className="mt-1 text-sm text-gray-400">Explore curated practice questions</div>
-              </Link>
+            <div className="space-y-4">
+              <Card className="border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                <Link to="/new" className="p-6 block">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 mb-1">New Session</div>
+                      <div className="text-sm text-gray-600">Start learning with a new problem</div>
+                    </div>
+                  </div>
+                </Link>
+              </Card>
+              <Card className="border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                <Link to="/problems" className="p-6 block">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 shadow-md">
+                      <BookOpen className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 mb-1">Problem Bank</div>
+                      <div className="text-sm text-gray-600">Browse curated practice problems</div>
+                    </div>
+                  </div>
+                </Link>
+              </Card>
+              <Card className="border-2 border-amber-200 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                <Link to="/analytics" className="p-6 block">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 shadow-md">
+                      <TrendingUp className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 mb-1">Analytics</div>
+                      <div className="text-sm text-gray-600">Track your progress over time</div>
+                    </div>
+                  </div>
+                </Link>
+              </Card>
             </div>
           </div>
         </div>

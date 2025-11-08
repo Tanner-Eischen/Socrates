@@ -138,7 +138,7 @@ router.post('/sessions', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, err
         },
     });
     // Track session creation
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_session_created',
         eventData: {
@@ -246,7 +246,7 @@ router.get('/sessions', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, erro
         sessions = sessions.slice(offset, offset + limit);
     }
     // Track session browsing
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_sessions_browsed',
         eventData: {
@@ -317,7 +317,7 @@ router.get('/sessions/:id', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, 
         recentMessages,
     };
     // Track session view
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_session_viewed',
         eventData: {
@@ -426,7 +426,7 @@ router.patch('/sessions/:id', auth_1.authenticate, rateLimiter_1.rateLimiter, (0
     }
     const updatedSession = await CollaborationService_1.CollaborationService.updateStatus(req.params.id, value.status);
     // Track session update
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_session_updated',
         eventData: {
@@ -493,7 +493,7 @@ router.post('/sessions/:id/join', auth_1.authenticate, rateLimiter_1.rateLimiter
         role,
     });
     // Track session join
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_session_joined',
         eventData: {
@@ -545,7 +545,7 @@ router.post('/sessions/:id/leave', auth_1.authenticate, rateLimiter_1.rateLimite
     }
     await CollaborationService_1.CollaborationService.leaveSession(req.params.id, req.user.id);
     // Track session leave
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_session_left',
         eventData: {
@@ -640,7 +640,7 @@ router.post('/sessions/:id/messages', auth_1.authenticate, rateLimiter_1.rateLim
         metadata: value.metadata,
     });
     // Track message sent
-    await AnalyticsService_1.AnalyticsService.trackEvent({
+    AnalyticsService_1.AnalyticsService.trackEvent({
         userId: req.user.id,
         eventType: 'collaboration_message_sent',
         eventData: {

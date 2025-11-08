@@ -1,3 +1,16 @@
+export declare enum ProblemType {
+    ALGEBRA = "algebra",
+    GEOMETRY = "geometry",
+    CALCULUS = "calculus",
+    STATISTICS = "statistics",
+    TRIGONOMETRY = "trigonometry",
+    ARITHMETIC = "arithmetic"
+}
+export declare enum DifficultyLevel {
+    BEGINNER = "beginner",
+    INTERMEDIATE = "intermediate",
+    ADVANCED = "advanced"
+}
 export declare enum SocraticQuestionType {
     CLARIFICATION = "clarification",// "What do you mean by...?"
     ASSUMPTIONS = "assumptions",// "What assumptions are you making?"
@@ -52,5 +65,21 @@ export interface EnhancedMessage extends Message {
     effectiveness?: number;
     targetedConcepts?: string[];
     studentConfidence?: number;
+    confidenceDelta?: number;
+    reasoningScore?: number;
+    teachBackScore?: number;
+    transferAttempt?: {
+        problemId: string;
+        success: boolean;
+    };
+    predictedConfidence?: number;
+    breakthroughMoment?: boolean;
+}
+export interface BehavioralAssessment {
+    teachBackScore: number;
+    transferSuccess: boolean;
+    reasoningScore: number;
+    calibrationError: number;
+    depthLevelEvidence: number;
 }
 //# sourceMappingURL=types.d.ts.map

@@ -1,4 +1,4 @@
-# SocraTeach — AI-Powered Socratic Learning Platform
+# Socrates — AI-Powered Socratic Learning Platform
 
 🎓 Full-stack Socratic AI tutoring platform with adaptive learning, real-time collaboration, and comprehensive analytics.
 
@@ -32,7 +32,7 @@ echo OPENAI_API_KEY=your-openai-api-key-here > .env
 npm install
 
 # 3A) Use the CLI locally without global link
-node ./bin/socrateach --help
+node ./bin/socrates --help
 
 # 3B) Or create a global alias (makes `tutor` available)
 npm link
@@ -119,7 +119,7 @@ cd client && npm test
 ## Project Structure
 
 ```
-SocraTeach/
+Socrates/
 ├── src/                           # Backend (Node.js + Express + TypeScript)
 │   ├── api/
 │   │   ├── routes/                # RESTful API endpoints
@@ -276,6 +276,9 @@ tutor demo --scenario calculus-advanced
 - `GET /api/v1/analytics/user` - User performance metrics
 - `GET /api/v1/analytics/dashboard` - Dashboard statistics
 - `GET /api/v1/analytics/system` - System metrics (admin)
+- `GET /api/v1/sessions/:id/journey` - Get learning journey timeline for a session
+- `GET /api/v1/sessions/:id/compliance` - Get Socratic compliance metrics for a session
+- `GET /api/v1/analytics/session/:id/report` - Get aggregated learning metrics report for a session
 
 ## Development
 
@@ -334,6 +337,12 @@ DATABASE_URL=your_db_url
 
 # CORS
 CORS_ORIGIN=http://localhost:5173
+
+# Behavioral Learning Measurement (Optional)
+UNDERSTANDING_CHECK_INTERVAL=3          # Interval between understanding checks (default: 3)
+ENABLE_TRANSFER_PROBES=true             # Enable transfer challenge probes (default: true)
+ENABLE_TEACHBACK_PROBES=true            # Enable teach-back probes (default: true)
+STRICT_SOCRATIC_MODE=false              # Enable strict Socratic compliance mode (default: false)
 ```
 
 ## CLI Measurement & Analytics

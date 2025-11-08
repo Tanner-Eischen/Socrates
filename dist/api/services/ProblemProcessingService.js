@@ -58,9 +58,17 @@ class ProblemProcessingService {
                 throw new Error(`Invalid image: ${validation.errors.join(', ')}`);
             }
             // Process image with OCR (OpenAI Vision)
-            const imageResult = await image_processor_1.ImageProcessor.processImage(imagePath);
+            let imageResult;
+            try {
+                imageResult = await image_processor_1.ImageProcessor.processImage(imagePath);
+            }
+            catch (error) {
+                const { handleImageProcessingError } = require('../../lib/error-utils');
+                throw handleImageProcessingError(error, 'Image OCR processing');
+            }
             if (!imageResult.success) {
-                throw new Error(`Image processing failed: ${imageResult.error}`);
+                const { ImageProcessingError } = require('../middleware/errorHandler');
+                throw new ImageProcessingError(imageResult.error || 'Failed to extract text from image. Please ensure the image is clear and contains readable text.');
             }
             // Parse the extracted text
             const parsedProblem = problem_parser_1.ProblemParser.parseProblem(imageResult.extractedText);

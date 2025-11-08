@@ -33,5 +33,50 @@ export const submitProblemImage = async (imageFile: File) => {
   return response.data;
 };
 
+// Behavioral Learning Measurement API Types
+export interface TimelineEntry {
+  turn: number;
+  questionType: string;
+  depth: number;
+  confidence: number;
+  confidenceDelta?: number;
+  teachBackScore?: number;
+  transferSuccess?: boolean;
+  reasoningScore?: number;
+  breakthrough: boolean;
+}
+
+export interface ComplianceMetrics {
+  directAnswerViolations: number;
+  complianceScore: number;
+  lastViolationTurn: number;
+  examples: string[];
+}
+
+export interface SessionReport {
+  transferSuccessRate: number;
+  avgTeachBackScore: number;
+  avgReasoningScore: number;
+  calibrationErrorAvg: number;
+  depthTrajectory: number[];
+  breakthroughs: number;
+}
+
+// Behavioral Learning Measurement API Functions
+export const getSessionJourney = async (sessionId: string): Promise<TimelineEntry[]> => {
+  const response = await api.get(`/sessions/${sessionId}/journey`);
+  return response.data.data;
+};
+
+export const getSessionCompliance = async (sessionId: string): Promise<ComplianceMetrics> => {
+  const response = await api.get(`/sessions/${sessionId}/compliance`);
+  return response.data.data;
+};
+
+export const getSessionReport = async (sessionId: string): Promise<SessionReport> => {
+  const response = await api.get(`/analytics/session/${sessionId}/report`);
+  return response.data.data;
+};
+
 export default api;
 

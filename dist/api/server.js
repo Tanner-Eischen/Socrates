@@ -25,6 +25,7 @@ const auth_2 = __importDefault(require("./routes/auth"));
 const users_1 = __importDefault(require("./routes/users"));
 const sessions_1 = __importDefault(require("./routes/sessions"));
 const problems_1 = __importDefault(require("./routes/problems"));
+const assessments_1 = __importDefault(require("./routes/assessments"));
 const analytics_1 = __importDefault(require("./routes/analytics"));
 const collaboration_1 = __importDefault(require("./routes/collaboration"));
 const voice_1 = __importDefault(require("./routes/voice"));
@@ -151,6 +152,7 @@ class SocraTeachServer {
         apiRouter.use('/users', auth_1.authMiddleware, users_1.default);
         apiRouter.use('/sessions', sessions_1.default); // Auth handled by optionalAuthMiddleware in routes
         apiRouter.use('/problems', problems_1.default); // Auth handled by optionalAuthMiddleware in routes
+        apiRouter.use('/assessments', assessments_1.default); // Auth handled by optionalAuthMiddleware in routes
         apiRouter.use('/analytics', auth_1.authMiddleware, analytics_1.default);
         apiRouter.use('/collaboration', auth_1.authMiddleware, collaboration_1.default);
         apiRouter.use('/voice', auth_1.authMiddleware, voice_1.default);

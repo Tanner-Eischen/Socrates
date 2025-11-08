@@ -141,7 +141,7 @@ router.post('/speech-to-text', auth_1.authenticate, rateLimiter_1.voiceRateLimit
             voiceInteractionId = saved.id;
         }
         // Track speech-to-text usage
-        await AnalyticsService_1.AnalyticsService.trackEvent({
+        AnalyticsService_1.AnalyticsService.trackEvent({
             userId: req.user.id,
             sessionId: value.sessionId,
             eventType: 'voice_speech_to_text',
@@ -180,7 +180,7 @@ router.post('/speech-to-text', auth_1.authenticate, rateLimiter_1.voiceRateLimit
             fileSize: req.file.size,
         });
         // Track failed conversion
-        await AnalyticsService_1.AnalyticsService.trackEvent({
+        AnalyticsService_1.AnalyticsService.trackEvent({
             userId: req.user.id,
             sessionId: value.sessionId,
             eventType: 'voice_speech_to_text_failed',
@@ -273,7 +273,7 @@ router.post('/text-to-speech', auth_1.authenticate, rateLimiter_1.voiceRateLimit
         const processingTime = Date.now() - startTime;
         // Optionally save a voice interaction if a session is provided in future
         // Track text-to-speech usage
-        await AnalyticsService_1.AnalyticsService.trackEvent({
+        AnalyticsService_1.AnalyticsService.trackEvent({
             userId: req.user.id,
             eventType: 'voice_text_to_speech',
             eventData: {
@@ -311,7 +311,7 @@ router.post('/text-to-speech', auth_1.authenticate, rateLimiter_1.voiceRateLimit
             textLength: value.text.length,
         });
         // Track failed conversion
-        await AnalyticsService_1.AnalyticsService.trackEvent({
+        AnalyticsService_1.AnalyticsService.trackEvent({
             userId: req.user.id,
             eventType: 'voice_text_to_speech_failed',
             eventData: {

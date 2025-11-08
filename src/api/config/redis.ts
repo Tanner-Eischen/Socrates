@@ -19,7 +19,7 @@ const defaultConfig: RedisConfig = {
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
   db: parseInt(process.env.REDIS_DB || '0'),
-  keyPrefix: process.env.REDIS_KEY_PREFIX || 'socrateach:',
+  keyPrefix: process.env.REDIS_KEY_PREFIX || 'socrates:',
   retryDelayOnFailover: 100,
   maxRetriesPerRequest: 3,
   lazyConnect: true,
@@ -108,7 +108,7 @@ export const initializeRedis = async (): Promise<{
   try {
     // Create main Redis client
     redisClient = createRedisClient();
-    (global as any).socrateachRedisClient = redisClient;
+    (global as any).socratesRedisClient = redisClient;
     await redisClient.ping();
 
     // Create subscriber client (for pub/sub)

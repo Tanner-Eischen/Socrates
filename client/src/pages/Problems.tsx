@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
 import api from '../api';
 import MathRenderer from '../components/MathRenderer';
 import { ProblemCardSkeleton } from '../components/SkeletonLoader';
@@ -17,7 +16,6 @@ interface Problem {
 }
 
 export default function Problems() {
-  const { user, logout } = useAuth();
   const [problems, setProblems] = useState<Problem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,15 +29,10 @@ export default function Problems() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg">
-        <header className="sticky top-0 z-10 border-b border-white/5 bg-bg/80 backdrop-blur">
-          <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white">SocraTeach</h1>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
         <main className="mx-auto max-w-5xl px-4 py-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white">Available Problems</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">Available Problems</h2>
           </div>
           <div className="grid gap-4">
             {[1, 2, 3].map((i) => (
@@ -52,37 +45,18 @@ export default function Problems() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-bg/80 backdrop-blur">
-        <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">SocraTeach</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400">
-              {user?.name || user?.email}
-            </span>
-            <button
-              onClick={logout}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white">Available Problems</h2>
-            <p className="mt-1 text-slate-400">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">Available Problems</h2>
+            <p className="mt-1 text-gray-600">
               Choose a problem to start a Socratic learning session
             </p>
           </div>
           <Link
-            to="/submit-problem"
-            className="rounded-xl bg-primary px-6 py-3 font-semibold text-black hover:bg-primary/90 flex items-center gap-2"
+            to="/submit"
+            className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-6 py-3 font-semibold text-white flex items-center gap-2 shadow-md transition-all"
           >
             <span className="text-xl">✏️</span>
             Submit Your Problem
@@ -90,7 +64,7 @@ export default function Problems() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-red-400">
+          <div className="mb-6 rounded-xl bg-red-50 border-2 border-red-200 p-4 text-red-700">
             {error}
           </div>
         )}
@@ -99,23 +73,23 @@ export default function Problems() {
           {problems.map((problem) => (
             <div
               key={problem.id}
-              className="rounded-2xl border border-white/5 bg-surface p-6 hover:border-primary/30 transition"
+              className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-6 hover:border-amber-400 hover:shadow-lg transition-all"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white">{problem.title}</h3>
-                  <div className="mt-2 text-slate-400 line-clamp-2">
+                  <h3 className="text-lg font-semibold text-gray-900">{problem.title}</h3>
+                  <div className="mt-2 text-gray-700 line-clamp-2">
                     <MathRenderer content={problem.description} />
                   </div>
                   
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs text-slate-300">
+                    <span className="rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs text-amber-700 font-medium">
                       {problem.type}
                     </span>
-                    <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs text-slate-300">
+                    <span className="rounded-full bg-orange-50 border border-orange-200 px-3 py-1 text-xs text-orange-700 font-medium">
                       Level {problem.difficultyLevel}
                     </span>
-                    <span className="rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs text-slate-300">
+                    <span className="rounded-full bg-yellow-50 border border-yellow-200 px-3 py-1 text-xs text-yellow-700 font-medium">
                       ~{problem.estimatedTime} min
                     </span>
                   </div>
@@ -123,7 +97,7 @@ export default function Problems() {
 
                 <Link
                   to={`/session/${problem.id}`}
-                  className="ml-4 rounded-xl bg-primary/10 border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
+                  className="ml-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-4 py-2 text-sm font-medium text-white shadow-md transition-all"
                 >
                   Start Session
                 </Link>

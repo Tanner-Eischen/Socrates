@@ -93,7 +93,7 @@ const defaultConfig: Partial<Config> = {
   
   DB_HOST: 'localhost',
   DB_PORT: 5432,
-  DB_NAME: 'socrateach',
+  DB_NAME: 'socrates',
   DB_USER: 'postgres',
   DB_PASSWORD: 'password',
   DB_MAX_CONNECTIONS: 20,
@@ -104,7 +104,7 @@ const defaultConfig: Partial<Config> = {
   REDIS_HOST: 'localhost',
   REDIS_PORT: 6379,
   REDIS_DB: 0,
-  REDIS_KEY_PREFIX: 'socrateach:',
+  REDIS_KEY_PREFIX: 'socrates:',
   
   JWT_EXPIRES_IN: '1h',
   JWT_REFRESH_EXPIRES_IN: '7d',
@@ -357,7 +357,7 @@ export const getRedisUrl = (): string => {
 
 // Create .env template
 export const createEnvTemplate = (): string => {
-  return `# SocraTeach Environment Configuration
+  return `# Socrates Environment Configuration
 
 # Environment
 NODE_ENV=development
@@ -367,7 +367,7 @@ HOST=0.0.0.0
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=socrateach
+DB_NAME=socrates
 DB_USER=postgres
 DB_PASSWORD=password
 DB_MAX_CONNECTIONS=20
@@ -380,7 +380,7 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_DB=0
-REDIS_KEY_PREFIX=socrateach:
+REDIS_KEY_PREFIX=socrates:
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production

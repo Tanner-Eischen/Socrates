@@ -11,6 +11,105 @@ import { SocraticEngine } from '../../socratic-engine'; // ADDED FOR ENHANCED FE
 
 const router = Router();
 
+// Helper: Import problem data (would normally be from database)
+// For now, we replicate the mock data structure
+interface Problem {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  difficultyLevel: number;
+  isAssessment: boolean;
+  prerequisites?: string[];
+  expectedAnswer?: string;
+}
+
+// This would normally fetch from database - for now, inline the assessment problems
+const mockProblems: Problem[] = [
+  {
+    id: 'math-linear-1',
+    title: 'Linear Equations Basics',
+    description: 'Solve for x: 3x + 7 = 22',
+    type: 'math',
+    difficultyLevel: 1,
+    isAssessment: true,
+    prerequisites: [],
+    expectedAnswer: '5',
+  },
+  {
+    id: 'math-quad-1',
+    title: 'Quadratic Equations',
+    description: 'Solve the quadratic equation: x² - 5x + 6 = 0',
+    type: 'math',
+    difficultyLevel: 3,
+    isAssessment: true,
+    prerequisites: ['math-linear-1'],
+    expectedAnswer: 'x = 2, x = 3',
+  },
+  {
+    id: 'math-geo-1',
+    title: 'Area of a Rectangle',
+    description: 'Find the area of a rectangle with length 8 cm and width 5 cm.',
+    type: 'math',
+    difficultyLevel: 1,
+    isAssessment: true,
+    prerequisites: [],
+    expectedAnswer: '40',
+  },
+  {
+    id: 'math-geo-2',
+    title: 'Pythagorean Theorem',
+    description: 'A right triangle has legs of length 3 and 4. Find the length of the hypotenuse.',
+    type: 'math',
+    difficultyLevel: 2,
+    isAssessment: true,
+    prerequisites: ['math-geo-1'],
+    expectedAnswer: '5',
+  },
+  {
+    id: 'sci-phys-1',
+    title: 'Speed and Distance',
+    description: 'A car travels at 60 mph for 2.5 hours. How far does it travel?',
+    type: 'science',
+    difficultyLevel: 2,
+    isAssessment: true,
+    prerequisites: [],
+    expectedAnswer: '150',
+  },
+  {
+    id: 'sci-phys-2',
+    title: 'Velocity Concepts',
+    description: 'If you\'re running at constant speed on a treadmill, is your position changing? Explain the concept of velocity.',
+    type: 'science',
+    difficultyLevel: 2,
+    isAssessment: true,
+    prerequisites: ['sci-phys-1'],
+  },
+  {
+    id: 'sci-bio-1',
+    title: 'Cell Structure',
+    description: 'What is the powerhouse of the cell and what does it do?',
+    type: 'science',
+    difficultyLevel: 1,
+    isAssessment: true,
+    prerequisites: [],
+    expectedAnswer: 'mitochondria',
+  },
+  {
+    id: 'sci-bio-2',
+    title: 'Photosynthesis',
+    description: 'What are the reactants and products of photosynthesis?',
+    type: 'science',
+    difficultyLevel: 2,
+    isAssessment: true,
+    prerequisites: ['sci-bio-1'],
+  },
+];
+
+function getProblemById(problemId: string): Problem | undefined {
+  return mockProblems.find(p => p.id === problemId);
+}
+
 // Validation schemas
 const createSessionSchema = Joi.object({
   problemId: Joi.string().optional(),
@@ -588,13 +687,61 @@ router.post('/:id/enhanced-interactions',
 
     try {
       // Initialize enhanced Socratic engine
-      const engine = new SocraticEngine();
+      // Check for strict mode header
+      const strictMode = req.headers['x-strict-socratic'] === 'true' || 
+                         process.env.STRICT_SOCRATIC_MODE === 'true';
+      const engine = new SocraticEngine(undefined, strictMode);
       
       // Initialize session with problem
       engine.initializeSession(id);
-      await engine.startProblem(session.problemText);
       
-      // Get tutor response using enhanced engine
+      // Check if this session is using an assessment problem
+      let problem: Problem | undefined;
+      if (session.problemId) {
+        problem = getProblemById(session.problemId);
+      }
+      
+      if (problem && problem.isAssessment) {
+        // Start in assessment mode with expected answer
+        await engine.startAssessmentProblem(session.problemText, problem.expectedAnswer);
+        logger.info('Started session in assessment mode', {
+          sessionId: id,
+          problemId: problem.id,
+          hasExpectedAnswer: !!problem.expectedAnswer
+        });
+      } else {
+        // Start in normal tutoring mode
+        await engine.startProblem(session.problemText);
+      }
+      
+      // CRITICAL FIX: Restore conversation history from database
+      const existingInteractions = await SessionService.getInteractions(id);
+      
+      if (existingInteractions.length > 0) {
+        // Build conversation history from stored interactions
+        const conversationHistory = [];
+        
+        for (const interaction of existingInteractions) {
+          if (interaction.type === 'enhanced_student_response' || interaction.type === 'student_response') {
+            conversationHistory.push({
+              role: 'user' as const,
+              content: interaction.content,
+              timestamp: interaction.timestamp
+            });
+          } else if (interaction.type === 'enhanced_tutor_response' || interaction.type === 'answer') {
+            conversationHistory.push({
+              role: 'assistant' as const,
+              content: interaction.content,
+              timestamp: interaction.timestamp
+            });
+          }
+        }
+        
+        // Restore conversation into engine (no API calls, just rebuilding state)
+        engine.restoreConversationHistory(conversationHistory);
+      }
+      
+      // Get tutor response using enhanced engine with full context
       const tutorResponse = await engine.respondToStudent(value.content);
       
       // Get enhanced metadata from engine
@@ -660,6 +807,11 @@ router.post('/:id/enhanced-interactions',
         depthLevel: depthTracker.currentDepth,
       });
 
+      // Check if this was an assessment and it's now complete
+      const wasAssessment = problem && problem.isAssessment;
+      const assessmentComplete = wasAssessment && !engine.isInAssessmentMode();
+      const assessmentCorrect = assessmentComplete && tutorResponse.includes('✅ Correct');
+      
       return res.status(201).json({
         success: true,
         message: 'Enhanced interaction processed successfully',
@@ -667,6 +819,10 @@ router.post('/:id/enhanced-interactions',
         questionType: currentQuestionType,
         depthLevel: depthTracker.currentDepth,
         targetedConcepts: depthTracker.conceptualConnections.slice(-3),
+        // Assessment mode information
+        isAssessmentMode: engine.isInAssessmentMode(),
+        assessmentComplete,
+        assessmentCorrect,
         // Flags - only show when relevant
         flags: {
           struggling: isStruggling,

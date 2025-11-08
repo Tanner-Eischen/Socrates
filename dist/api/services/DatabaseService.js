@@ -58,6 +58,13 @@ class DatabaseService {
         if (!this.isInitialized) {
             await this.initialize();
         }
+        // If pool is not available (database connection failed), throw a helpful error
+        if (!this.pool) {
+            logger_1.logger.warn('Database query attempted but database is not available', {
+                query: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+            });
+            throw new Error('Database is not available. Sessions cannot be persisted without a database connection.');
+        }
         const start = Date.now();
         try {
             const result = await this.pool.query(text, params);
@@ -86,6 +93,9 @@ class DatabaseService {
     static async getClient() {
         if (!this.isInitialized) {
             await this.initialize();
+        }
+        if (!this.pool) {
+            throw new Error('Database is not available. Cannot get client without a database connection.');
         }
         return await this.pool.connect();
     }
@@ -134,9 +144,9 @@ class DatabaseService {
             return null;
         }
         return {
-            totalCount: this.pool.totalCount,
-            idleCount: this.pool.idleCount,
-            waitingCount: this.pool.waitingCount,
+            totalCount: this.pool?.totalCount || 0,
+            idleCount: this.pool?.idleCount || 0,
+            waitingCount: this.pool?.waitingCount || 0,
         };
     }
     /**
@@ -323,6 +333,7 @@ class DatabaseService {
     }
 }
 exports.DatabaseService = DatabaseService;
+DatabaseService.pool = null;
 DatabaseService.isInitialized = false;
 exports.default = DatabaseService;
 //# sourceMappingURL=DatabaseService.js.map

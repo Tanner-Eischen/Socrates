@@ -1,5 +1,5 @@
-# Start SocraTeach API Server
-Write-Host "Starting SocraTeach API Server..." -ForegroundColor Green
+# Start Socrates API Server
+Write-Host "Starting Socrates API Server..." -ForegroundColor Green
 Write-Host ""
 
 # Set environment

@@ -13,10 +13,12 @@ try {
   try {
     require('../dist/cli/index.js');
   } catch (e2) {
-    console.error('Unable to launch SocraTeach CLI. Build the project or install ts-node.');
+    console.error('Unable to launch Socrates CLI. Build the project or install ts-node.');
     console.error('Tried: src/cli via ts-node and dist/cli build output.');
     process.exit(1);
   }
 }
+
+
 
 

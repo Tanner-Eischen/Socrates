@@ -1,3 +1,20 @@
+// Problem Type Enum
+export enum ProblemType {
+  ALGEBRA = "algebra",
+  GEOMETRY = "geometry",
+  CALCULUS = "calculus",
+  STATISTICS = "statistics",
+  TRIGONOMETRY = "trigonometry",
+  ARITHMETIC = "arithmetic"
+}
+
+// Difficulty Level Enum
+export enum DifficultyLevel {
+  BEGINNER = "beginner",
+  INTERMEDIATE = "intermediate",
+  ADVANCED = "advanced"
+}
+
 // Enhanced Socratic Question Types
 export enum SocraticQuestionType {
   CLARIFICATION = "clarification",        // "What do you mean by...?"
@@ -68,4 +85,20 @@ export interface EnhancedMessage extends Message {
   effectiveness?: number;
   targetedConcepts?: string[];
   studentConfidence?: number;
+  // Behavioral assessment fields
+  confidenceDelta?: number; // Change in confidence from previous turn
+  reasoningScore?: number; // 0-4 chain completeness score
+  teachBackScore?: number; // 0-4 explanation quality score
+  transferAttempt?: { problemId: string; success: boolean }; // Transfer challenge result
+  predictedConfidence?: number; // 0-1 student self-reported confidence
+  breakthroughMoment?: boolean; // Flag for significant learning moments
+}
+
+// Behavioral Assessment Interface
+export interface BehavioralAssessment {
+  teachBackScore: number;          // 0-4
+  transferSuccess: boolean;        // true/false
+  reasoningScore: number;          // 0-4
+  calibrationError: number;        // 0-1 (abs(predicted - actual))
+  depthLevelEvidence: number;      // 1-5
 }

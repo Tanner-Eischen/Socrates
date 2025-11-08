@@ -6,7 +6,7 @@ const DatabaseService_1 = require("./DatabaseService");
 const logger_1 = require("../middleware/logger");
 class AnalyticsService {
     /**
-     * Track an analytics event
+     * Track an analytics event (gracefully handles database unavailability)
      */
     static async trackEvent(eventData) {
         try {
@@ -46,8 +46,20 @@ class AnalyticsService {
             };
         }
         catch (error) {
-            logger_1.logger.error('Error tracking analytics event', { error, eventData });
-            throw error;
+            // If database is not available, log warning and return null instead of throwing
+            const errorMessage = error?.message || '';
+            if (errorMessage.includes('not available') ||
+                error?.code === 'ECONNREFUSED' ||
+                error?.code === 'ENOTFOUND') {
+                logger_1.logger.debug('Analytics event not tracked (database unavailable)', {
+                    eventType: eventData.eventType,
+                    userId: eventData.userId
+                });
+                return null;
+            }
+            // For other errors, log and return null (don't throw)
+            logger_1.logger.warn('Error tracking analytics event', { error: error?.message || error, eventData });
+            return null;
         }
     }
     /**

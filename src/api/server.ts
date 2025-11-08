@@ -20,6 +20,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import sessionRoutes from './routes/sessions';
 import problemRoutes from './routes/problems';
+import assessmentRoutes from './routes/assessments';
 import analyticsRoutes from './routes/analytics';
 import collaborationRoutes from './routes/collaboration';
 import voiceRoutes from './routes/voice';
@@ -33,7 +34,7 @@ export let sessionService: any;
 export let io: SocketIOServer;
 
 // Application class
-class SocraTeachServer {
+class SocratesServer {
   private app: express.Application;
   private server: any;
   private io: SocketIOServer;
@@ -174,6 +175,7 @@ class SocraTeachServer {
     apiRouter.use('/users', authMiddleware, userRoutes);
     apiRouter.use('/sessions', sessionRoutes); // Auth handled by optionalAuthMiddleware in routes
     apiRouter.use('/problems', problemRoutes); // Auth handled by optionalAuthMiddleware in routes
+    apiRouter.use('/assessments', assessmentRoutes); // Auth handled by optionalAuthMiddleware in routes
     apiRouter.use('/analytics', authMiddleware, analyticsRoutes);
     apiRouter.use('/collaboration', authMiddleware, collaborationRoutes);
     apiRouter.use('/voice', authMiddleware, voiceRoutes);
@@ -221,7 +223,7 @@ class SocraTeachServer {
 
       // Start listening
       this.server.listen(config.PORT, config.HOST, () => {
-        logger.info(`SocraTeach API server started`, {
+        logger.info(`Socrates API server started`, {
           port: config.PORT,
           host: config.HOST,
           environment: config.NODE_ENV,
@@ -333,7 +335,7 @@ class SocraTeachServer {
 }
 
 // Create and export server instance
-const server = new SocraTeachServer();
+const server = new SocratesServer();
 
 // Start server if this file is run directly
 if (require.main === module) {
@@ -344,4 +346,4 @@ if (require.main === module) {
 }
 
 export default server;
-export { SocraTeachServer };
+export { SocratesServer };
