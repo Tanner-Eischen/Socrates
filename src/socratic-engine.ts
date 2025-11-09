@@ -136,6 +136,10 @@ export class SocraticEngine {
   private isAssessmentMode: boolean = false; // New: Assessment mode flag
   private expectedAnswer?: string; // New: Expected answer for assessment
   private studentHasAnswered: boolean = false; // New: Track if student gave an answer
+  private sessionPhase: 'goal' | 'assess_knowledge' | 'first_steps' | 'working' | 'hint_needed' | 'wrap_up' = 'goal';
+  private problemSolved: boolean = false;
+  private hintGiven: boolean = false;
+  private turnsSinceLastPhase: number = 0;
 
   constructor(sessionManager?: any, strictMode: boolean = false) {
     this.openai = new OpenAI({ 
@@ -1908,5 +1912,46 @@ Respond with ONLY a single integer from 1-5, nothing else.`
       metacognitivePrompts: this.depthTracker.maxDepthReached >= 3 ? 2 : 0,
       learningGains
     };
+  }
+
+  // Add method to detect if problem is solved
+  private detectProblemSolved(studentInput: string): boolean {
+    // Look for indicators that student has solved it
+    const solvedIndicators = [
+      /answer is/i,
+      /solution is/i,
+      /equals? \d+/i,
+      /x\s*=\s*\d+/i,
+      /i got/i,
+      /it's \d+/i,
+      /the answer/i
+    ];
+    
+    // Also check if they're expressing high confidence with a specific answer
+    const hasAnswer = solvedIndicators.some(pattern => pattern.test(studentInput));
+    const highConfidence = this.assessStudentResponse(studentInput).confidenceLevel > 0.8;
+    
+    return hasAnswer && highConfidence;
+  }
+
+  // Add method to advance phase
+  private advancePhase(): void {
+    switch (this.sessionPhase) {
+      case 'goal':
+        this.sessionPhase = 'assess_knowledge';
+        break;
+      case 'assess_knowledge':
+        this.sessionPhase = 'first_steps';
+        break;
+      case 'first_steps':
+        this.sessionPhase = 'working';
+        break;
+      case 'working':
+        // Stay in working until solved or stuck
+        break;
+      case 'hint_needed':
+        this.sessionPhase = 'working'; // Return to working after hint
+        break;
+    }
   }
 }

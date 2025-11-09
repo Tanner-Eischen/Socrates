@@ -21,6 +21,7 @@ import userRoutes from './routes/users';
 import sessionRoutes from './routes/sessions';
 import problemRoutes from './routes/problems';
 import assessmentRoutes from './routes/assessments';
+import adaptiveRoutes from './routes/adaptive';
 import analyticsRoutes from './routes/analytics';
 import collaborationRoutes from './routes/collaboration';
 import voiceRoutes from './routes/voice';
@@ -176,6 +177,7 @@ class SocratesServer {
     apiRouter.use('/sessions', sessionRoutes); // Auth handled by optionalAuthMiddleware in routes
     apiRouter.use('/problems', problemRoutes); // Auth handled by optionalAuthMiddleware in routes
     apiRouter.use('/assessments', assessmentRoutes); // Auth handled by optionalAuthMiddleware in routes
+    apiRouter.use('/adaptive', adaptiveRoutes); // Auth handled by optionalAuthMiddleware in routes
     apiRouter.use('/analytics', authMiddleware, analyticsRoutes);
     apiRouter.use('/collaboration', authMiddleware, collaborationRoutes);
     apiRouter.use('/voice', authMiddleware, voiceRoutes);

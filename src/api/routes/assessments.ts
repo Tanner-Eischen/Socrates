@@ -3,6 +3,7 @@ import { authenticate, optionalAuthMiddleware, AuthenticatedRequest } from '../m
 import { rateLimiter } from '../middleware/rateLimiter';
 import { asyncHandler } from '../middleware/errorHandler';
 import { logger } from '../middleware/logger';
+import { AdaptiveLearningService } from '../../services/adaptive-learning';
 import Joi from 'joi';
 
 const router = Router();
@@ -111,6 +112,20 @@ router.post('/:id/complete',
       });
     }
 
+    // Mock problem data to get assessment details
+    const mockProblems = [
+      { id: 'math-linear-1', category: 'Math - Algebra', difficulty: 1 },
+      { id: 'math-quad-1', category: 'Math - Algebra', difficulty: 3 },
+      { id: 'math-geo-1', category: 'Math - Geometry', difficulty: 1 },
+      { id: 'math-geo-2', category: 'Math - Geometry', difficulty: 2 },
+      { id: 'sci-phys-1', category: 'Science - Physics', difficulty: 2 },
+      { id: 'sci-phys-2', category: 'Science - Physics', difficulty: 2 },
+      { id: 'sci-bio-1', category: 'Science - Biology', difficulty: 1 },
+      { id: 'sci-bio-2', category: 'Science - Biology', difficulty: 2 },
+    ];
+    
+    const assessment = mockProblems.find(p => p.id === id);
+
     // Get or create user's completions list
     let userCompletions = completionsStore.get(userId) || [];
     
@@ -135,6 +150,27 @@ router.post('/:id/complete',
     }
 
     completionsStore.set(userId, userCompletions);
+
+    // Update adaptive learning profile
+    if (assessment) {
+      const correct = (value.score || 0) >= 70; // Consider 70% or higher as correct
+      AdaptiveLearningService.updateAbility(
+        userId,
+        assessment.category,
+        assessment.difficulty,
+        correct,
+        {
+          attemptNumber: existingIndex >= 0 ? 2 : 1,
+        }
+      );
+      
+      logger.info('Updated adaptive learning profile', {
+        userId,
+        category: assessment.category,
+        difficulty: assessment.difficulty,
+        correct,
+      });
+    }
 
     logger.info('Assessment completed', {
       userId,

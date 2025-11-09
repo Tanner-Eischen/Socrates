@@ -127,6 +127,27 @@ class AnalyticsService {
             };
         }
         catch (error) {
+            // If database is not available, return empty analytics instead of throwing
+            const errorMessage = error?.message || '';
+            if (errorMessage.includes('not available') ||
+                error?.code === 'ECONNREFUSED' ||
+                error?.code === 'ENOTFOUND') {
+                logger_1.logger.debug('User analytics not available (database unavailable)', { userId });
+                return {
+                    userId,
+                    totalSessions: 0,
+                    completedSessions: 0,
+                    averageSessionDuration: 0,
+                    totalInteractions: 0,
+                    averageInteractionsPerSession: 0,
+                    hintsUsed: 0,
+                    problemsSolved: 0,
+                    difficultyProgression: [],
+                    learningVelocity: 0,
+                    engagementScore: 0,
+                    masteryLevel: 0,
+                };
+            }
             logger_1.logger.error('Error getting user analytics', { error, userId });
             throw error;
         }
@@ -196,6 +217,21 @@ class AnalyticsService {
             };
         }
         catch (error) {
+            // If database is not available, return empty metrics instead of throwing
+            const errorMessage = error?.message || '';
+            if (errorMessage.includes('not available') ||
+                error?.code === 'ECONNREFUSED' ||
+                error?.code === 'ENOTFOUND') {
+                logger_1.logger.debug('System metrics not available (database unavailable)');
+                return {
+                    activeUsers: 0,
+                    totalSessions: 0,
+                    averageSessionDuration: 0,
+                    errorRate: 0,
+                    responseTime: 0,
+                    throughput: 0,
+                };
+            }
             logger_1.logger.error('Error getting system metrics', { error });
             throw error;
         }
@@ -230,6 +266,14 @@ class AnalyticsService {
             }));
         }
         catch (error) {
+            // If database is not available, return empty array instead of throwing
+            const errorMessage = error?.message || '';
+            if (errorMessage.includes('not available') ||
+                error?.code === 'ECONNREFUSED' ||
+                error?.code === 'ENOTFOUND') {
+                logger_1.logger.debug('Events not available (database unavailable)', { eventType });
+                return [];
+            }
             logger_1.logger.error('Error getting events by type', { error, eventType });
             throw error;
         }
@@ -304,6 +348,20 @@ class AnalyticsService {
             };
         }
         catch (error) {
+            // If database is not available, return empty patterns instead of throwing
+            const errorMessage = error?.message || '';
+            if (errorMessage.includes('not available') ||
+                error?.code === 'ECONNREFUSED' ||
+                error?.code === 'ENOTFOUND') {
+                logger_1.logger.debug('Behavior patterns not available (database unavailable)', { userId });
+                return {
+                    sessionTimes: [],
+                    problemTypes: [],
+                    difficultyPreference: [],
+                    averageSessionLength: 0,
+                    peakActivityHour: 0,
+                };
+            }
             logger_1.logger.error('Error getting user behavior patterns', { error, userId });
             throw error;
         }
@@ -400,6 +458,19 @@ class AnalyticsService {
             return insights;
         }
         catch (error) {
+            // If database is not available or data generation fails, return empty insights instead of throwing
+            const errorMessage = error?.message || '';
+            if (errorMessage.includes('not available') ||
+                error?.code === 'ECONNREFUSED' ||
+                error?.code === 'ENOTFOUND') {
+                logger_1.logger.debug('Learning insights not available (database unavailable)', { userId });
+                return {
+                    strengths: [],
+                    improvements: [],
+                    recommendations: ['Get started by creating your first session!'],
+                    nextSteps: ['Try solving your first problem', 'Explore different problem types'],
+                };
+            }
             logger_1.logger.error('Error generating learning insights', { error, userId });
             throw error;
         }

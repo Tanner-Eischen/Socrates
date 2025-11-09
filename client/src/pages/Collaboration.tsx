@@ -65,16 +65,26 @@ export default function Collaboration() {
   }, [messages]);
 
   const createRoom = () => {
-    if (!socket) return;
+    if (!socket || !connected) {
+      toast.error('WebSocket connection not available. This feature requires a live server connection.');
+      return;
+    }
     
     const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     socket.emit('room:create', { roomId: newRoomCode });
+    // Automatically join the created room
+    socket.emit('room:join', { roomId: newRoomCode });
     setRoomCode(newRoomCode);
   };
 
   const joinRoom = () => {
-    if (!socket || !roomCode.trim()) {
+    if (!roomCode.trim()) {
       toast.error('Please enter a room code');
+      return;
+    }
+    
+    if (!socket || !connected) {
+      toast.error('WebSocket connection not available. This feature requires a live server connection.');
       return;
     }
     
@@ -135,10 +145,14 @@ export default function Collaboration() {
             <div className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-8 shadow-lg">
               <h3 className="mb-4 text-xl font-semibold text-gray-900">Create a Room</h3>
               <p className="mb-6 text-gray-600">Start a new collaboration session</p>
+              {!connected && (
+                <div className="mb-4 rounded-xl bg-red-50 border-2 border-red-200 p-3 text-center text-sm text-red-700">
+                  ⚠️ Not connected to server
+                </div>
+              )}
               <button
                 onClick={createRoom}
-                disabled={!connected}
-                className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 p-3 font-semibold text-white shadow-md transition-all disabled:opacity-50"
+                className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 p-3 font-semibold text-white shadow-md transition-all"
               >
                 Create Room
               </button>
@@ -165,8 +179,7 @@ export default function Collaboration() {
                 />
                 <button
                   onClick={joinRoom}
-                  disabled={!connected || !roomCode.trim()}
-                  className="w-full rounded-xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 p-3 font-semibold text-amber-700 transition-all disabled:opacity-50"
+                  className="w-full rounded-xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 p-3 font-semibold text-amber-700 transition-all"
                 >
                   Join Room
                 </button>

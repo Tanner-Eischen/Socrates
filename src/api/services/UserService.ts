@@ -37,6 +37,31 @@ export interface CreateUserData {
 
 export class UserService {
   private static db = DatabaseService;
+  // In-memory storage fallback when database is not available
+  private static inMemoryUsers = new Map<string, User>();
+  private static inMemoryUsersByEmail = new Map<string, User>();
+
+  /**
+   * Check if database is available
+   */
+  private static async isDatabaseAvailable(): Promise<boolean> {
+    try {
+      await DatabaseService.query('SELECT 1');
+      return true;
+    } catch (error: any) {
+      const errorMessage = error?.message || '';
+      const errorCode = error?.code || '';
+      
+      if (errorMessage.includes('not available') || 
+          errorCode === 'ECONNREFUSED' ||
+          errorCode === 'ENOTFOUND' ||
+          errorCode === '28P01' || // Authentication failed
+          errorMessage.includes('Database is not available')) {
+        return false;
+      }
+      return true;
+    }
+  }
 
   /**
    * Create a new user
@@ -44,6 +69,12 @@ export class UserService {
   static async create(userData: CreateUserData): Promise<User> {
     try {
       const now = new Date();
+      
+      // Try database first
+      const dbAvailable = await this.isDatabaseAvailable();
+      
+      if (dbAvailable) {
+        try {
       
       // Insert user
       const userQuery = `
@@ -129,6 +160,46 @@ export class UserService {
         emailVerified: user.email_verified,
         twoFactorEnabled: user.two_factor_enabled,
       };
+        } catch (dbError: any) {
+          // If database operation fails, fall back to in-memory storage
+          const errorCode = dbError?.code || '';
+          const errorMessage = dbError?.message || '';
+          
+          if (errorCode === 'ECONNREFUSED' || 
+              errorCode === '28P01' ||
+              errorMessage.includes('Database is not available') ||
+              errorMessage.includes('not available')) {
+            logger.warn('Database insert failed, falling back to in-memory storage', { 
+              userId: userData.id, error: dbError 
+            });
+            // Fall through to in-memory storage below
+          } else {
+            // For other database errors, re-throw
+            throw dbError;
+          }
+        }
+      }
+      
+      // Use in-memory storage (either db not available or insert failed)
+      const user: User = {
+        id: userData.id,
+        email: userData.email,
+        passwordHash: userData.passwordHash,
+        name: userData.name,
+        role: userData.role,
+        createdAt: now,
+        updatedAt: now,
+        isActive: true,
+        emailVerified: false,
+        twoFactorEnabled: false,
+      };
+      
+      this.inMemoryUsers.set(userData.id, user);
+      this.inMemoryUsersByEmail.set(userData.email.toLowerCase(), user);
+      
+      logger.info('User created successfully (in-memory)', { userId: userData.id, email: userData.email });
+      
+      return user;
     } catch (error) {
       logger.error('Error creating user', { error, userData: { ...userData, passwordHash: '[REDACTED]' } });
       throw error;
@@ -140,31 +211,47 @@ export class UserService {
    */
   static async findById(id: string): Promise<User | null> {
     try {
-      const query = `
-        SELECT * FROM users WHERE id = $1 AND is_active = true
-      `;
+      const dbAvailable = await this.isDatabaseAvailable();
       
-      const result = await this.db.query(query, [id]);
-      
-      if (result.rows.length === 0) {
-        return null;
-      }
+      if (dbAvailable) {
+        const query = `
+          SELECT * FROM users WHERE id = $1 AND is_active = true
+        `;
+        
+        const result = await this.db.query(query, [id]);
+        
+        if (result.rows.length === 0) {
+          return this.inMemoryUsers.get(id) || null;
+        }
 
-      const user = result.rows[0];
-      return {
-        id: user.id,
-        email: user.email,
-        passwordHash: user.password_hash,
-        name: user.name,
-        role: user.role,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
-        isActive: user.is_active,
-        lastLogin: user.last_login,
-        emailVerified: user.email_verified,
-        twoFactorEnabled: user.two_factor_enabled,
-      };
-    } catch (error) {
+        const user = result.rows[0];
+        return {
+          id: user.id,
+          email: user.email,
+          passwordHash: user.password_hash,
+          name: user.name,
+          role: user.role,
+          createdAt: user.created_at,
+          updatedAt: user.updated_at,
+          isActive: user.is_active,
+          lastLogin: user.last_login,
+          emailVerified: user.email_verified,
+          twoFactorEnabled: user.two_factor_enabled,
+        };
+      }
+      
+      return this.inMemoryUsers.get(id) || null;
+    } catch (error: any) {
+      const errorCode = error?.code || '';
+      const errorMessage = error?.message || '';
+      
+      if (errorCode === 'ECONNREFUSED' ||
+          errorCode === '28P01' ||
+          errorMessage.includes('Database is not available') ||
+          errorMessage.includes('not available')) {
+        return this.inMemoryUsers.get(id) || null;
+      }
+      
       logger.error('Error finding user by ID', { error, userId: id });
       throw error;
     }
@@ -175,31 +262,47 @@ export class UserService {
    */
   static async findByEmail(email: string): Promise<User | null> {
     try {
-      const query = `
-        SELECT * FROM users WHERE email = $1 AND is_active = true
-      `;
+      const dbAvailable = await this.isDatabaseAvailable();
       
-      const result = await this.db.query(query, [email]);
-      
-      if (result.rows.length === 0) {
-        return null;
-      }
+      if (dbAvailable) {
+        const query = `
+          SELECT * FROM users WHERE email = $1 AND is_active = true
+        `;
+        
+        const result = await this.db.query(query, [email]);
+        
+        if (result.rows.length === 0) {
+          return this.inMemoryUsersByEmail.get(email.toLowerCase()) || null;
+        }
 
-      const user = result.rows[0];
-      return {
-        id: user.id,
-        email: user.email,
-        passwordHash: user.password_hash,
-        name: user.name,
-        role: user.role,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
-        isActive: user.is_active,
-        lastLogin: user.last_login,
-        emailVerified: user.email_verified,
-        twoFactorEnabled: user.two_factor_enabled,
-      };
-    } catch (error) {
+        const user = result.rows[0];
+        return {
+          id: user.id,
+          email: user.email,
+          passwordHash: user.password_hash,
+          name: user.name,
+          role: user.role,
+          createdAt: user.created_at,
+          updatedAt: user.updated_at,
+          isActive: user.is_active,
+          lastLogin: user.last_login,
+          emailVerified: user.email_verified,
+          twoFactorEnabled: user.two_factor_enabled,
+        };
+      }
+      
+      return this.inMemoryUsersByEmail.get(email.toLowerCase()) || null;
+    } catch (error: any) {
+      const errorCode = error?.code || '';
+      const errorMessage = error?.message || '';
+      
+      if (errorCode === 'ECONNREFUSED' ||
+          errorCode === '28P01' ||
+          errorMessage.includes('Database is not available') ||
+          errorMessage.includes('not available')) {
+        return this.inMemoryUsersByEmail.get(email.toLowerCase()) || null;
+      }
+      
       logger.error('Error finding user by email', { error, email });
       throw error;
     }

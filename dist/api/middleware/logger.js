@@ -23,7 +23,7 @@ const logFormat = winston_1.default.format.combine(winston_1.default.format.time
 exports.logger = winston_1.default.createLogger({
     level: process.env.LOG_LEVEL || 'info',
     format: logFormat,
-    defaultMeta: { service: 'socrateach-api' },
+    defaultMeta: { service: 'socrates-api' },
     transports: [
         // Console transport for development
         new winston_1.default.transports.Console({
@@ -48,7 +48,7 @@ exports.logger = winston_1.default.createLogger({
 exports.auditLogger = winston_1.default.createLogger({
     level: 'info',
     format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.json()),
-    defaultMeta: { service: 'socrateach-audit' },
+    defaultMeta: { service: 'socrates-audit' },
     transports: [
         new winston_1.default.transports.File({
             filename: path_1.default.join(logsDir, 'audit.log'),
@@ -61,7 +61,7 @@ exports.auditLogger = winston_1.default.createLogger({
 exports.performanceLogger = winston_1.default.createLogger({
     level: 'info',
     format: winston_1.default.format.combine(winston_1.default.format.timestamp(), winston_1.default.format.json()),
-    defaultMeta: { service: 'socrateach-performance' },
+    defaultMeta: { service: 'socrates-performance' },
     transports: [
         new winston_1.default.transports.File({
             filename: path_1.default.join(logsDir, 'performance.log'),

@@ -10,10 +10,10 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'SocraTeach API',
+            title: 'Socrates API',
             version: '1.0.0',
             description: `
-        SocraTeach is a production-ready, multi-modal learning platform that uses the Socratic method 
+        Socrates is a production-ready, multi-modal learning platform that uses the Socratic method 
         to guide students through problem-solving processes. This API provides comprehensive endpoints 
         for user management, learning sessions, collaboration, voice interactions, analytics, and monitoring.
         
@@ -38,8 +38,8 @@ const options = {
         detailed error messages to help with debugging and integration.
       `,
             contact: {
-                name: 'SocraTeach Support',
-                email: 'support@socrateach.com',
+                name: 'Socrates Support',
+                email: 'support@socrates.com',
             },
             license: {
                 name: 'MIT',
@@ -52,7 +52,7 @@ const options = {
                 description: 'Development server',
             },
             {
-                url: 'https://api.socrateach.com',
+                url: 'https://api.socrates.com',
                 description: 'Production server',
             },
         ],
@@ -610,7 +610,7 @@ const setupSwagger = (app) => {
       .swagger-ui .info .title { color: #2c3e50 }
       .swagger-ui .scheme-container { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0 }
     `,
-        customSiteTitle: 'SocraTeach API Documentation',
+        customSiteTitle: 'Socrates API Documentation',
         customfavIcon: '/favicon.ico',
     };
     // Serve Swagger UI

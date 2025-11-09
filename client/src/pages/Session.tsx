@@ -305,17 +305,10 @@ export default function Session() {
         const newSessionId = res.data.data.id;
         setSessionId(newSessionId);
         
-        // Determine if this is an assessment based on problemId pattern
-        const isAssessment = loadedProblemData.isAssessment || 
-                             loadedProblemData.id.includes('math-') || 
-                             loadedProblemData.id.includes('sci-');
-        
-        // Add placeholder that prompts the student to begin
+        // Problem Bank sessions are always normal tutoring sessions (not assessments)
         setMessages([{
           role: 'assistant',
-          content: isAssessment
-            ? "What's your answer to this problem? Take your time and show your work if needed."
-            : "I'm here to help you think through this problem. What's your first thought?",
+          content: "I'm here to help you think through this problem. What's your first thought?",
           timestamp: new Date(),
           questionType: 'clarification',
           depthLevel: 1
@@ -408,26 +401,6 @@ export default function Session() {
         // Update analytics
         if (enhancedResponse.analytics) {
           setAnalytics(enhancedResponse.analytics);
-        }
-        
-        // Handle assessment completion
-        if (enhancedResponse.assessmentComplete) {
-          console.log('Assessment complete!', {
-            correct: enhancedResponse.assessmentCorrect,
-            problemId: problem?.id || id
-          });
-          
-          // Mark assessment as complete in the backend
-          if (enhancedResponse.assessmentCorrect && (problem?.id || id)) {
-            api.post(`/assessments/${problem?.id || id}/complete`, {
-              score: 100,
-              sessionId: sessionId
-            }).then(() => {
-              console.log('Assessment marked as complete');
-            }).catch(err => {
-              console.error('Failed to mark assessment complete:', err);
-            });
-          }
         }
       } else {
         // Use basic endpoint

@@ -5,7 +5,7 @@ export declare let redisClient: any;
 export declare let cacheService: any;
 export declare let sessionService: any;
 export declare let io: SocketIOServer;
-declare class SocraTeachServer {
+declare class SocratesServer {
     private app;
     private server;
     private io;
@@ -21,7 +21,7 @@ declare class SocraTeachServer {
     getServer(): any;
     getIO(): SocketIOServer;
 }
-declare const server: SocraTeachServer;
+declare const server: SocratesServer;
 export default server;
-export { SocraTeachServer };
+export { SocratesServer };
 //# sourceMappingURL=server.d.ts.map

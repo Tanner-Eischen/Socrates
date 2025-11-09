@@ -23,7 +23,7 @@ class SessionService {
             const errorMessage = error?.message || '';
             const errorCode = error?.code || '';
             if (errorMessage.includes('not available') ||
-                errorCode === 'ECONNREFUSED' ||
+                errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorCode === 'ENOTFOUND' ||
                 errorMessage.includes('Database is not available')) {
                 return false;
@@ -89,8 +89,11 @@ class SessionService {
                     // If database INSERT fails, fall back to in-memory storage
                     const errorCode = dbError?.code || '';
                     const errorMessage = dbError?.message || '';
-                    if (errorCode === 'ECONNREFUSED' ||
+                    if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
+                        errorCode === '28P01' || // PostgreSQL authentication failed
+                        errorCode === 'ENOTFOUND' ||
                         errorMessage.includes('Database is not available') ||
+                        errorMessage.includes('password authentication failed') ||
                         errorMessage.includes('not available')) {
                         logger_1.logger.warn('Database insert failed, falling back to in-memory storage', {
                             sessionId, error: dbError
@@ -175,8 +178,11 @@ class SessionService {
             // If database query fails, check in-memory storage as fallback
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
+                errorCode === '28P01' || // PostgreSQL authentication failed
+                errorCode === 'ENOTFOUND' ||
                 errorMessage.includes('Database is not available') ||
+                errorMessage.includes('password authentication failed') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, checking in-memory storage', { sessionId: id });
                 return this.inMemorySessions.get(id) || null;
@@ -230,7 +236,7 @@ class SessionService {
             // If database query fails, check in-memory storage as fallback
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorMessage.includes('Database is not available') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, checking in-memory storage', { userId });
@@ -346,7 +352,7 @@ class SessionService {
             // If database query fails, check in-memory storage as fallback
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorMessage.includes('Database is not available') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, checking in-memory storage', { sessionId: id });
@@ -508,7 +514,7 @@ class SessionService {
             // If database query fails, check in-memory storage as fallback
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorMessage.includes('Database is not available') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, checking in-memory storage', { sessionId });
@@ -574,7 +580,7 @@ class SessionService {
             // If database query fails, calculate from in-memory storage
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorMessage.includes('Database is not available') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, calculating stats from in-memory storage', { userId });
@@ -641,7 +647,7 @@ class SessionService {
             // If database query fails, check in-memory storage
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorMessage.includes('Database is not available') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, checking in-memory storage', { userId });
@@ -692,7 +698,7 @@ class SessionService {
             // If database query fails, try in-memory storage
             const errorCode = error?.code || '';
             const errorMessage = error?.message || '';
-            if (errorCode === 'ECONNREFUSED' ||
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
                 errorMessage.includes('Database is not available') ||
                 errorMessage.includes('not available')) {
                 logger_1.logger.warn('Database unavailable, deleting from in-memory storage', { sessionId: id });

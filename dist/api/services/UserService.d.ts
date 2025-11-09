@@ -30,6 +30,12 @@ export interface CreateUserData {
 }
 export declare class UserService {
     private static db;
+    private static inMemoryUsers;
+    private static inMemoryUsersByEmail;
+    /**
+     * Check if database is available
+     */
+    private static isDatabaseAvailable;
     /**
      * Create a new user
      */

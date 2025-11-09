@@ -1,5 +1,5 @@
 "use strict";
-// Main entry point for SocraTeach modules
+// Main entry point for Socrates modules
 // This helps with IDE module resolution
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;

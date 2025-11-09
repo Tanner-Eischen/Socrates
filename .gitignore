@@ -40,14 +40,20 @@ lerna-debug.log*
 ._*
 .Spotlight-V100
 .Trashes
+
+# Windows files
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 desktop.ini
+*.ps1.bak
 
 # IDE and Editor files
-.vscode/
+.vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo
@@ -60,9 +66,11 @@ desktop.ini
 
 # Testing
 coverage/
+client/coverage/
 .nyc_output/
 *.lcov
 .jest/
+.vitest/
 
 # Temp files
 *.tmp
@@ -83,6 +91,7 @@ data/
 uploads/
 public/uploads/
 client/public/uploads/
+testmedia/
 
 # Documentation (generated)
 docs/api/
@@ -140,7 +149,6 @@ temp/
 
 # Local database backups
 backups/
-*.backup
 
 # AI/ML model files (if storing locally)
 models/
@@ -158,3 +166,14 @@ credentials/
 
 # macOS
 **/.DS_Store
+
+# Test files and fixtures (keep structure, ignore content)
+testmedia/*
+!testmedia/.gitkeep
+fixtures/scripts/*.json.bak
+
+# Duplicate/backup files (Windows creates these)
+* (1).*
+* (2).*
+*.bak
+*.backup

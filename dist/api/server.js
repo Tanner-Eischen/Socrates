@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SocraTeachServer = exports.io = exports.sessionService = exports.cacheService = exports.redisClient = exports.dbPool = void 0;
+exports.SocratesServer = exports.io = exports.sessionService = exports.cacheService = exports.redisClient = exports.dbPool = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -26,12 +26,13 @@ const users_1 = __importDefault(require("./routes/users"));
 const sessions_1 = __importDefault(require("./routes/sessions"));
 const problems_1 = __importDefault(require("./routes/problems"));
 const assessments_1 = __importDefault(require("./routes/assessments"));
+const adaptive_1 = __importDefault(require("./routes/adaptive"));
 const analytics_1 = __importDefault(require("./routes/analytics"));
 const collaboration_1 = __importDefault(require("./routes/collaboration"));
 const voice_1 = __importDefault(require("./routes/voice"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
 // Application class
-class SocraTeachServer {
+class SocratesServer {
     constructor() {
         this.isShuttingDown = false;
         this.app = (0, express_1.default)();
@@ -153,6 +154,7 @@ class SocraTeachServer {
         apiRouter.use('/sessions', sessions_1.default); // Auth handled by optionalAuthMiddleware in routes
         apiRouter.use('/problems', problems_1.default); // Auth handled by optionalAuthMiddleware in routes
         apiRouter.use('/assessments', assessments_1.default); // Auth handled by optionalAuthMiddleware in routes
+        apiRouter.use('/adaptive', adaptive_1.default); // Auth handled by optionalAuthMiddleware in routes
         apiRouter.use('/analytics', auth_1.authMiddleware, analytics_1.default);
         apiRouter.use('/collaboration', auth_1.authMiddleware, collaboration_1.default);
         apiRouter.use('/voice', auth_1.authMiddleware, voice_1.default);
@@ -191,7 +193,7 @@ class SocraTeachServer {
             this.setupWebSocket();
             // Start listening
             this.server.listen(environment_1.config.PORT, environment_1.config.HOST, () => {
-                logger_1.logger.info(`SocraTeach API server started`, {
+                logger_1.logger.info(`Socrates API server started`, {
                     port: environment_1.config.PORT,
                     host: environment_1.config.HOST,
                     environment: environment_1.config.NODE_ENV,
@@ -287,9 +289,9 @@ class SocraTeachServer {
         return this.io;
     }
 }
-exports.SocraTeachServer = SocraTeachServer;
+exports.SocratesServer = SocratesServer;
 // Create and export server instance
-const server = new SocraTeachServer();
+const server = new SocratesServer();
 // Start server if this file is run directly
 if (require.main === module) {
     server.start().catch((error) => {

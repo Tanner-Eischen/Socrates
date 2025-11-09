@@ -7,7 +7,7 @@ const logger_1 = require("../middleware/logger");
 const defaultConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME || 'socrateach',
+    database: process.env.DB_NAME || 'socrates',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'password',
     max: parseInt(process.env.DB_MAX_CONNECTIONS || '20'),
@@ -314,7 +314,7 @@ const seedInitialData = async (pool) => {
     try {
         await client.query('BEGIN');
         // Check if admin user already exists
-        const adminCheck = await client.query('SELECT id FROM users WHERE email = $1', ['admin@socrateach.com']);
+        const adminCheck = await client.query('SELECT id FROM users WHERE email = $1', ['admin@socrates.com']);
         if (adminCheck.rows.length === 0) {
             // Create admin user
             const bcrypt = require('bcrypt');
@@ -323,7 +323,7 @@ const seedInitialData = async (pool) => {
         INSERT INTO users (email, password_hash, role)
         VALUES ($1, $2, $3)
         RETURNING id
-      `, ['admin@socrateach.com', adminPassword, 'admin']);
+      `, ['admin@socrates.com', adminPassword, 'admin']);
             const adminId = adminResult.rows[0].id;
             // Create admin profile
             await client.query(`
@@ -334,7 +334,7 @@ const seedInitialData = async (pool) => {
                 'System',
                 'Administrator',
                 'System Admin',
-                'SocraTeach system administrator'
+                'Socrates system administrator'
             ]);
             logger_1.logger.info('Admin user created', { adminId });
         }

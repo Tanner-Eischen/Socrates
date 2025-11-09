@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// Automated demonstration of SocraTeach Day 1 Socratic methodology
+// Automated demonstration of Socrates Day 1 Socratic methodology
 const socratic_engine_1 = require("./socratic-engine");
 const problem_bank_1 = require("./problem-bank");
 async function demonstrateSocraticEngine() {
-    console.log('🎓 SocraTeach Day 1 - Socratic Engine Demonstration');
+    console.log('🎓 Socrates Day 1 - Socratic Engine Demonstration');
     console.log('==================================================\n');
     console.log('📋 Testing Core Functionality:');
     console.log('  ✅ Pure Socratic methodology (no direct answers)');

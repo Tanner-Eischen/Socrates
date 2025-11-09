@@ -49,26 +49,58 @@ const PLACEHOLDER_MASTERY_DATA = [
   { topic: 'Statistics', mastery: 90 },
 ];
 
+interface AdaptiveLearningData {
+  overallLevel: number;
+  categoryLevels: Record<string, number>;
+  learningVelocity: number;
+  strengths: string[];
+  weaknesses: string[];
+}
+
 export default function Analytics() {
   const { user, logout } = useAuth();
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [adaptiveData, setAdaptiveData] = useState<AdaptiveLearningData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState('month');
 
   useEffect(() => {
-    api
-      .get(`/analytics/user?timeframe=${timeframe}`)
-      .then((res) => {
-        setData(res.data.data);
-      })
-      .catch((err) => {
-        console.error('Failed to load analytics:', err);
-        // Use placeholder data if API fails
-        setData({
-          accuracyOverTime: PLACEHOLDER_ACCURACY_DATA,
-          timeBySubject: PLACEHOLDER_TIME_DATA,
-          topicMastery: PLACEHOLDER_MASTERY_DATA,
-        });
+    Promise.all([
+      api.get(`/analytics/user?timeframe=${timeframe}`).catch(() => null),
+      api.get('/adaptive/analytics').catch(() => null)
+    ])
+      .then(([analyticsRes, adaptiveRes]) => {
+        if (analyticsRes) {
+          setData(analyticsRes.data.data);
+        } else {
+          // Use placeholder data if API fails
+          setData({
+            accuracyOverTime: PLACEHOLDER_ACCURACY_DATA,
+            timeBySubject: PLACEHOLDER_TIME_DATA,
+            topicMastery: PLACEHOLDER_MASTERY_DATA,
+          });
+        }
+        
+        if (adaptiveRes) {
+          const adaptive = adaptiveRes.data.data;
+          // Convert categoryLevels Map to Record
+          const categoryLevels: Record<string, number> = {};
+          if (adaptive.categoryLevels) {
+            if (Array.isArray(adaptive.categoryLevels)) {
+              // Handle array format [[key, value], ...]
+              adaptive.categoryLevels.forEach((item: unknown) => {
+                const [key, value] = item as [string, number];
+                categoryLevels[key] = value;
+              });
+            } else {
+              Object.assign(categoryLevels, adaptive.categoryLevels);
+            }
+          }
+          setAdaptiveData({
+            ...adaptive,
+            categoryLevels
+          });
+        }
       })
       .finally(() => setLoading(false));
   }, [timeframe]);
@@ -110,6 +142,90 @@ export default function Analytics() {
             ))}
           </div>
         </div>
+
+        {/* Adaptive Learning Section */}
+        {adaptiveData && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">🎯 Adaptive Learning Progress</h2>
+            
+            {/* Overall Level Card */}
+            <div className="mb-6 p-6 rounded-2xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900">Overall Learning Level</h3>
+                  <p className="text-sm text-blue-700">Based on your performance across all categories</p>
+                </div>
+                <div className="text-4xl font-bold text-blue-600">
+                  {adaptiveData.overallLevel.toFixed(1)}<span className="text-2xl text-blue-500">/10</span>
+                </div>
+              </div>
+              
+              {/* Learning Velocity */}
+              {adaptiveData.learningVelocity !== 0 && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className={`px-3 py-1 rounded-full font-medium ${
+                    adaptiveData.learningVelocity > 0
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {adaptiveData.learningVelocity > 0 ? '↗' : '↘'} 
+                    {Math.abs(adaptiveData.learningVelocity).toFixed(2)} levels/week
+                  </span>
+                  <span className="text-gray-600">
+                    {adaptiveData.learningVelocity > 0 ? 'Improving!' : 'Keep practicing!'}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {/* Category Levels */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {Object.entries(adaptiveData.categoryLevels).map(([category, level]) => (
+                <div key={category} className="p-4 rounded-xl border-2 border-amber-200 bg-white/80">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-900">{category}</span>
+                    <span className="text-lg font-bold text-amber-600">{level.toFixed(1)}</span>
+                  </div>
+                  <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-amber-500 to-orange-600"
+                      style={{ width: `${(level / 10) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Strengths & Weaknesses */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {adaptiveData.strengths.length > 0 && (
+                <div className="p-4 rounded-xl border-2 border-green-200 bg-green-50/50">
+                  <h4 className="font-semibold text-green-900 mb-2">💪 Strengths</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {adaptiveData.strengths.map(strength => (
+                      <span key={strength} className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                        {strength}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {adaptiveData.weaknesses.length > 0 && (
+                <div className="p-4 rounded-xl border-2 border-orange-200 bg-orange-50/50">
+                  <h4 className="font-semibold text-orange-900 mb-2">📚 Focus Areas</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {adaptiveData.weaknesses.map(weakness => (
+                      <span key={weakness} className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium">
+                        {weakness}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

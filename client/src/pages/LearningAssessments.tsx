@@ -23,22 +23,73 @@ interface AssessmentCompletion {
   completedAt?: Date;
 }
 
+interface StudentAbility {
+  userId: string;
+  category: string;
+  currentLevel: number;
+  confidence: number;
+  assessmentsCompleted: number;
+}
+
+interface AdaptiveRecommendation {
+  assessmentId: string;
+  difficulty: number;
+  category: string;
+  reason: string;
+  expectedSuccessRate: number;
+}
+
 export default function LearningAssessments() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [completions, setCompletions] = useState<AssessmentCompletion[]>([]);
+  const [abilities, setAbilities] = useState<StudentAbility[]>([]);
+  const [recommendations, setRecommendations] = useState<Map<string, AdaptiveRecommendation>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     Promise.all([
-      api.get('/problems'),
-      api.get('/assessments/completions').catch(() => ({ data: { data: [] } }))
+      api.get('/problems?limit=100'), // Request all assessments (we have ~40)
+      api.get('/assessments/completions').catch(() => ({ data: { data: [] } })),
+      api.get('/adaptive/ability').catch(() => ({ data: { data: [] } }))
     ])
-      .then(([problemsRes, completionsRes]) => {
+      .then(async ([problemsRes, completionsRes, abilitiesRes]) => {
         // Filter only assessment problems
         const assessmentProblems = problemsRes.data.data.filter((p: Problem) => p.isAssessment);
         setProblems(assessmentProblems);
         setCompletions(completionsRes.data.data);
+        setAbilities(abilitiesRes.data.data);
+        
+        // Get recommendations for each category
+        const categories = [...new Set(assessmentProblems.map((p: Problem) => p.category))];
+        const recommendationsMap = new Map<string, AdaptiveRecommendation>();
+        
+        for (const category of categories) {
+          try {
+            const categoryProblems = assessmentProblems.filter((p: Problem) => p.category === category);
+            const completedIds = completionsRes.data.data.map((c: AssessmentCompletion) => c.assessmentId);
+            
+            const availableAssessments = categoryProblems.map((p: Problem) => ({
+              id: p.id,
+              difficulty: p.difficultyLevel,
+              category: p.category,
+              completed: completedIds.includes(p.id)
+            }));
+            
+            const recRes = await api.post('/adaptive/recommend', {
+              category: String(category),
+              availableAssessments
+            });
+            
+            if (recRes.data.data) {
+              recommendationsMap.set(String(category), recRes.data.data);
+            }
+          } catch (err) {
+            console.error(`Failed to get recommendation for ${category}:`, err);
+          }
+        }
+        
+        setRecommendations(recommendationsMap);
       })
       .catch(err => {
         console.error('API Error:', err);
@@ -63,22 +114,6 @@ export default function LearningAssessments() {
     return completions.some(c => c.assessmentId === problemId && c.completed);
   };
 
-  // Check if prerequisites are met
-  const prerequisitesMet = (problem: Problem) => {
-    if (!problem.prerequisites || problem.prerequisites.length === 0) {
-      return true;
-    }
-    return problem.prerequisites.every(prereqId => isCompleted(prereqId));
-  };
-
-  // Get prerequisite titles
-  const getPrerequisiteTitles = (problem: Problem): string[] => {
-    if (!problem.prerequisites) return [];
-    return problem.prerequisites
-      .map(prereqId => problems.find(p => p.id === prereqId)?.title)
-      .filter(Boolean) as string[];
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
@@ -101,22 +136,13 @@ export default function LearningAssessments() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">
-              Learning Assessments
-            </h2>
-            <p className="mt-1 text-gray-600">
-              Test your understanding with these learning checkpoints
-            </p>
-          </div>
-          <Link
-            to="/submit"
-            className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-6 py-3 font-semibold text-white flex items-center gap-2 shadow-md transition-all"
-          >
-            <span className="text-xl">✏️</span>
-            Submit Your Problem
-          </Link>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">
+            Learning Assessments
+          </h2>
+          <p className="mt-1 text-gray-600">
+            Complete assessments matched to your learning level
+          </p>
         </div>
 
         {error && (
@@ -125,37 +151,66 @@ export default function LearningAssessments() {
           </div>
         )}
 
-        {/* Progress Summary */}
-        <div className="mb-8 rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Your Progress</h3>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="h-3 bg-amber-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all duration-500"
-                  style={{ width: `${problems.length > 0 ? (completions.length / problems.length) * 100 : 0}%` }}
-                />
-              </div>
-            </div>
-            <div className="text-sm font-medium text-gray-700">
-              {completions.length} / {problems.length} Completed
-            </div>
-          </div>
-        </div>
-
         {/* Assessments by Category */}
         <div className="space-y-8">
-          {categories.map(category => (
+          {categories.map(category => {
+            const ability = abilities.find(a => a.category === category);
+            const recommendation = recommendations.get(category);
+            
+            return (
             <div key={category}>
               <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full"></span>
                 {category}
+                {ability && (
+                  <span className="ml-auto text-sm font-normal text-gray-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    📊 Level {ability.currentLevel.toFixed(1)} / 10
+                  </span>
+                )}
               </h3>
+              
+              {/* Adaptive Recommendation */}
+              {recommendation && (
+                <div className="mb-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">🎯</span>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-blue-900 mb-1">
+                        Next Assessment: Level {recommendation.difficulty}
+                      </h4>
+                      <p className="text-sm text-blue-800 mb-2">
+                        {recommendation.reason} • Expected success: {Math.round(recommendation.expectedSuccessRate * 100)}%
+                      </p>
+                      <p className="text-xs text-blue-600 italic">
+                        Complete this to unlock your next challenge
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="grid gap-4">
-                {problemsByCategory[category].map((problem) => {
+                {(() => {
+                  const filteredProblems = problemsByCategory[category]
+                    .filter((problem) => {
+                      // Only show recommended assessment OR completed ones
+                      const isRecommended = recommendation?.assessmentId === problem.id;
+                      const completed = isCompleted(problem.id);
+                      return isRecommended || completed;
+                    });
+                  
+                  if (filteredProblems.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="mb-2">🎉 All assessments in this category complete!</p>
+                        <p className="text-sm">Great job! Check other categories.</p>
+                      </div>
+                    );
+                  }
+                  
+                  return filteredProblems.map((problem) => {
                   const completed = isCompleted(problem.id);
-                  const locked = !prerequisitesMet(problem);
-                  const prereqTitles = getPrerequisiteTitles(problem);
+                  const isRecommended = recommendation?.assessmentId === problem.id;
 
                   return (
                     <div
@@ -163,21 +218,17 @@ export default function LearningAssessments() {
                       className={`rounded-2xl border-2 p-6 transition-all ${
                         completed
                           ? 'border-green-300 bg-green-50/50'
-                          : locked
-                          ? 'border-gray-300 bg-gray-50/50 opacity-60'
+                          : isRecommended
+                          ? 'border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 hover:border-blue-400 hover:shadow-xl shadow-blue-100'
                           : 'border-amber-200 bg-white/80 backdrop-blur-sm hover:border-amber-400 hover:shadow-lg'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            {completed && (
+                            {completed ? (
                               <span className="text-2xl" title="Completed">✅</span>
-                            )}
-                            {locked && (
-                              <span className="text-2xl" title="Locked - Prerequisites not met">🔒</span>
-                            )}
-                            {!completed && !locked && (
+                            ) : (
                               <span className="text-2xl" title="Available">📚</span>
                             )}
                             <h3 className="text-lg font-semibold text-gray-900">{problem.title}</h3>
@@ -186,27 +237,6 @@ export default function LearningAssessments() {
                           <div className="mt-2 text-gray-700 line-clamp-2">
                             <MathRenderer content={problem.description} />
                           </div>
-                          
-                          {/* Prerequisites Display */}
-                          {prereqTitles.length > 0 && (
-                            <div className="mt-3 flex items-start gap-2">
-                              <span className="text-xs text-gray-500 font-medium">Prerequisites:</span>
-                              <div className="flex flex-wrap gap-1">
-                                {prereqTitles.map((title, idx) => (
-                                  <span
-                                    key={idx}
-                                    className={`text-xs px-2 py-0.5 rounded-full ${
-                                      locked
-                                        ? 'bg-red-100 text-red-700 border border-red-200'
-                                        : 'bg-green-100 text-green-700 border border-green-200'
-                                    }`}
-                                  >
-                                    {title}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                           
                           <div className="mt-4 flex flex-wrap gap-2">
                             <span className="rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs text-amber-700 font-medium">
@@ -229,14 +259,6 @@ export default function LearningAssessments() {
                             >
                               ✓ Completed
                             </button>
-                          ) : locked ? (
-                            <button
-                              disabled
-                              className="rounded-xl bg-gray-200 border-2 border-gray-300 px-4 py-2 text-sm font-medium text-gray-500 cursor-not-allowed"
-                              title={`Complete ${prereqTitles.join(', ')} first`}
-                            >
-                              🔒 Locked
-                            </button>
                           ) : (
                             <Link
                               to={`/session/${problem.id}`}
@@ -249,10 +271,12 @@ export default function LearningAssessments() {
                       </div>
                     </div>
                   );
-                })}
+                  });
+                })()}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {problems.length === 0 && (

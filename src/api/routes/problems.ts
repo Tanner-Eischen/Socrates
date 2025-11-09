@@ -8,6 +8,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { logger } from '../middleware/logger';
 import { ProblemProcessingServiceInstance } from '../services/ProblemProcessingService';
 import Joi from 'joi';
+import { LEARNING_ASSESSMENTS, PROBLEM_BANK } from './assessment-data';
 
 const router = Router();
 
@@ -61,17 +62,29 @@ interface Problem {
   expectedAnswer?: string; // New: Expected answer format for assessments
 }
 
-// Mock data - replace with actual database queries
+// Combine assessments and problem bank problems
 const mockProblems: Problem[] = [
-  // Math - Algebra Fundamentals
+  ...LEARNING_ASSESSMENTS,
+  ...PROBLEM_BANK,
+];
+
+// Helper function to get problem by ID
+export function getProblemById(id: string): Problem | undefined {
+  return mockProblems.find(p => p.id === id && p.isActive);
+}
+
+// Note: Legacy inline problems removed - all problems now in assessment-data.ts
+/*
+// Keeping old code structure for reference
+const oldMockProblems: Problem[] = [
   {
-    id: 'math-linear-1',
-    title: 'Linear Equations Basics',
+    id: 'alg-1',
+    title: 'Linear Equations - Basic',
     description: 'Solve for x: 3x + 7 = 22',
     type: 'math',
     difficultyLevel: 1,
     tags: ['algebra', 'linear', 'equations', 'basics'],
-    category: 'Math - Algebra',
+    category: 'Algebra',
     estimatedTime: 5,
     hints: ['What operation can you use to isolate x?', 'Remember to do the same thing to both sides'],
     solution: 'x = 5',
@@ -82,6 +95,62 @@ const mockProblems: Problem[] = [
     isActive: true,
     isAssessment: true,
     prerequisites: [],
+  },
+  {
+    id: 'alg-2',
+    title: 'Understanding Variables',
+    description: 'Explain what a variable represents in an equation and why we use letters like x and y in algebra.',
+    type: 'math',
+    difficultyLevel: 1,
+    tags: ['algebra', 'variables', 'comprehension'],
+    category: 'Algebra',
+    estimatedTime: 8,
+    hints: ['Think about what unknowns are', 'Variables are placeholders'],
+    expectedAnswer: 'variable placeholder unknown',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['alg-1'],
+  },
+  {
+    id: 'alg-3',
+    title: 'Systems of Equations',
+    description: 'Solve the system: x + y = 10 and x - y = 2. What is the value of x?',
+    type: 'math',
+    difficultyLevel: 2,
+    tags: ['algebra', 'systems', 'equations'],
+    category: 'Algebra',
+    estimatedTime: 10,
+    hints: ['Try adding the two equations together', 'What happens when you add x - y to x + y?'],
+    solution: 'x = 6',
+    expectedAnswer: '6',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['alg-1', 'alg-2'],
+  },
+  {
+    id: 'alg-4',
+    title: 'Quadratic Equations',
+    description: 'Solve: x² - 5x + 6 = 0. Give both solutions.',
+    type: 'math',
+    difficultyLevel: 3,
+    tags: ['algebra', 'quadratic', 'factoring'],
+    category: 'Algebra',
+    estimatedTime: 12,
+    hints: ['Try factoring', 'Look for two numbers that multiply to 6 and add to -5'],
+    solution: 'x = 2 or x = 3',
+    expectedAnswer: '2 3',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: true,
+    prerequisites: ['alg-3'],
   },
   {
     id: 'math-quad-1',
@@ -223,7 +292,97 @@ const mockProblems: Problem[] = [
     isAssessment: true,
     prerequisites: ['sci-bio-1'],
   },
+  
+  // ==================== PROBLEM BANK (isAssessment: false) ====================
+  // These are used for the Problem Bank page with Socratic tutoring
+  
+  {
+    id: 'prob-algebra-1',
+    title: 'Exploring Linear Relationships',
+    description: 'A train travels at a constant speed. After 2 hours, it has covered 150 miles. After 5 hours, it has covered 375 miles. How can we express the relationship between time and distance?',
+    type: 'math',
+    difficultyLevel: 2,
+    tags: ['algebra', 'linear', 'relationships', 'real-world'],
+    category: 'Math - Algebra',
+    estimatedTime: 15,
+    hints: ['Think about the rate of change', 'How much distance is covered per hour?'],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-05'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: false,
+    prerequisites: [],
+  },
+  {
+    id: 'prob-geometry-1',
+    title: 'Garden Design Problem',
+    description: 'You want to create a rectangular garden with an area of 60 square meters. You have 32 meters of fencing to go around it. What should the dimensions be?',
+    type: 'math',
+    difficultyLevel: 3,
+    tags: ['geometry', 'area', 'perimeter', 'problem-solving'],
+    category: 'Math - Geometry',
+    estimatedTime: 20,
+    hints: ['Think about the formulas for area and perimeter', 'Can you set up two equations?'],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-05'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: false,
+    prerequisites: [],
+  },
+  {
+    id: 'prob-physics-1',
+    title: 'Falling Object',
+    description: 'If you drop a ball from a tall building, it falls faster and faster. Why does this happen, and how would you describe its motion?',
+    type: 'science',
+    difficultyLevel: 2,
+    tags: ['physics', 'gravity', 'motion', 'acceleration'],
+    category: 'Science - Physics',
+    estimatedTime: 15,
+    hints: ['Think about forces acting on the ball', 'What does gravity do?'],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-05'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: false,
+    prerequisites: [],
+  },
+  {
+    id: 'prob-biology-1',
+    title: 'Photosynthesis Investigation',
+    description: 'What are the reactants and products of photosynthesis?',
+    type: 'science',
+    difficultyLevel: 2,
+    tags: ['biology', 'photosynthesis', 'plants', 'energy'],
+    category: 'Science - Biology',
+    estimatedTime: 15,
+    hints: ['What do plants need to make their own food?', 'What do plants release?'],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-05'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: false,
+    prerequisites: [],
+  },
+  {
+    id: 'prob-critical-thinking-1',
+    title: 'The Bridge Problem',
+    description: 'Four people need to cross a bridge at night. The bridge can only hold two people at a time. They have one flashlight and it must be carried across. Person A takes 1 minute to cross, B takes 2 minutes, C takes 5 minutes, and D takes 10 minutes. When two people cross together, they must go at the slower person\'s pace. What is the minimum time for all four to cross?',
+    type: 'logic',
+    difficultyLevel: 4,
+    tags: ['logic', 'problem-solving', 'optimization', 'critical-thinking'],
+    category: 'Critical Thinking',
+    estimatedTime: 25,
+    hints: ['Think about who should cross together', 'Consider sending the flashlight back with the fastest person'],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-05'),
+    createdBy: 'system',
+    isActive: true,
+    isAssessment: false,
+    prerequisites: [],
+  },
 ];
+*/
 
 // Validation schemas
 const createProblemSchema = Joi.object({

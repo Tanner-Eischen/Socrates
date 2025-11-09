@@ -16,7 +16,7 @@ const defaultConfig = {
     HOST: '0.0.0.0',
     DB_HOST: 'localhost',
     DB_PORT: 5432,
-    DB_NAME: 'socrateach',
+    DB_NAME: 'socrates',
     DB_USER: 'postgres',
     DB_PASSWORD: 'password',
     DB_MAX_CONNECTIONS: 20,
@@ -26,7 +26,7 @@ const defaultConfig = {
     REDIS_HOST: 'localhost',
     REDIS_PORT: 6379,
     REDIS_DB: 0,
-    REDIS_KEY_PREFIX: 'socrateach:',
+    REDIS_KEY_PREFIX: 'socrates:',
     JWT_EXPIRES_IN: '1h',
     JWT_REFRESH_EXPIRES_IN: '7d',
     RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000, // 15 minutes
@@ -238,7 +238,7 @@ const getRedisUrl = () => {
 exports.getRedisUrl = getRedisUrl;
 // Create .env template
 const createEnvTemplate = () => {
-    return `# SocraTeach Environment Configuration
+    return `# Socrates Environment Configuration
 
 # Environment
 NODE_ENV=development
@@ -248,7 +248,7 @@ HOST=0.0.0.0
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=socrateach
+DB_NAME=socrates
 DB_USER=postgres
 DB_PASSWORD=password
 DB_MAX_CONNECTIONS=20
@@ -261,7 +261,7 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_DB=0
-REDIS_KEY_PREFIX=socrateach:
+REDIS_KEY_PREFIX=socrates:
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production

@@ -5,84 +5,146 @@ const DatabaseService_1 = require("./DatabaseService");
 const logger_1 = require("../middleware/logger");
 class UserService {
     /**
+     * Check if database is available
+     */
+    static async isDatabaseAvailable() {
+        try {
+            await DatabaseService_1.DatabaseService.query('SELECT 1');
+            return true;
+        }
+        catch (error) {
+            const errorMessage = error?.message || '';
+            const errorCode = error?.code || '';
+            if (errorMessage.includes('not available') ||
+                errorCode === 'ECONNREFUSED' ||
+                errorCode === 'ENOTFOUND' ||
+                errorCode === '28P01' || // Authentication failed
+                errorMessage.includes('Database is not available')) {
+                return false;
+            }
+            return true;
+        }
+    }
+    /**
      * Create a new user
      */
     static async create(userData) {
         try {
             const now = new Date();
-            // Insert user
-            const userQuery = `
+            // Try database first
+            const dbAvailable = await this.isDatabaseAvailable();
+            if (dbAvailable) {
+                try {
+                    // Insert user
+                    const userQuery = `
         INSERT INTO users (id, email, password_hash, name, role, created_at, updated_at, is_active, email_verified, two_factor_enabled)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
       `;
-            const userValues = [
-                userData.id,
-                userData.email,
-                userData.passwordHash,
-                userData.name,
-                userData.role,
-                now,
-                now,
-                true, // isActive
-                false, // emailVerified
-                false, // twoFactorEnabled
-            ];
-            const userResult = await this.db.query(userQuery, userValues);
-            const user = userResult.rows[0];
-            // Create default user profile
-            const profileQuery = `
+                    const userValues = [
+                        userData.id,
+                        userData.email,
+                        userData.passwordHash,
+                        userData.name,
+                        userData.role,
+                        now,
+                        now,
+                        true, // isActive
+                        false, // emailVerified
+                        false, // twoFactorEnabled
+                    ];
+                    const userResult = await this.db.query(userQuery, userValues);
+                    const user = userResult.rows[0];
+                    // Create default user profile
+                    const profileQuery = `
         INSERT INTO user_profiles (user_id, preferences, learning_style, accessibility_settings, notification_preferences, timezone, language, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `;
-            const defaultPreferences = {
-                theme: 'light',
-                difficulty: 'adaptive',
-                sessionLength: 30,
-                voiceEnabled: false,
+                    const defaultPreferences = {
+                        theme: 'light',
+                        difficulty: 'adaptive',
+                        sessionLength: 30,
+                        voiceEnabled: false,
+                    };
+                    const defaultLearningStyle = {
+                        preferredMode: 'mixed',
+                        pacePreference: 'moderate',
+                        feedbackStyle: 'encouraging',
+                    };
+                    const defaultAccessibilitySettings = {
+                        highContrast: false,
+                        largeText: false,
+                        screenReader: false,
+                        keyboardNavigation: false,
+                    };
+                    const defaultNotificationPreferences = {
+                        email: true,
+                        push: false,
+                        sessionReminders: true,
+                        progressUpdates: true,
+                    };
+                    const profileValues = [
+                        userData.id,
+                        JSON.stringify(defaultPreferences),
+                        JSON.stringify(defaultLearningStyle),
+                        JSON.stringify(defaultAccessibilitySettings),
+                        JSON.stringify(defaultNotificationPreferences),
+                        'UTC',
+                        'en',
+                        now,
+                    ];
+                    await this.db.query(profileQuery, profileValues);
+                    logger_1.logger.info('User created successfully', { userId: userData.id, email: userData.email });
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        passwordHash: user.password_hash,
+                        name: user.name,
+                        role: user.role,
+                        createdAt: user.created_at,
+                        updatedAt: user.updated_at,
+                        isActive: user.is_active,
+                        lastLogin: user.last_login,
+                        emailVerified: user.email_verified,
+                        twoFactorEnabled: user.two_factor_enabled,
+                    };
+                }
+                catch (dbError) {
+                    // If database operation fails, fall back to in-memory storage
+                    const errorCode = dbError?.code || '';
+                    const errorMessage = dbError?.message || '';
+                    if (errorCode === 'ECONNREFUSED' ||
+                        errorCode === '28P01' ||
+                        errorMessage.includes('Database is not available') ||
+                        errorMessage.includes('not available')) {
+                        logger_1.logger.warn('Database insert failed, falling back to in-memory storage', {
+                            userId: userData.id, error: dbError
+                        });
+                        // Fall through to in-memory storage below
+                    }
+                    else {
+                        // For other database errors, re-throw
+                        throw dbError;
+                    }
+                }
+            }
+            // Use in-memory storage (either db not available or insert failed)
+            const user = {
+                id: userData.id,
+                email: userData.email,
+                passwordHash: userData.passwordHash,
+                name: userData.name,
+                role: userData.role,
+                createdAt: now,
+                updatedAt: now,
+                isActive: true,
+                emailVerified: false,
+                twoFactorEnabled: false,
             };
-            const defaultLearningStyle = {
-                preferredMode: 'mixed',
-                pacePreference: 'moderate',
-                feedbackStyle: 'encouraging',
-            };
-            const defaultAccessibilitySettings = {
-                highContrast: false,
-                largeText: false,
-                screenReader: false,
-                keyboardNavigation: false,
-            };
-            const defaultNotificationPreferences = {
-                email: true,
-                push: false,
-                sessionReminders: true,
-                progressUpdates: true,
-            };
-            const profileValues = [
-                userData.id,
-                JSON.stringify(defaultPreferences),
-                JSON.stringify(defaultLearningStyle),
-                JSON.stringify(defaultAccessibilitySettings),
-                JSON.stringify(defaultNotificationPreferences),
-                'UTC',
-                'en',
-                now,
-            ];
-            await this.db.query(profileQuery, profileValues);
-            logger_1.logger.info('User created successfully', { userId: userData.id, email: userData.email });
-            return {
-                id: user.id,
-                email: user.email,
-                passwordHash: user.password_hash,
-                name: user.name,
-                role: user.role,
-                createdAt: user.created_at,
-                updatedAt: user.updated_at,
-                isActive: user.is_active,
-                lastLogin: user.last_login,
-                emailVerified: user.email_verified,
-                twoFactorEnabled: user.two_factor_enabled,
-            };
+            this.inMemoryUsers.set(userData.id, user);
+            this.inMemoryUsersByEmail.set(userData.email.toLowerCase(), user);
+            logger_1.logger.info('User created successfully (in-memory)', { userId: userData.id, email: userData.email });
+            return user;
         }
         catch (error) {
             logger_1.logger.error('Error creating user', { error, userData: { ...userData, passwordHash: '[REDACTED]' } });
@@ -94,29 +156,41 @@ class UserService {
      */
     static async findById(id) {
         try {
-            const query = `
-        SELECT * FROM users WHERE id = $1 AND is_active = true
-      `;
-            const result = await this.db.query(query, [id]);
-            if (result.rows.length === 0) {
-                return null;
+            const dbAvailable = await this.isDatabaseAvailable();
+            if (dbAvailable) {
+                const query = `
+          SELECT * FROM users WHERE id = $1 AND is_active = true
+        `;
+                const result = await this.db.query(query, [id]);
+                if (result.rows.length === 0) {
+                    return this.inMemoryUsers.get(id) || null;
+                }
+                const user = result.rows[0];
+                return {
+                    id: user.id,
+                    email: user.email,
+                    passwordHash: user.password_hash,
+                    name: user.name,
+                    role: user.role,
+                    createdAt: user.created_at,
+                    updatedAt: user.updated_at,
+                    isActive: user.is_active,
+                    lastLogin: user.last_login,
+                    emailVerified: user.email_verified,
+                    twoFactorEnabled: user.two_factor_enabled,
+                };
             }
-            const user = result.rows[0];
-            return {
-                id: user.id,
-                email: user.email,
-                passwordHash: user.password_hash,
-                name: user.name,
-                role: user.role,
-                createdAt: user.created_at,
-                updatedAt: user.updated_at,
-                isActive: user.is_active,
-                lastLogin: user.last_login,
-                emailVerified: user.email_verified,
-                twoFactorEnabled: user.two_factor_enabled,
-            };
+            return this.inMemoryUsers.get(id) || null;
         }
         catch (error) {
+            const errorCode = error?.code || '';
+            const errorMessage = error?.message || '';
+            if (errorCode === 'ECONNREFUSED' ||
+                errorCode === '28P01' ||
+                errorMessage.includes('Database is not available') ||
+                errorMessage.includes('not available')) {
+                return this.inMemoryUsers.get(id) || null;
+            }
             logger_1.logger.error('Error finding user by ID', { error, userId: id });
             throw error;
         }
@@ -126,29 +200,41 @@ class UserService {
      */
     static async findByEmail(email) {
         try {
-            const query = `
-        SELECT * FROM users WHERE email = $1 AND is_active = true
-      `;
-            const result = await this.db.query(query, [email]);
-            if (result.rows.length === 0) {
-                return null;
+            const dbAvailable = await this.isDatabaseAvailable();
+            if (dbAvailable) {
+                const query = `
+          SELECT * FROM users WHERE email = $1 AND is_active = true
+        `;
+                const result = await this.db.query(query, [email]);
+                if (result.rows.length === 0) {
+                    return this.inMemoryUsersByEmail.get(email.toLowerCase()) || null;
+                }
+                const user = result.rows[0];
+                return {
+                    id: user.id,
+                    email: user.email,
+                    passwordHash: user.password_hash,
+                    name: user.name,
+                    role: user.role,
+                    createdAt: user.created_at,
+                    updatedAt: user.updated_at,
+                    isActive: user.is_active,
+                    lastLogin: user.last_login,
+                    emailVerified: user.email_verified,
+                    twoFactorEnabled: user.two_factor_enabled,
+                };
             }
-            const user = result.rows[0];
-            return {
-                id: user.id,
-                email: user.email,
-                passwordHash: user.password_hash,
-                name: user.name,
-                role: user.role,
-                createdAt: user.created_at,
-                updatedAt: user.updated_at,
-                isActive: user.is_active,
-                lastLogin: user.last_login,
-                emailVerified: user.email_verified,
-                twoFactorEnabled: user.two_factor_enabled,
-            };
+            return this.inMemoryUsersByEmail.get(email.toLowerCase()) || null;
         }
         catch (error) {
+            const errorCode = error?.code || '';
+            const errorMessage = error?.message || '';
+            if (errorCode === 'ECONNREFUSED' ||
+                errorCode === '28P01' ||
+                errorMessage.includes('Database is not available') ||
+                errorMessage.includes('not available')) {
+                return this.inMemoryUsersByEmail.get(email.toLowerCase()) || null;
+            }
             logger_1.logger.error('Error finding user by email', { error, email });
             throw error;
         }
@@ -330,5 +416,8 @@ class UserService {
 }
 exports.UserService = UserService;
 UserService.db = DatabaseService_1.DatabaseService;
+// In-memory storage fallback when database is not available
+UserService.inMemoryUsers = new Map();
+UserService.inMemoryUsersByEmail = new Map();
 exports.default = UserService;
 //# sourceMappingURL=UserService.js.map

@@ -13,6 +13,7 @@ interface Problem {
   tags: string[];
   category: string;
   estimatedTime: number;
+  isAssessment: boolean;
 }
 
 export default function Problems() {
@@ -21,8 +22,12 @@ export default function Problems() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/problems')
-      .then(res => setProblems(res.data.data))
+    api.get('/problems?limit=100') // Request all problems
+      .then(res => {
+        // Filter for Problem Bank problems only (non-assessments)
+        const problemBankProblems = res.data.data.filter((p: Problem) => !p.isAssessment);
+        setProblems(problemBankProblems);
+      })
       .catch(err => setError(err.response?.data?.message || 'Failed to load problems'))
       .finally(() => setLoading(false));
   }, []);

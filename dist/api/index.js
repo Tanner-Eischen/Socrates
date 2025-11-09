@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 "use strict";
 /**
- * SocraTeach API Server Entry Point
+ * Socrates API Server Entry Point
  *
- * This is the main entry point for the SocraTeach API server.
+ * This is the main entry point for the Socrates API server.
  * It initializes and starts the Express server with all necessary
  * middleware, routes, and services.
  */
@@ -14,9 +14,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const logger_1 = require("./middleware/logger");
 const server_1 = __importDefault(require("./server"));
 // Set process title
-process.title = 'socrateach-api';
+process.title = 'socrates-api';
 // Log startup information
-logger_1.logger.info('Starting SocraTeach API Server...', {
+logger_1.logger.info('Starting Socrates API Server...', {
     nodeVersion: process.version,
     platform: process.platform,
     arch: process.arch,
@@ -25,7 +25,7 @@ logger_1.logger.info('Starting SocraTeach API Server...', {
 });
 // Start the server
 server_1.default.start().catch((error) => {
-    logger_1.logger.error('Failed to start SocraTeach API server', {
+    logger_1.logger.error('Failed to start Socrates API server', {
         error: error.message,
         stack: error.stack
     });
