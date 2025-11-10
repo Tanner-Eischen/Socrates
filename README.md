@@ -170,6 +170,28 @@ Socrates/
 └── README.md                      # This file
 ```
 
+## Frontend vs Backend Separation
+
+- Frontend:
+  - Location: `client/`
+  - Entry points: `client/src/main.tsx`, `client/src/App.tsx`
+  - Dev server: `npm --prefix client run dev` (http://localhost:5173 or 5174)
+  - Build output: `client/dist/`
+  - Lint: `npm --prefix client run lint`
+
+- Backend (API + WebSocket + CLI):
+  - Location: `src/` (API under `src/api/`, CLI under `src/cli/`)
+  - Dev server: `npm run api:dev` (Express + Socket.IO)
+  - Build output: `dist/`
+  - CLI: `bin/socrates` and `bin/socrateach` launchers; commands registered via `src/cli/index.ts`
+
+<!-- Experimental UI (NewCSS) removed to reduce clutter. -->
+
+Guidelines:
+- Place all browser UI code under `client/` (pages, components, assets).
+- Keep server-only logic under `src/api/` and CLI under `src/cli/`.
+- Avoid adding frontend components at the repo root.
+
 ## Features
 
 ### Backend API
@@ -396,6 +418,70 @@ You can create your own by following the same JSON shape:
 ```
 
 Image intake is supported in `tutor chat` using `--image` at start or `:attach <path>` mid-session. The CLI will extract text with the available image/text processors and inject it as context for the next Socratic turn.
+
+## Example Walkthroughs (5+)
+
+These examples demonstrate text input, image upload, Socratic dialogue, and a stretch feature.
+
+- Linear equation (text):
+  - `tutor chat --problem "Solve 2x + 5 = 13"`
+  - Respond naturally; observe guiding questions, no direct answers.
+
+- Geometry reasoning (text):
+  - `tutor chat --problem "Explain why base angles of an isosceles triangle are equal"`
+  - Ask for definitions and evidence; note perspective and implications prompts.
+
+- Calculus concept (text):
+  - `tutor chat --problem "What does the derivative represent at a point?"`
+  - Explore intuition and examples; observe meta_questioning for reflection.
+
+- Image-based algebra (image upload):
+  - `tutor chat --image ./samples/linear1.png`
+  - Or in-session: `:attach ./samples/linear1.png` to inject extracted text/context.
+
+- Word problem decomposition (text):
+  - `tutor chat --problem "A runner completes 3 laps of a 400m track in 5 minutes. What is the average speed?"`
+  - Guide units, assumptions, and step-wise reasoning.
+
+- Stretch feature — Collaboration room:
+  - Frontend: go to `Collaboration` page, create/join a room, exchange messages.
+  - Observe real-time presence, typing indicators, and message flow.
+
+## Prompt Engineering Notes
+
+- Socratic persona:
+  - Tutor is instructed to ask guiding questions, probe assumptions, and avoid direct answers.
+  - Emphasizes clarification, evidence, perspective, implications, and meta_questioning.
+
+- Guardrails against direct answers:
+  - Responses are checked for direct-answer patterns; strict mode can auto-retry.
+  - Tips: adjust problem phrasing and difficulty to increase scaffolding.
+
+- Adaptive difficulty and tone:
+  - Engine adjusts challenge level based on inferred confidence and turn history.
+  - Encourages teach-back probes and reflection when the student struggles.
+
+- Image intake prompts:
+  - When images are attached, the system summarizes extracted text, asks for key features, and invites the student to describe what they notice before proceeding.
+
+- Collaboration prompts:
+  - In shared rooms, prompts nudge participants to articulate reasoning and respond to each other’s questions without converging prematurely on final answers.
+
+## Demo Video Guide (≈5 minutes)
+
+- Preparation:
+  - Ensure `OPENAI_API_KEY` is set and both servers are running (`npm run api:dev`, `cd client && npm run dev`).
+  - Open the app at `http://localhost:5173` and have `samples/linear1.png` available.
+
+- Record (screen + mic):
+  - Text input: Start a session with a simple algebra problem; show Q&A cadence.
+  - Image upload: Attach `linear1.png` via CLI (`--image` or `:attach`) or the frontend image input; show how context is incorporated.
+  - Socratic dialogue: Highlight question types and compliance (no direct answers).
+  - Stretch feature: Open Collaboration, create/join a room, send a few messages to show real-time updates.
+
+- Wrap-up:
+  - Briefly reference analytics or compliance metrics if available.
+  - End with how to reproduce locally from README.
 
 ## License
 

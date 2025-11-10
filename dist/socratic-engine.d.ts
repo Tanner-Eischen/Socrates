@@ -119,6 +119,10 @@ export declare class SocraticEngine {
     private isAssessmentMode;
     private expectedAnswer?;
     private studentHasAnswered;
+    private sessionPhase;
+    private problemSolved;
+    private hintGiven;
+    private turnsSinceLastPhase;
     constructor(sessionManager?: any, strictMode?: boolean);
     private initializeEnhancedFeatures;
     private initializeMetacognitivePrompts;
@@ -306,5 +310,7 @@ export declare class SocraticEngine {
             breakthroughs: number;
         };
     };
+    private detectProblemSolved;
+    private advancePhase;
 }
 //# sourceMappingURL=socratic-engine.d.ts.map

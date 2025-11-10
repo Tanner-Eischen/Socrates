@@ -7,7 +7,13 @@ export const initSocket = (token: string): Socket => {
     return socket;
   }
 
-  socket = io('http://localhost:3000', {
+  const { VITE_WS_BASE_URL, VITE_API_BASE_URL } = import.meta.env;
+  const baseUrl =
+    VITE_WS_BASE_URL ||
+    (VITE_API_BASE_URL ? VITE_API_BASE_URL.replace(/\/api\/v1$/, '') : undefined) ||
+    'http://localhost:3333';
+
+  socket = io(baseUrl, {
     auth: {
       token,
     },

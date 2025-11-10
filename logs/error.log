@@ -44580,3 +44580,4938 @@
     "routine": "auth_failed"
   }
 }
+2025-11-09 22:35:35 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "332",
+    "routine": "auth_failed"
+  }
+}
+2025-11-09 22:37:22 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "332",
+    "routine": "auth_failed"
+  }
+}
+2025-11-09 22:38:37 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "332",
+    "routine": "auth_failed"
+  }
+}
+2025-11-09 22:39:03 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-09 22:53:55 [ERROR]: Failed to initialize database schema
+{
+  "service": "socrates-api",
+  "error": "foreign key constraint \"problems_created_by_fkey\" cannot be implemented"
+}
+2025-11-09 22:53:55 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 235,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42804",
+    "detail": "Key columns \"created_by\" and \"id\" are of incompatible types: uuid and character varying.",
+    "file": "tablecmds.c",
+    "line": "9905",
+    "routine": "ATAddForeignKeyConstraint"
+  }
+}
+2025-11-09 22:56:28 [ERROR]: Failed to initialize database schema
+{
+  "service": "socrates-api",
+  "error": "column \"started_at\" does not exist"
+}
+2025-11-09 22:56:28 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 100,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "file": "indexcmds.c",
+    "line": "1891",
+    "routine": "ComputeIndexAttrs"
+  }
+}
+2025-11-09 23:06:19 [ERROR]: Failed to initialize database schema
+{
+  "service": "socrates-api",
+  "error": "column \"started_at\" does not exist"
+}
+2025-11-09 23:06:19 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 100,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "file": "indexcmds.c",
+    "line": "1891",
+    "routine": "ComputeIndexAttrs"
+  }
+}
+2025-11-09 23:28:37 [ERROR]: Failed to initialize database schema
+{
+  "service": "socrates-api",
+  "error": "column \"started_at\" does not exist"
+}
+2025-11-09 23:28:37 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 100,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "file": "indexcmds.c",
+    "line": "1891",
+    "routine": "ComputeIndexAttrs"
+  }
+}
+2025-11-09 23:59:32 [ERROR]: Failed to initialize database schema
+{
+  "service": "socrates-api",
+  "error": "column \"started_at\" does not exist"
+}
+2025-11-09 23:59:32 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 100,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "file": "indexcmds.c",
+    "line": "1891",
+    "routine": "ComputeIndexAttrs"
+  }
+}
+2025-11-10 00:16:14 [ERROR]: Failed to initialize database schema
+{
+  "service": "socrates-api",
+  "error": "column \"started_at\" does not exist"
+}
+2025-11-10 00:16:14 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 100,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "file": "indexcmds.c",
+    "line": "1891",
+    "routine": "ComputeIndexAttrs"
+  }
+}
+2025-11-10 00:17:57 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "Cannot find module 'bcrypt'\nRequire stack:\n- C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\config\\database.ts\n- C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\server.ts\n- C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\index.ts"
+}
+2025-11-10 07:05:21 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "Cannot find module 'bcrypt'\nRequire stack:\n- C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\config\\database.ts\n- C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\server.ts\n- C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\index.ts"
+}
+2025-11-10 07:05:21 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "code": "MODULE_NOT_FOUND",
+    "requireStack": [
+      "C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\config\\database.ts",
+      "C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\server.ts",
+      "C:\\Users\\tanne\\Gauntlet\\SocraTeach\\src\\api\\index.ts"
+    ]
+  }
+}
+2025-11-10 07:06:54 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "relation \"problems\" does not exist"
+}
+2025-11-10 07:06:54 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 107,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42P01",
+    "position": "22",
+    "file": "parse_relation.c",
+    "line": "1452",
+    "routine": "parserOpenTable"
+  }
+}
+2025-11-10 07:08:30 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "current transaction is aborted, commands ignored until end of transaction block"
+}
+2025-11-10 07:08:30 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 144,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "25P02",
+    "file": "postgres.c",
+    "line": "1144",
+    "routine": "exec_simple_query"
+  }
+}
+2025-11-10 07:08:58 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "column \"started_at\" of relation \"sessions\" does not exist"
+}
+2025-11-10 07:08:58 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 131,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "position": "88",
+    "file": "parse_target.c",
+    "line": "1070",
+    "routine": "checkInsertTargets"
+  }
+}
+2025-11-10 07:16:14 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "column \"metadata\" of relation \"sessions\" does not exist"
+}
+2025-11-10 07:16:14 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 130,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "position": "100",
+    "file": "parse_target.c",
+    "line": "1070",
+    "routine": "checkInsertTargets"
+  }
+}
+2025-11-10 07:16:39 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "null value in column \"id\" of relation \"sessions\" violates not-null constraint"
+}
+2025-11-10 07:16:39 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 400,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "23502",
+    "detail": "Failing row contains (null, dev-user-123, 96c87f33-1bda-4de3-8961-073f149756b0, null, null, 1, completed, 2025-11-10 06:16:39.153-06, 2025-11-10 06:36:39.153-06, 1200, 0, 0, 2025-11-10 07:16:39.051508-06, 2025-11-10 07:16:39.051508-06).",
+    "schema": "public",
+    "table": "sessions",
+    "column": "id",
+    "file": "execMain.c",
+    "line": "1987",
+    "routine": "ExecConstraints"
+  }
+}
+2025-11-10 07:17:51 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "null value in column \"problem_text\" of relation \"sessions\" violates not-null constraint"
+}
+2025-11-10 07:17:51 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 452,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "23502",
+    "detail": "Failing row contains (220093e4-22a1-4a69-a713-dc74369379e9, dev-user-123, 16865d39-0509-478e-a460-180590e60d69, null, null, 1, completed, 2025-11-10 06:17:51.363-06, 2025-11-10 06:37:51.363-06, 1200, 0, 0, 2025-11-10 07:17:51.163538-06, 2025-11-10 07:17:51.163538-06).",
+    "schema": "public",
+    "table": "sessions",
+    "column": "problem_text",
+    "file": "execMain.c",
+    "line": "1987",
+    "routine": "ExecConstraints"
+  }
+}
+2025-11-10 07:18:26 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "null value in column \"problem_type\" of relation \"sessions\" violates not-null constraint"
+}
+2025-11-10 07:18:26 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 472,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "23502",
+    "detail": "Failing row contains (3ad7d6cb-c7bd-4b5d-b2c0-3df87fb87e6a, dev-user-123, 8180f823-04d1-4044-b792-4e545783ea56, Solve for x: 2x + 5 = 13, null, 1, completed, 2025-11-10 06:18:26.957-06, 2025-11-10 06:38:26.957-06, 1200, 0, 0, 2025-11-10 07:18:26.745054-06, 2025-11-10 07:18:26.745054-06).",
+    "schema": "public",
+    "table": "sessions",
+    "column": "problem_type",
+    "file": "execMain.c",
+    "line": "1987",
+    "routine": "ExecConstraints"
+  }
+}
+2025-11-10 07:19:02 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "column \"input_data\" of relation \"interactions\" does not exist"
+}
+2025-11-10 07:19:02 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 135,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "position": "73",
+    "file": "parse_target.c",
+    "line": "1070",
+    "routine": "checkInsertTargets"
+  }
+}
+2025-11-10 07:19:57 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "null value in column \"user_id\" of relation \"interactions\" violates not-null constraint"
+}
+2025-11-10 07:19:57 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 362,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "23502",
+    "detail": "Failing row contains (a6e32f6d-c057-4a91-97fe-27213ea304bc, 0bda6fef-4f49-4cc1-999a-0f76df0d4928, null, question, null, {\"source\": \"seed\"}, 2025-11-10 06:19:57.008-06, null, null).",
+    "schema": "public",
+    "table": "interactions",
+    "column": "user_id",
+    "file": "execMain.c",
+    "line": "1987",
+    "routine": "ExecConstraints"
+  }
+}
+2025-11-10 07:32:44 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "column \"username\" does not exist"
+}
+2025-11-10 07:32:44 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 108,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "42703",
+    "position": "28",
+    "file": "parse_relation.c",
+    "line": "3721",
+    "routine": "errorMissingColumn"
+  }
+}
+2025-11-10 07:33:16 [ERROR]: Failed to seed initial data
+{
+  "service": "socrates-api",
+  "error": "current transaction is aborted, commands ignored until end of transaction block"
+}
+2025-11-10 07:33:16 [ERROR]: Database initialization failed. Continuing in degraded mode.
+{
+  "service": "socrates-api",
+  "error": {
+    "length": 144,
+    "name": "error",
+    "severity": "ERROR",
+    "code": "25P02",
+    "file": "postgres.c",
+    "line": "1144",
+    "routine": "exec_simple_query"
+  }
+}
+2025-11-10 10:05:02 [ERROR]: Uncaught Exception
+{
+  "service": "socrates-api",
+  "error": {
+    "code": "EADDRINUSE",
+    "errno": -4091,
+    "syscall": "listen",
+    "address": "0.0.0.0",
+    "port": 3333
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 4,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 9,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:06 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 9,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 4,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 9,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 4,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:07 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 4,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 7,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 8,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 5,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 10:18:08 [ERROR]: Database query failed
+{
+  "service": "socrates-api",
+  "query": "SELECT 1",
+  "duration": 6,
+  "error": {
+    "length": 104,
+    "name": "error",
+    "severity": "FATAL",
+    "code": "28P01",
+    "file": "auth.c",
+    "line": "334",
+    "routine": "auth_failed"
+  }
+}
+2025-11-10 11:40:23 [ERROR]: Uncaught Exception
+{
+  "service": "socrates-api",
+  "error": {
+    "code": "EADDRINUSE",
+    "errno": -4091,
+    "syscall": "listen",
+    "address": "0.0.0.0",
+    "port": 3333
+  }
+}
+2025-11-10 12:30:25 [ERROR]: Uncaught Exception
+{
+  "service": "socrates-api",
+  "error": {
+    "code": "EADDRINUSE",
+    "errno": -4091,
+    "syscall": "listen",
+    "address": "0.0.0.0",
+    "port": 3333
+  }
+}

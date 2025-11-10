@@ -3,19 +3,20 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../AuthContext';
 import { useSocket } from '../hooks/useSocket';
+import api from '../api';
 
 interface Participant {
-  id: string;
-  name: string;
-  online: boolean;
+  userId: string;
+  role: 'tutor' | 'student' | 'observer';
+  joinedAt: string;
+  isActive: boolean;
 }
 
 interface RoomMessage {
   id: string;
   userId: string;
-  userName: string;
   content: string;
-  timestamp: Date;
+  timestamp: string | Date;
 }
 
 export default function Collaboration() {
@@ -25,6 +26,7 @@ export default function Collaboration() {
   
   const [roomCode, setRoomCode] = useState('');
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
+  const [collaborationSessionId, setCollaborationSessionId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [messages, setMessages] = useState<RoomMessage[]>([]);
   const [input, setInput] = useState('');
@@ -33,30 +35,44 @@ export default function Collaboration() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('room:joined', (data: { roomId: string; participants: Participant[] }) => {
-      setCurrentRoom(data.roomId);
+    // Server emits when room is joined successfully
+    socket.on('room_joined', (data: { collaborationSession: { id: string; roomId: string }; participants: Participant[] }) => {
+      setCollaborationSessionId(data.collaborationSession.id);
+      setCurrentRoom(data.collaborationSession.roomId);
       setParticipants(data.participants);
-      toast.success('Joined room successfully!');
+      setRoomCode(data.collaborationSession.id);
+      toast.success('Joined collaboration session');
     });
 
-    socket.on('room:participant-joined', (participant: Participant) => {
-      setParticipants(prev => [...prev, participant]);
-      toast.success(`${participant.name} joined the room`);
+    // Participant lifecycle events
+    socket.on('user_joined', (payload: { userId: string; role: Participant['role']; timestamp: string }) => {
+      setParticipants(prev => {
+        const exists = prev.find(p => p.userId === payload.userId);
+        if (exists) return prev;
+        return [...prev, { userId: payload.userId, role: payload.role, joinedAt: payload.timestamp, isActive: true }];
+      });
     });
 
-    socket.on('room:participant-left', (participantId: string) => {
-      setParticipants(prev => prev.filter(p => p.id !== participantId));
+    socket.on('user_left', (payload: { userId: string }) => {
+      setParticipants(prev => prev.filter(p => p.userId !== payload.userId));
     });
 
-    socket.on('room:message', (message: RoomMessage) => {
+    // Message events
+    socket.on('message_received', (message: RoomMessage) => {
       setMessages(prev => [...prev, message]);
     });
 
+    // Error events
+    socket.on('error', (payload: { message?: string }) => {
+      toast.error(payload?.message || 'Socket error');
+    });
+
     return () => {
-      socket.off('room:joined');
-      socket.off('room:participant-joined');
-      socket.off('room:participant-left');
-      socket.off('room:message');
+      socket.off('room_joined');
+      socket.off('user_joined');
+      socket.off('user_left');
+      socket.off('message_received');
+      socket.off('error');
     };
   }, [socket]);
 
@@ -64,51 +80,80 @@ export default function Collaboration() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const createRoom = () => {
+  const createRoom = async () => {
     if (!socket || !connected) {
       toast.error('WebSocket connection not available. This feature requires a live server connection.');
       return;
     }
-    
-    const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    socket.emit('room:create', { roomId: newRoomCode });
-    // Automatically join the created room
-    socket.emit('room:join', { roomId: newRoomCode });
-    setRoomCode(newRoomCode);
+
+    try {
+      // Create collaboration session via REST API
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const res = await api.post('/collaboration/sessions', {
+        title: `Room ${code}`,
+        description: 'Ad-hoc collaboration session',
+        type: 'peer_learning',
+        isPublic: true,
+        maxParticipants: 10,
+      });
+
+      const session = res.data?.data;
+      if (!session?.id) {
+        throw new Error('Failed to create collaboration session');
+      }
+
+      setCollaborationSessionId(session.id);
+      setRoomCode(session.id);
+
+      // Join the room via WebSocket
+      socket.emit('join_room', { collaborationSessionId: session.id, role: 'student' });
+    } catch (err: any) {
+      console.error('Failed to create collaboration session:', err);
+      toast.error(err?.response?.data?.message || 'Failed to create collaboration session');
+    }
   };
 
-  const joinRoom = () => {
+  const joinRoom = async () => {
     if (!roomCode.trim()) {
-      toast.error('Please enter a room code');
+      toast.error('Please enter a session ID');
       return;
     }
-    
+
     if (!socket || !connected) {
       toast.error('WebSocket connection not available. This feature requires a live server connection.');
       return;
     }
-    
-    socket.emit('room:join', { roomId: roomCode.toUpperCase() });
+
+    try {
+      // Join directly via WebSocket; server will validate and emit errors if needed
+      setCollaborationSessionId(roomCode);
+      socket.emit('join_room', { collaborationSessionId: roomCode, role: 'student' });
+    } catch (err: any) {
+      console.error('Failed to join session:', err);
+      toast.error(err?.response?.data?.message || 'Failed to join session');
+    }
   };
 
   const leaveRoom = () => {
-    if (!socket || !currentRoom) return;
-    
-    socket.emit('room:leave', { roomId: currentRoom });
+    if (!socket || !collaborationSessionId) return;
+
+    socket.emit('leave_room', collaborationSessionId);
     setCurrentRoom(null);
     setParticipants([]);
     setMessages([]);
     setRoomCode('');
+    setCollaborationSessionId(null);
   };
 
   const sendMessage = () => {
-    if (!socket || !currentRoom || !input.trim()) return;
-    
-    socket.emit('room:message', {
-      roomId: currentRoom,
+    if (!socket || !collaborationSessionId || !input.trim()) return;
+
+    socket.emit('send_message', {
+      collaborationSessionId,
+      type: 'text',
       content: input,
     });
-    
+
     setInput('');
   };
 
@@ -154,11 +199,11 @@ export default function Collaboration() {
                 onClick={createRoom}
                 className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 p-3 font-semibold text-white shadow-md transition-all"
               >
-                Create Room
+                Create Session
               </button>
               {roomCode && (
                 <div className="mt-4 rounded-xl bg-amber-50 border-2 border-amber-200 p-4 text-center">
-                  <div className="text-sm text-gray-600 font-medium">Room Code</div>
+                  <div className="text-sm text-gray-600 font-medium">Session ID</div>
                   <div className="mt-1 text-2xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">{roomCode}</div>
                   <div className="mt-2 text-xs text-gray-500">Share this code with others to join</div>
                 </div>
@@ -167,21 +212,20 @@ export default function Collaboration() {
 
             {/* Join Room */}
             <div className="rounded-2xl border-2 border-amber-200 bg-white/80 backdrop-blur-sm p-8 shadow-lg">
-              <h3 className="mb-4 text-xl font-semibold text-gray-900">Join a Room</h3>
-              <p className="mb-6 text-gray-600">Enter a room code to join</p>
+              <h3 className="mb-4 text-xl font-semibold text-gray-900">Join a Session</h3>
+              <p className="mb-6 text-gray-600">Enter a session ID to join</p>
               <div className="space-y-3">
                 <input
                   value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  placeholder="Enter room code"
+                  onChange={(e) => setRoomCode(e.target.value)}
+                  placeholder="Enter session ID"
                   className="w-full rounded-xl bg-white border-2 border-amber-200 p-3 text-center text-xl font-mono text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                  maxLength={6}
                 />
                 <button
                   onClick={joinRoom}
                   className="w-full rounded-xl bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 p-3 font-semibold text-amber-700 transition-all"
                 >
-                  Join Room
+                  Join Session
                 </button>
               </div>
             </div>
@@ -208,11 +252,11 @@ export default function Collaboration() {
             <div className="flex -space-x-2">
               {participants.slice(0, 3).map((p) => (
                 <div
-                  key={p.id}
+                  key={p.userId}
                   className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white flex items-center justify-center text-xs font-semibold text-white shadow-md"
-                  title={p.name}
+                  title={p.userId}
                 >
-                  {p.name.charAt(0).toUpperCase()}
+                  {p.userId.charAt(0).toUpperCase()}
                 </div>
               ))}
               {participants.length > 3 && (
@@ -238,7 +282,9 @@ export default function Collaboration() {
                   ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
                   : 'bg-white border-2 border-amber-200'
               }`}>
-                <div className={`text-xs font-medium mb-1 ${msg.userId === user?.id ? 'text-amber-100' : 'text-gray-600'}`}>{msg.userName}</div>
+                <div className={`text-xs font-medium mb-1 ${msg.userId === user?.id ? 'text-amber-100' : 'text-gray-600'}`}>
+                  {msg.userId === user?.id ? 'You' : `User ${msg.userId.slice(0, 6)}`}
+                </div>
                 <div className={msg.userId === user?.id ? 'text-white' : 'text-gray-900'}>{msg.content}</div>
               </div>
             </div>

@@ -315,7 +315,8 @@ export default function Session() {
         }]);
       }).catch(err => {
         console.error('[Session] Failed to load problem or create session:', err.response?.data || err.message);
-        navigate('/problems');
+        // If loading a problem or creating a session fails, return user to New Session flow
+        navigate('/new');
       });
     } else {
       console.log('[Session] No valid ID or submittedProblemId, staying on loading...');

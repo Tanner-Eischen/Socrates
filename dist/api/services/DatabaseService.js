@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseService = void 0;
-const pg_1 = require("pg");
 const logger_1 = require("../middleware/logger");
+const database_1 = require("../config/database");
 class DatabaseService {
     /**
      * Initialize database connection pool
@@ -15,15 +15,28 @@ class DatabaseService {
             const dbConfig = config || {
                 host: process.env.DB_HOST || 'localhost',
                 port: parseInt(process.env.DB_PORT || '5432'),
-                database: process.env.DB_NAME || 'socra_teach',
+                database: process.env.DB_NAME || 'socrates',
                 user: process.env.DB_USER || 'postgres',
                 password: process.env.DB_PASSWORD || 'password',
                 ssl: process.env.NODE_ENV === 'production',
-                max: 20, // Maximum number of clients in the pool
-                idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-                connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+                max: 20,
+                idleTimeoutMillis: 30000,
+                connectionTimeoutMillis: 10000,
             };
-            this.pool = new pg_1.Pool(dbConfig);
+            // Use the shared database pool creator to ensure consistent config and pg-mem support
+            this.pool = (0, database_1.createDatabasePool)({
+                host: dbConfig.host,
+                port: dbConfig.port,
+                database: dbConfig.database,
+                user: dbConfig.user,
+                password: dbConfig.password,
+                ssl: dbConfig.ssl,
+                max: dbConfig.max,
+                idleTimeoutMillis: dbConfig.idleTimeoutMillis,
+                connectionTimeoutMillis: dbConfig.connectionTimeoutMillis,
+            });
+            // Ensure schema is initialized (idempotent)
+            await (0, database_1.initializeSchema)(this.pool);
             // Test the connection
             const client = await this.pool.connect();
             await client.query('SELECT NOW()');

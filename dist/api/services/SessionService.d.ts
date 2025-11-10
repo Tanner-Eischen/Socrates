@@ -62,6 +62,10 @@ export declare class SessionService {
      */
     static findByUserId(userId: string, limit?: number, offset?: number): Promise<Session[]>;
     /**
+     * List recent sessions without user filter (dev-friendly fallback)
+     */
+    static listRecent(limit?: number, offset?: number): Promise<Session[]>;
+    /**
      * Update session status
      */
     static updateStatus(id: string, status: Session['status'], endTime?: Date): Promise<Session>;

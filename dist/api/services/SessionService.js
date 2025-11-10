@@ -206,7 +206,7 @@ class SessionService {
           LIMIT $2 OFFSET $3
         `;
                 const result = await this.db.query(query, [userId, limit, offset]);
-                return result.rows.map(session => ({
+                const dbSessions = result.rows.map(session => ({
                     id: session.id,
                     userId: session.user_id,
                     problemId: session.problem_id,
@@ -222,6 +222,15 @@ class SessionService {
                     createdAt: session.created_at,
                     updatedAt: session.updated_at,
                 }));
+                // Always include in-memory sessions and de-duplicate (safe if empty)
+                const memSessions = Array.from(this.inMemorySessions.values())
+                    .filter(s => s.userId === userId);
+                const merged = [...dbSessions, ...memSessions];
+                const uniqueById = new Map();
+                merged.forEach(s => uniqueById.set(s.id, s));
+                const sorted = Array.from(uniqueById.values())
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+                return sorted.slice(offset, offset + limit);
             }
             else {
                 // Use in-memory storage
@@ -247,6 +256,68 @@ class SessionService {
                 return sessions;
             }
             logger_1.logger.error('Error finding sessions by user ID', { error, userId });
+            throw error;
+        }
+    }
+    /**
+     * List recent sessions without user filter (dev-friendly fallback)
+     */
+    static async listRecent(limit = 20, offset = 0) {
+        try {
+            const dbAvailable = await this.isDatabaseAvailable();
+            if (dbAvailable) {
+                const query = `
+          SELECT * FROM sessions
+          ORDER BY created_at DESC
+          LIMIT $1 OFFSET $2
+        `;
+                const result = await this.db.query(query, [limit, offset]);
+                const dbSessions = result.rows.map(session => ({
+                    id: session.id,
+                    userId: session.user_id,
+                    problemId: session.problem_id,
+                    problemText: session.problem_text,
+                    problemType: session.problem_type,
+                    difficultyLevel: session.difficulty_level,
+                    status: session.status,
+                    startTime: session.start_time,
+                    endTime: session.end_time,
+                    totalDuration: session.total_duration,
+                    interactionCount: session.interaction_count,
+                    hintCount: session.hint_count,
+                    createdAt: session.created_at,
+                    updatedAt: session.updated_at,
+                }));
+                // Always include in-memory sessions and de-duplicate (safe if empty)
+                const memSessions = Array.from(this.inMemorySessions.values());
+                const merged = [...dbSessions, ...memSessions];
+                const uniqueById = new Map();
+                merged.forEach(s => uniqueById.set(s.id, s));
+                const sorted = Array.from(uniqueById.values())
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+                return sorted.slice(offset, offset + limit);
+            }
+            else {
+                // In-memory fallback: return most recent sessions
+                const sessions = Array.from(this.inMemorySessions.values())
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                    .slice(offset, offset + limit);
+                return sessions;
+            }
+        }
+        catch (error) {
+            const errorCode = error?.code || '';
+            const errorMessage = error?.message || '';
+            if (errorCode === 'ECONNREFUSED' || errorCode === '28P01' ||
+                errorMessage.includes('Database is not available') ||
+                errorMessage.includes('not available')) {
+                logger_1.logger.warn('Database unavailable, returning recent sessions from in-memory', {});
+                const sessions = Array.from(this.inMemorySessions.values())
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                    .slice(offset, offset + limit);
+                return sessions;
+            }
+            logger_1.logger.error('Error listing recent sessions', { error });
             throw error;
         }
     }

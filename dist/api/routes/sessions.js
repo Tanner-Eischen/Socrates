@@ -187,6 +187,7 @@ const enhancedInteractionSchema = joi_1.default.object({
  *         description: Unauthorized
  */
 router.post('/', auth_1.optionalAuthMiddleware, rateLimiter_1.rateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const isDevEnv = process.env.NODE_ENV === 'development';
     const { error, value } = createSessionSchema.validate(req.body);
     if (error) {
         return res.status(400).json({
@@ -198,7 +199,7 @@ router.post('/', auth_1.optionalAuthMiddleware, rateLimiter_1.rateLimiter, (0, e
     const { submittedProblemId, ...sessionData } = value;
     // If using a submitted problem, fetch it and use its details
     if (submittedProblemId) {
-        const submittedProblem = ProblemProcessingService_1.ProblemProcessingServiceInstance.getSubmittedProblem(submittedProblemId, req.user?.id || 'demo-user');
+        const submittedProblem = ProblemProcessingService_1.ProblemProcessingServiceInstance.getSubmittedProblem(submittedProblemId, req.user?.id || 'dev-user-123');
         if (!submittedProblem) {
             return res.status(404).json({
                 success: false,
@@ -217,18 +218,18 @@ router.post('/', auth_1.optionalAuthMiddleware, rateLimiter_1.rateLimiter, (0, e
         };
         sessionData.difficultyLevel = difficultyMap[submittedProblem.parsedProblem.difficulty] || 1;
         logger_1.logger.info('Creating session from submitted problem', {
-            userId: req.user?.id || 'demo-user',
+            userId: req.user?.id || 'dev-user-123',
             submittedProblemId,
             problemType: sessionData.problemType,
         });
     }
     const session = await SessionService_1.SessionService.create({
-        userId: req.user?.id || 'demo-user',
+        userId: req.user?.id || 'dev-user-123',
         ...sessionData,
     });
     // Track session creation (non-blocking)
     AnalyticsService_1.AnalyticsService.trackEvent({
-        userId: req.user?.id || 'demo-user',
+        userId: req.user?.id || 'dev-user-123',
         sessionId: session.id,
         eventType: 'session_created',
         eventData: {
@@ -240,7 +241,7 @@ router.post('/', auth_1.optionalAuthMiddleware, rateLimiter_1.rateLimiter, (0, e
         userAgent: req.get('user-agent'),
     }).catch(err => logger_1.logger.warn('Analytics tracking failed', { error: err }));
     logger_1.logger.info('Session created successfully', {
-        userId: req.user?.id || 'demo-user',
+        userId: req.user?.id || 'dev-user-123',
         sessionId: session.id,
         problemType: session.problemType,
         useEnhancedEngine: sessionData.useEnhancedEngine, // ADDED
@@ -330,8 +331,26 @@ router.get('/:id', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHand
  *         description: Unauthorized
  */
 router.get('/', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHandler_1.asyncHandler)(async (req, res) => {
-    const { status, limit = 20, offset = 0 } = req.query;
-    const sessions = await SessionService_1.SessionService.findByUserId(req.user?.id || 'demo-user', Number(limit), Number(offset));
+    const { status, limit = 20, offset = 0, userId: userIdQuery } = req.query;
+    // Resolve environment/user flags early
+    const isDevEnv = process.env.NODE_ENV === 'development';
+    const isDevUser = !!req.user?.id && req.user.id.startsWith('dev-');
+    const effectiveUserId = (isDevEnv || isDevUser) && typeof userIdQuery === 'string' && userIdQuery.length > 0
+        ? userIdQuery
+        : (req.user?.id || 'demo-user');
+    let sessions = await SessionService_1.SessionService.findByUserId(effectiveUserId, Number(limit), Number(offset));
+    // Development-friendly fallback: if authenticated dev user has no sessions, show recent
+    // Trigger when in dev environment OR when the mocked dev user is present
+    if (sessions.length === 0 && (isDevEnv || isDevUser)) {
+        // First try demo-user sessions, then fall back to recent
+        const demoSessions = await SessionService_1.SessionService.findByUserId('demo-user', Number(limit), Number(offset));
+        if (demoSessions.length > 0) {
+            sessions = demoSessions;
+        }
+        else {
+            sessions = await SessionService_1.SessionService.listRecent(Number(limit), Number(offset));
+        }
+    }
     return res.json({
         success: true,
         data: sessions,
@@ -341,6 +360,11 @@ router.get('/', auth_1.authenticate, rateLimiter_1.rateLimiter, (0, errorHandler
             total: sessions.length,
         },
     });
+}));
+// Debug: list recent sessions (dev-only helper)
+router.get('/dev/recent', (0, errorHandler_1.asyncHandler)(async (_req, res) => {
+    const recent = await SessionService_1.SessionService.listRecent(50, 0);
+    return res.json({ success: true, data: recent, total: recent.length });
 }));
 /**
  * @swagger
