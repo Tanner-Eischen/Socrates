@@ -7,6 +7,7 @@
 
 import { BehavioralAssessment } from './types';
 import { chatCompletion } from './engine/openai-client';
+import type { SessionManager } from './session-manager';
 
 // Import types explicitly
 import type {
@@ -51,7 +52,7 @@ export class SocraticEngine {
   private promptManager: PromptManager;
   private questionSelector: QuestionSelector;
   private studentAssessor: StudentAssessor;
-  private sessionManager?: any;
+  private sessionManager?: SessionManager;
   
   // Keep depthTracker for backward compatibility
   private get depthTracker(): ConversationDepthTracker {
@@ -70,7 +71,7 @@ export class SocraticEngine {
   private hintGiven: boolean = false;
   private turnsSinceLastPhase: number = 0;
 
-  constructor(sessionManager?: any, strictMode: boolean = false) {
+  constructor(sessionManager?: SessionManager, strictMode: boolean = false) {
     this.sessionManager = sessionManager;
     this.strictMode = strictMode;
     this.promptManager = new PromptManager();
@@ -130,7 +131,6 @@ export class SocraticEngine {
       return '';
     }
 
-    let baseResponse: string;
     const llmContent = await chatCompletion([
       ...this.conversation.map(msg => ({ role: msg.role, content: msg.content })),
       { role: 'system', content: `Use ${initialQuestionType} questioning approach. Keep response to 1-2 sentences maximum. Ask an indirect, exploratory question rather than a direct one.` }
@@ -138,7 +138,7 @@ export class SocraticEngine {
     if (!llmContent) {
       throw new Error('LLM failed to generate an opening question');
     }
-    baseResponse = this.adaptQuestionToProblem(llmContent);
+    const baseResponse = this.adaptQuestionToProblem(llmContent);
 
     // Sanitize the very first question to avoid directive phrasing
     const initialAssessment = this.assessStudentResponse('');
@@ -436,7 +436,7 @@ Start by asking for their answer in a warm, encouraging way.`;
       if (!llmResponse || llmResponse.trim().length === 0) {
         throw new Error('LLM returned empty response');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       llmError = err instanceof Error ? err : new Error(String(err));
       
       // Log detailed error information
@@ -719,7 +719,7 @@ RESPOND NOW:`;
     return guidance;
   }
 
-  private buildEnhancedSystemPrompt(problem: string): string {
+  private buildEnhancedSystemPrompt(_problem: string): string {
     return `Role: You are a thoughtful and patient tutor whose goal is to help the student master concepts through independent problem solving. Your job is to encourage critical thinking, provide detailed feedback, and promote metacognitive awareness. 
 
  Guidelines: 
@@ -926,9 +926,11 @@ RESPOND NOW:`;
       const categoryQuestions = questionBank[questionTypeKey];
       
       if (categoryQuestions) {
-        selectedQuestions = (categoryQuestions as any)[confidenceLevel] 
-          || (categoryQuestions as any).high_confidence
-          || Object.values(categoryQuestions)[0];
+        // Type-safe access with fallback chain
+        const questionsByConfidence = categoryQuestions as Record<string, string[]>;
+        selectedQuestions = questionsByConfidence[confidenceLevel] 
+          || questionsByConfidence.high_confidence
+          || Object.values(categoryQuestions)[0] as string[];
       } else {
         // Fallback to clarification questions
         selectedQuestions = questionBank.clarification[confidenceLevel];
@@ -1012,8 +1014,6 @@ RESPOND NOW:`;
     
     // Get env-configurable interval (default: 3)
     const checkInterval = parseInt(process.env.UNDERSTANDING_CHECK_INTERVAL || '3', 10);
-    const enableTransferProbes = process.env.ENABLE_TRANSFER_PROBES !== 'false';
-    const enableTeachbackProbes = process.env.ENABLE_TEACHBACK_PROBES !== 'false';
     
     // Check at configured interval
     if (turnsSinceLastCheck >= checkInterval) {
@@ -1074,7 +1074,11 @@ RESPOND NOW:`;
    */
   private getPrimaryDomain(): 'algebra' | 'geometry' | 'calculus' | 'statistics' | 'fractions' | 'arithmetic' | 'general' {
     const concepts = this.extractConcepts(this.problem || '');
-    return (concepts[0] as any) || 'general';
+    const firstConcept = concepts[0];
+    if (firstConcept && ['algebra', 'geometry', 'calculus', 'statistics', 'fractions', 'arithmetic', 'general'].includes(firstConcept)) {
+      return firstConcept as 'algebra' | 'geometry' | 'calculus' | 'statistics' | 'fractions' | 'arithmetic' | 'general';
+    }
+    return 'general';
   }
 
   /**
