@@ -2,7 +2,7 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package*.json ./
 
 # Install dependencies (without cache to avoid lock issues)
@@ -14,10 +14,9 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
-# Railway sets PORT automatically - don't hardcode it
-# EXPOSE is just documentation, Railway will use its own port
+# Railway sets PORT automatically via environment variable
+# Our server reads PORT from process.env, so no need to expose
 
-# Start server
-# Railway will set PORT environment variable automatically
+# Start server - Railway will set PORT automatically
 CMD ["node", "dist/api/index.js"]
 
