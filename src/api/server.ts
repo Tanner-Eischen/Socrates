@@ -113,11 +113,13 @@ class SocratesServer {
 
     // CORS
     // Configure CORS to allow requests from frontend
+    // When credentials are enabled, browsers require the actual origin (not '*')
     let expressCorsOrigin: any;
     if (config.CORS_ORIGIN === '*' || (Array.isArray(config.CORS_ORIGIN) && config.CORS_ORIGIN.length === 0)) {
-      // Allow all origins - use function to dynamically allow any origin
-      expressCorsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-        callback(null, true); // Allow all origins
+      // Allow all origins - return the requesting origin when credentials are used
+      expressCorsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
+        // When credentials are enabled, return the actual origin, not '*'
+        callback(null, origin || '*');
       };
     } else if (Array.isArray(config.CORS_ORIGIN)) {
       expressCorsOrigin = config.CORS_ORIGIN;
