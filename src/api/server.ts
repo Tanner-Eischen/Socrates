@@ -112,12 +112,11 @@ class SocratesServer {
     }));
 
     // CORS
-    // When credentials are enabled, browsers disallow '*' for Access-Control-Allow-Origin.
-    // Use dynamic origin echoing to keep credentials working with local dev.
+    // Configure CORS to allow requests from frontend
     let expressCorsOrigin: any;
     if (config.CORS_ORIGIN === '*' || (Array.isArray(config.CORS_ORIGIN) && config.CORS_ORIGIN.length === 0)) {
-      // Allow all origins in development, or reflect request origin
-      expressCorsOrigin = isDevelopment() ? true : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow all origins - use function to dynamically allow any origin
+      expressCorsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         callback(null, true); // Allow all origins
       };
     } else if (Array.isArray(config.CORS_ORIGIN)) {
@@ -131,6 +130,8 @@ class SocratesServer {
       credentials: config.CORS_CREDENTIALS,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
     }));
 
     // Compression
