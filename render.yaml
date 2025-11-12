@@ -6,6 +6,10 @@ services:
     dockerContext: .
     buildCommand: npm ci --no-cache && npm run build
     startCommand: node dist/api/index.js
+    # Force rebuild by adding build args
+    buildArgs:
+      - key: BUILD_DATE
+        value: "2025-01-12-$(date +%s)"
     envVars:
       - key: NODE_ENV
         value: production
@@ -15,4 +19,5 @@ services:
         value: "true"
     # Note: Add other environment variables (OPENAI_API_KEY, JWT_SECRET, etc.) via Render dashboard
     # Render sets PORT automatically - do not set it manually
+
 

@@ -1,5 +1,9 @@
 FROM node:18-alpine
 
+# Build argument to force cache invalidation
+ARG BUILD_DATE=unknown
+ENV BUILD_DATE=${BUILD_DATE}
+
 WORKDIR /app
 
 # Copy package files first for better caching
