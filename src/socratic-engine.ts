@@ -773,10 +773,11 @@ RESPOND NOW:`;
     // Use contextual selection if we have a previous question type
     // Pass recent question types to avoid repetition
     if (lastQuestionType) {
+      const recentTypes: SocraticQuestionType[] = this.questionTypeSequence;
       return this.questionSelector.selectContextualQuestionType(
         assessment, 
         lastQuestionType,
-        this.questionTypeSequence // Pass full sequence to check for repetition
+        recentTypes // Pass full sequence to check for repetition
       );
     }
     
