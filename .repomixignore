@@ -99,6 +99,7 @@ uploads/
 public/uploads/
 client/public/uploads/
 testmedia/
+web-bundles/
 
 # Documentation (generated)
 docs/api/
