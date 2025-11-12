@@ -107,16 +107,21 @@ class SocratesServer {
   // Setup middleware
   private setupMiddleware(): void {
     // CRITICAL: Handle OPTIONS requests FIRST, before ANY other middleware
-    this.app.options('*', (req, res) => {
-      const origin = req.headers.origin;
-      const allowedOrigin = origin || '*';
-      logger.debug('OPTIONS preflight request', { origin, allowedOrigin });
-      res.header('Access-Control-Allow-Origin', allowedOrigin);
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.header('Access-Control-Max-Age', '86400'); // 24 hours
-      res.sendStatus(204);
+    this.app.options('*', (req, res, next) => {
+      try {
+        const origin = req.headers.origin;
+        const allowedOrigin = origin || '*';
+        logger.debug('OPTIONS preflight request', { origin, allowedOrigin, path: req.path });
+        res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+        return res.status(204).end();
+      } catch (error) {
+        logger.error('OPTIONS handler error', { error });
+        return res.status(204).end();
+      }
     });
 
     // CORS - must be before other middleware
