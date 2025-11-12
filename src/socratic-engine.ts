@@ -1,9 +1,6 @@
 // Complete Socratic Engine - Standalone Implementation
 // Replaces the existing socratic-engine.ts with all enhancements built-in
 
-import OpenAI from 'openai';
-import { handleOpenAIError, retryWithBackoff } from './lib/error-utils';
-import { LLMServiceError } from './api/middleware/errorHandler';
 import { BehavioralAssessment } from './types';
 import { chatCompletion } from './engine/openai-client';
 
@@ -162,9 +159,6 @@ export class SocraticEngine {
   private turnsSinceLastPhase: number = 0;
 
   constructor(sessionManager?: any, strictMode: boolean = false) {
-    this.openai = new OpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY 
-    });
     this.sessionManager = sessionManager;
     this.strictMode = strictMode;
     this.initializeEnhancedFeatures();
@@ -302,8 +296,8 @@ export class SocraticEngine {
 
     let baseResponse: string;
     const llmContent = await chatCompletion([
-            ...this.conversation.map(msg => ({ role: msg.role, content: msg.content })),
-            { role: 'system', content: `Use ${initialQuestionType} questioning approach. Keep response to 1-2 sentences maximum. Ask an indirect, exploratory question rather than a direct one.` }
+      ...this.conversation.map(msg => ({ role: msg.role, content: msg.content })),
+      { role: 'system', content: `Use ${initialQuestionType} questioning approach. Keep response to 1-2 sentences maximum. Ask an indirect, exploratory question rather than a direct one.` }
     ], { temperature: 0.8, max_tokens: 150, retryContext: 'Starting problem' });
     if (!llmContent) {
       throw new Error('LLM failed to generate an opening question');
@@ -574,11 +568,14 @@ Start by asking for their answer in a warm, encouraging way.`;
           nextQuestionType,
           studentInput
         );
-    
-    // Ensure response ends with question
-    if (!tutorResponse.trim().endsWith('?')) {
-      tutorResponse += " What do you think?";
-    }
+
+    // Enforce strict Socratic guardrails and reframe if needed
+    tutorResponse = this.sanitizeToSocraticQuestion(
+      tutorResponse,
+      assessment,
+      nextQuestionType,
+      studentInput
+    );
     
     const enhancedMessage: EnhancedMessage = {
       role: 'assistant',
@@ -587,17 +584,47 @@ Start by asking for their answer in a warm, encouraging way.`;
       questionType: nextQuestionType,
       depthLevel: this.depthTracker.currentDepth,
       studentConfidence: assessment.confidenceLevel,
-      targetedConcepts: this.depthTracker.conceptualConnections.slice(-2)
+      targetedConcepts: this.depthTracker.conceptualConnections.slice(-2),
+      dialogueLevel: this.computeDialogueLevel(nextQuestionType),
+      cycleStage: this.computeCycleStage(nextQuestionType, false, false)
     };
     
     this.conversation.push(enhancedMessage);
     this.questionTypeSequence.push(nextQuestionType);
+    // Update tracker with dialogue metadata
+    this.depthTracker.dialogueLevel = enhancedMessage.dialogueLevel!;
+    this.depthTracker.cycleStage = enhancedMessage.cycleStage!;
     
     const responseTime = Date.now() - responseStartTime;
     this.updateStudentProfile(nextQuestionType, assessment, responseTime);
     
     this.lastResponseTime = Date.now();
     return tutorResponse;
+  }
+
+  private getVariedClosing(type: SocraticQuestionType): string {
+    const options: Record<SocraticQuestionType, string[]> = {
+      [SocraticQuestionType.CLARIFICATION]: [
+        'How would you describe that in your own words?'
+      ],
+      [SocraticQuestionType.ASSUMPTIONS]: [
+        'What are you assuming when you say that?'
+      ],
+      [SocraticQuestionType.EVIDENCE]: [
+        'What in the problem supports that idea?'
+      ],
+      [SocraticQuestionType.PERSPECTIVE]: [
+        'How might someone look at this differently?'
+      ],
+      [SocraticQuestionType.IMPLICATIONS]: [
+        'If that were true, what would follow from it?'
+      ],
+      [SocraticQuestionType.META_QUESTIONING]: [
+        'Why is exploring that step useful here?'
+      ]
+    };
+    const list = options[type] || ['What makes you think that fits here?'];
+    return list[Math.floor(Math.random() * list.length)] + '?';
   }
 
   private buildDetailedGuidance(
@@ -674,18 +701,19 @@ DO NOT tell them HOW to solve or suggest specific methods/operations.
 - NUDGE them to recall relevant knowledge without stating it directly
 - PROBE their thinking by referencing what they just said
 - DO NOT suggest ANY specific method, formula, operation, or step
-- DO NOT be too generic - make it contextual to the problem they're facing
-- Use the problem structure as a CLUE about what kind of work is needed
-- Maximum 1-2 sentences (unless giving scaffolding help)
-- MUST end with a question mark (after scaffolding, always ask a follow-up question)
-- Be warm and conversational
-- NEVER introduce metaphors or "imagine" scenarios
-- NEVER ask them to rate their confidence
+ - DO NOT be too generic - make it contextual to the problem they're facing
+ - Use the problem structure as a CLUE about what kind of work is needed
+ - Maximum 1-2 sentences (unless giving scaffolding help)
+ - MUST end with a question mark (after scaffolding, always ask a follow-up question)
+ - Be warm and conversational
+ - NEVER introduce metaphors or "imagine" scenarios
+ - NEVER ask them to rate their confidence
+  - NEVER say: "solve for X", "isolate X", "what operation isolates X", "plug in", "substitute", "apply the formula", "use the derivative", or any instruction that gives away a method
 
-SCAFFOLDING EXCEPTION - If student is really stuck, you CAN tell them:
-✅ "We're trying to find [the goal]. What does that tell you about what we need to do?"
-✅ "The problem tells us [restate facts]. What does that suggest about our approach?"
-✅ "Finding [X] means [describe end result]. What would that look like here?"
+ SCAFFOLDING EXCEPTION - If student is really stuck, you CAN tell them:
+ ✅ "We're trying to find [the goal]. What does that tell you about what we need to do?"
+ ✅ "The problem tells us [restate facts]. What does that suggest about our approach?"
+ ✅ "Finding [X] means [describe end result]. What would that look like here?"
 BUT still NEVER tell them specific methods, formulas, or operations.
 
 WRONG EXAMPLES (TOO SPECIFIC OR TOO GENERIC - works for ANY problem):
@@ -700,187 +728,65 @@ RIGHT EXAMPLES (CONTEXTUAL NUDGING + SCAFFOLDING - works for ANY problem):
 ✅ "We're trying to find [goal]. What does that tell you about what we need?"
 ✅ "The problem tells us [facts]. What does that suggest about our approach?"
 
+TUTOR POLICY (STRICT):
+1) Never immediately provide the answer.
+2) First ask the student to explain steps taken and exactly where they’re stuck.
+3) Provide incremental hints or nudges, not full steps.
+4) If a mistake appears, point out gently and explain the misconception briefly.
+5) Use metacognitive prompts: ask for summaries, reflections, and strategy evaluations.
+6) Adapt question difficulty to the student’s responses; challenge when strong, simplify when struggling.
+7) If asked for the final solution, respectfully decline and redirect with a guiding question.
+8) Be encouraging and supportive throughout; reinforce effort and progress.
+
+Meta prompts to weave in naturally:
+- "Can you explain your thinking so far?"
+- "What might you try next, given what the problem is asking?"
+- "What information from the problem haven’t you used yet?"
+- "Where do you think your understanding is breaking down?"
+
 RESPOND NOW:`;
 
     return guidance;
   }
 
   private buildEnhancedSystemPrompt(problem: string): string {
-    const studentLevel = this.determineStudentLevel();
-    const concepts = this.extractConcepts(problem);
-    const learningObjective = this.generateLearningObjective(problem, concepts);
+    return `Role: You are a thoughtful and patient tutor whose goal is to help the student master concepts through independent problem solving. Your job is to encourage critical thinking, provide detailed feedback, and promote metacognitive awareness. 
 
-    return `You are an expert Socratic AI tutor combining ancient wisdom with modern pedagogy. Your role is to guide students to discover solutions through strategic, well-timed questions.
+ Guidelines: 
 
-=== CORE IDENTITY ===
-You are warm, patient, and genuinely curious about the student's thinking process. You care more about their intellectual growth than efficiency. You believe every student can learn—you just need to ask the right questions.
+ 1.  Never immediately provide the answer to the student's question. 
+ 2.  First, ask the student to clearly explain what steps they've already taken and precisely where they're getting stuck. 
+ 3.  Provide incremental hints or small nudges, not complete steps. Guide the student to think critically about the next logical action. 
+ 4.  Error Analysis and Feedback: 
+     -If the student makes a mistake, point out gently where and why the misunderstanding occurred. 
+     -Explain the underlying misconceptions and provide clear, concise explanations. 
+     -Provide the student with resources that can help them understand the problem better. 
+ 5.  Metacognitive Prompts: 
+     -Frequently prompt students to summarize their current understanding before moving forward. 
+     -Ask students to reflect on their learning process and identify their strengths and weaknesses. 
+     -Ask questions that promote self-evaluation, such as: 
+         -"What strategies did you use to solve this problem?" 
+         -"What could you have done differently?" 
+         -"How confident are you in your understanding of this concept?" 
+         -"What are some areas where you feel you need more practice?" 
+ 6.  Adaptive Questioning: 
+     -Adapt the difficulty of your questions based on the student's responses. 
+     -If the student demonstrates a strong understanding, introduce more challenging questions. 
+     -If the student is struggling, provide simpler questions and additional support. 
+ 7.  If the student directly asks for the final solution, respectfully decline and instead redirect them by providing another hint or asking guiding questions. 
+ 8.  Be encouraging and supportive throughout your interactions. Reinforce effort, progress, and persistence. 
 
-=== FUNDAMENTAL RULES ===
-1. NEVER give direct answers or solutions to the ACTUAL PROBLEM
-2. ALWAYS respond with a question (except brief encouragement OR scaffolding help)
-3. NEVER suggest specific operations (NO "subtract 5", "divide by 2", etc.)
-4. REFERENCE the equation structure to nudge thinking - not generic, not specific
-5. Questions must be SHORT (1-2 sentences max)
-6. End EVERY response with a question mark
-7. When student is correct, probe deeper before moving on
-8. STAY GROUNDED in the actual problem - NO metaphors, stories, or "imagine" scenarios
-9. AVOID generic questions like "What's our goal?" - be contextual and nudging
+ Example phrases you can use: 
 
-SCAFFOLDING EXCEPTION (You CAN tell them these):
-✅ Restate the goal: "We're trying to find [what the problem asks for]"
-✅ Restate given information: "The problem tells us that [restate the given facts]"
-✅ Clarify what solving/finding means in context: "Finding X means [what the end result looks like]"
-BUT NEVER tell them HOW to solve it or suggest specific operations.
+ -   "Can you explain your thinking so far?" 
+ -   "That's an interesting approach; what might you try next?" 
+ -   "You're on the right track, but check your previous step carefully, do you see anything unusual?" 
+ -   "Let's slow down here. What information from the problem haven't you used yet?" 
+ -   "What are some strategies you used to come to that conclusion?" 
+ -   "Where do you think your understanding is breaking down?" 
+ -   "Explain this concept as if you were teaching it to a friend." 
 
-CRITICAL EXAMPLES (work for ANY problem):
-❌ TOO GENERIC: "Based on what you know, what should we do?"
-❌ TOO SPECIFIC: "Should we subtract 5?" or "Use the Pythagorean theorem"
-✅ CONTEXTUAL NUDGE: "When you see [describe pattern they're looking at], what does that tell you?"
-✅ SCAFFOLDING HELP: "We're trying to find [the goal]. What does that tell you about what we need?"
-
-=== THE SIX QUESTION TYPES (Use strategically) ===
-
-**CLARIFICATION** - When student is vague or starting out:
-- "When you see a problem like this, what are we actually trying to find?"
-- "What would it look like if we were done with this problem?"
-- "What pattern do you notice in what you're looking at?"
-- Reference the problem structure/pattern, not generic strategies
-- NEVER suggest specific operations or give away methods
-
-**ASSUMPTIONS** - When student makes unstated assumptions:
-- "What are you assuming about...?"
-- "Does that always hold true?"
-- "What if that assumption wasn't correct?"
-- "What would need to be true for that to work?"
-
-**EVIDENCE** - When student makes claims without support:
-- "What makes you think that?"
-- "How do you know that's true?"
-- "What supports this conclusion?"
-- "Can you show me why that works?"
-
-**PERSPECTIVE** - When student needs to see alternatives:
-- "How might someone solve this differently?"
-- "What's another way to look at this?"
-- "Could there be a simpler approach?"
-- "What would happen if we tried it backwards?"
-
-**IMPLICATIONS** - When exploring consequences:
-- "If that's true, what would happen next?"
-- "How does this connect to...?"
-- "What pattern do you notice?"
-- "What does this tell us about...?"
-
-**META-QUESTIONING** - When building awareness:
-- "How did you decide to try that approach?"
-- "What made this problem tricky?"
-- "How is this similar to problems you've solved before?"
-- "Why do you think this question matters?"
-
-=== ADAPTIVE RESPONSE PATTERNS ===
-
-**When student is STUCK (confidence < 0.3):**
-- Reference problem structure: "When you see [describe what they're looking at], what does that pattern suggest?"
-- Nudge toward goal: "What would it look like if we found what we're looking for?"
-- Connect to prior work: "Remember the last problem? What was similar about what we needed to do?"
-- Be extra encouraging: "You're thinking hard about this—that's exactly right. Now..."
-- Stay concrete and contextual: Focus on the actual problem structure, not metaphors or generic strategies
-
-**When student is CONFIDENT (confidence > 0.7):**
-- Challenge deeper: "Interesting! Why does that work?"
-- Seek connections: "How does this relate to...?"
-- Ask for alternative methods: "Great! Is there another way you could solve this?"
-- Test understanding: "If I changed X, how would your answer change?"
-
-**When student is OFF-TRACK:**
-- Redirect gently: "Hmm, let's think about that. What are we actually trying to find?"
-- Highlight contradiction: "I notice you said X, but also Y. How do those fit together?"
-- Return to basics: "Let's step back. What do we know for certain?"
-
-**When student is CORRECT:**
-- Don't just validate: "You got it! Now why does that work?"
-- Deepen understanding: "Good! Can you explain it in your own words?"
-- Make connections: "How would you apply this to a different problem?"
-- Build confidence: "See how you figured that out? What strategy did you use?"
-
-=== DIALOGUE FLOW PATTERNS ===
-
-**Pattern 1: The Scaffolding Ladder**
-1. "What's the goal?" (Clarify objective)
-2. "What do we know?" (Gather facts from the actual problem)
-3. "What can we do with that?" (Explore operations on the actual equation)
-4. "What happens when we try it?" (Test approach with the real numbers)
-5. "Does that get us closer?" (Evaluate progress)
-
-**Pattern 2: The Error Recovery**
-Student: [makes mistake]
-Teacher: "Let's test that. If X = [wrong answer], what would happen?"
-Student: [sees contradiction]
-Teacher: "Interesting! So what does that tell us?"
-
-**Pattern 3: The Connection Builder**
-Teacher: "How is this like [previous problem]?"
-Student: [makes connection]
-Teacher: "Exactly! So what strategy worked there that might work here?"
-
-CRITICAL: All patterns should reference the ACTUAL problem, equation, or numbers they're working with. NO metaphors, stories, or abstract examples.
-
-=== TONE AND STYLE ===
-- Conversational, not formal: "Hmm, interesting!" not "That is an intriguing observation"
-- Encouraging: "You're onto something!" "That's good thinking!"
-- Curious: "I wonder..." "What if..."
-- Patient: Never rush, never show frustration
-- Specific: Refer to exact parts of their work
-
-=== EXAMPLES OF EXCELLENT SOCRATIC EXCHANGES ===
-(These show the APPROACH - apply the same style to ANY problem type)
-
-**Example 1 (Algebra):**
-Problem: Solve 2x + 5 = 11
-
-BAD: "To solve this, subtract 5 from both sides to get 2x = 6..."
-GOOD: "What's happening to x in this equation?"
-→ "It's being multiplied by 2 and having 5 added"
-"Perfect! So if we want to get x by itself, what would we need to undo first?"
-
-**Example 2 (Geometry):**
-Problem: Find the diagonal of a 3x4 rectangle
-
-BAD: "Use the Pythagorean theorem: a² + b² = c²"
-GOOD: "If you drew that diagonal, what shape would it create?"
-→ "A triangle"
-"What kind of triangle?"
-→ "A right triangle"
-"Excellent! And what do you know about right triangles?"
-
-NOTE: Use this same questioning APPROACH for calculus, word problems, proofs, or ANY math topic.
-
-=== FORBIDDEN BEHAVIORS ===
-❌ "The answer is X"
-❌ "Here's how you solve it: step 1..."
-❌ "That's wrong. Try again."
-❌ "Do you understand?" (too vague)
-❌ Long explanations without questions
-❌ Asking multiple questions at once
-❌ Using technical jargon without checking understanding
-
-=== SUCCESS METRICS ===
-You're succeeding when:
-✅ Student says "Oh! I see it now!"
-✅ Student explains their reasoning unprompted
-✅ Student catches their own errors
-✅ Student makes connections to other concepts
-✅ Student asks you a question back
-
-=== CURRENT CONTEXT ===
-Student Level: ${studentLevel}
-Problem: ${problem}
-Key Concepts: ${concepts.join(', ')}
-Learning Goal: ${learningObjective}
-
-Remember: Your job isn't to teach them the answer—it's to teach them to think. One well-placed question is worth a hundred explanations.
-
-Now, begin with your first Socratic question to start this student's journey of discovery.`;
+ Remember: your primary goal is to help the student develop problem-solving skills, confidence, and a deeper understanding, rather than simply providing solutions.`;
   }  
 
   private selectInitialQuestionType(problem: string): SocraticQuestionType {
@@ -1138,8 +1044,9 @@ Now, begin with your first Socratic question to start this student's journey of 
       }
     }
 
-    // Return random question from selected pool
-    return selectedQuestions[Math.floor(Math.random() * selectedQuestions.length)];
+    // Return random question from selected pool, adapted to the current problem/domain
+    const baseQuestion = selectedQuestions[Math.floor(Math.random() * selectedQuestions.length)];
+    return this.adaptQuestionToProblem(baseQuestion);
   }
 
   private updateDepthTracker(assessment: SocraticAssessment, studentInput: string): void {
@@ -1171,7 +1078,9 @@ Now, begin with your first Socratic question to start this student's journey of 
 
   private buildContextualGuidance(assessment: SocraticAssessment, questionType: SocraticQuestionType, studentResponse: string = '', isUnderstandingCheck: boolean = false): string {
     // Get contextual question template
-    const contextualQuestion = this.selectContextualQuestion(assessment, questionType, studentResponse);
+    const contextualQuestion = this.adaptQuestionToProblem(
+      this.selectContextualQuestion(assessment, questionType, studentResponse)
+    );
     
     let guidance = `Use ${questionType} questioning. `;
     
@@ -1306,6 +1215,81 @@ Now, begin with your first Socratic question to start this student's journey of 
     
     return [...new Set(concepts)];
   }
+
+  /**
+   * Choose a primary domain (algebra, geometry, calculus, statistics, fractions, arithmetic)
+   * based on the current problem text.
+   */
+  private getPrimaryDomain(): 'algebra' | 'geometry' | 'calculus' | 'statistics' | 'fractions' | 'arithmetic' | 'general' {
+    const concepts = this.extractConcepts(this.problem || '');
+    return (concepts[0] as any) || 'general';
+  }
+
+  /**
+   * Detect rough algebra subtype for equations: linear, quadratic, system, proportion, unknown
+   */
+  private detectEquationSubtype(problem: string): 'linear' | 'quadratic' | 'system' | 'proportion' | 'unknown' {
+    const text = (problem || '').toLowerCase();
+    if (/system of equations|solve for x and y|two equations|simultaneous/i.test(text)) return 'system';
+    if (/(x\s*\^\s*2|x²|squared|quadratic)/i.test(text)) return 'quadratic';
+    if (/(ratio|proportion|percent)/i.test(text)) return 'proportion';
+    if (/=/.test(text) && /\b[a-z]\b/i.test(text) && !/(x\s*\^\s*2|x²|squared)/i.test(text)) return 'linear';
+    return 'unknown';
+  }
+
+  /**
+   * Try to detect a primary variable symbol in the problem (defaults to 'x').
+   */
+  private detectPrimaryVariable(problem: string): string {
+    const match = (problem || '').match(/\b([a-z])\b/i);
+    return match ? match[1] : 'x';
+  }
+
+  /**
+   * Adapt a generic question to be domain-specific based on the current problem.
+   * Example: "What information do we have?" -> "What does the equation tell us?" (algebra)
+   */
+  private adaptQuestionToProblem(question: string): string {
+    const domain = this.getPrimaryDomain();
+    const problemText = this.problem || '';
+    const subtype = domain === 'algebra' ? this.detectEquationSubtype(problemText) : 'unknown';
+
+    // Domain terms to swap in
+    const terms: Record<string, { problem: string; info: string; approach?: string }> = {
+      algebra: { problem: subtype === 'system' ? 'system' : 'equation', info: 'equation and the given numbers', approach: subtype === 'linear' ? 'isolating the variable' : 'understanding the structure' },
+      geometry: { problem: 'figure', info: 'sides, angles, or the diagram', approach: 'recognizing shapes and relationships' },
+      calculus: { problem: 'function', info: 'rates, derivative, or integral given', approach: 'interpreting change and accumulation' },
+      statistics: { problem: 'dataset', info: 'distribution or values provided', approach: 'interpreting data and variability' },
+      fractions: { problem: 'fractions', info: 'numerators and denominators', approach: 'simplifying and comparing parts' },
+      arithmetic: { problem: 'numbers', info: 'the values and operations shown', approach: 'reasoning about operations' },
+      general: { problem: 'problem', info: 'the given information', approach: 'your strategy' }
+    };
+
+    const t = terms[domain];
+
+    // Targeted replacements
+    let q = question
+      .replace(/\bthis problem\b/gi, `this ${t.problem}`)
+      .replace(/\bthe problem\b/gi, `the ${t.problem}`)
+      .replace(/\bproblem\b/gi, t.problem)
+      .replace(/\binformation do we have\b/gi, `does the ${t.info} tell us`)
+      .replace(/\bwhat do we know\b/gi, `what do we know from the ${t.info}`)
+      .replace(/\bapproach\b/gi, t.approach || 'thinking');
+
+    // Domain-specific enhancements for algebra equations
+    if (domain === 'algebra') {
+      const variable = this.detectPrimaryVariable(problemText);
+      q = q.replace(/\bexplain that\b/gi, `explain what this ${t.problem} is asking in your own words`)
+           .replace(/\bwhat exactly are we trying to find here\b/gi, `what would getting ${variable} by itself actually mean here`);
+    }
+
+    // Ensure a question mark ending
+    q = q.trim();
+    if (!q.endsWith('?')) q += '?';
+    return q;
+  }
+
+  
 
   private generateLearningObjective(problem: string, concepts: string[]): string {
     if (concepts.includes('algebra')) {
@@ -1498,39 +1482,109 @@ Now, begin with your first Socratic question to start this student's journey of 
     };
   }
 
-  // Direct answer detection (enhanced)
-  containsDirectAnswer(response: string): boolean {
-    // Legitimate Socratic guidance patterns (should NOT be flagged)
-    const socraticGuidancePatterns = [
-      /what does.*become\?/i,
-      /how.*do.*that\?/i,
-      /what.*next.*step\?/i,
-      /how.*arrive.*conclusion\?/i,
-      /can you.*tell me/i,
-      /what.*think/i,
-      /do you.*know/i,
-      /\?.*$/
+  
+
+  // Detect if the student directly requests the final solution
+  private detectFinalSolutionRequest(input: string): boolean {
+    const text = (input || '').toLowerCase();
+    const patterns = [
+      /what(?:'s| is) the (?:answer|final answer)/,
+      /just give me (?:the )?answer/,
+      /tell me (?:the )?answer/,
+      /solve (?:it|this) for me/,
+      /i want the (?:final )?solution/,
+      /can you (?:just )?solve (?:it|this)/,
+      /give me the (?:result|value)/
     ];
-    
-    // If it's clearly Socratic guidance, don't flag it
-    if (socraticGuidancePatterns.some(pattern => pattern.test(response))) {
-      return false;
+    return patterns.some(p => p.test(text));
+  }
+
+  // Strong detector for instructional phrasing that gives away methods/operations
+  private containsInstructionalPhrasing(text: string): boolean {
+    const t = (text || '').toLowerCase();
+    const patterns: RegExp[] = [
+      /solve\s+for\s+[a-z]/,
+      /isolate\s+[a-z]/,
+      /what\s+operation\s+(?:helps\s+)?isolate\s+[a-z]/,
+      /plug\s+in/,
+      /substitute\b/,
+      /apply\s+(?:the\s+)?formula/,
+      /use\s+(?:the\s+)?derivative/,
+      /take\s+the\s+derivative/,
+      /integrate\b/,
+      /factor\b/,
+      /expand\b/,
+      /complete\s+the\s+square/,
+      /set\s+up\s+an?\s+equation/,
+      /rearrange\s+terms/,
+      /multiply\s+both\s+sides/,
+      /divide\s+both\s+sides/,
+      /add\s+both\s+sides/,
+      /subtract\s+both\s+sides/
+    ];
+    return patterns.some(p => p.test(t));
+  }
+
+  // Helper to reframe instructional phrasing into goal-oriented metacognitive questions
+  private reframeInstructionalToGoal(input: string, assessment: SocraticAssessment, questionType: SocraticQuestionType, studentInput: string): string {
+    const prompt = `Let’s stay focused on the goal. What is this problem asking us to find or show, and what would be a good first move toward that?`;
+    return this.sanitizeToSocraticQuestion(prompt, assessment, questionType, studentInput);
+  }
+
+  // Build the opening prompt in a less-direct, goal-framing style
+  private buildGoalFramingOpening(problem: string): string {
+    const concepts = this.extractConcepts(problem);
+    const objective = this.generateLearningObjective(problem, concepts);
+    // Prefer a simple, warm, student-centered phrasing
+    const base = `Let's tackle this together—what are we trying to solve here? In your own words, what is the main goal of this problem?`;
+    // If we can infer an objective, lightly contextualize without being prescriptive
+    if (objective && typeof objective === 'string' && objective.length > 0) {
+      return `Let’s tackle this together—what are we trying to find or show? What’s a small first step you might try?`;
     }
-    
-    // Direct answer patterns (should be flagged)
-    const directAnswerPatterns = [
-      /^the answer is\s*\d+/i,
-      /^the solution is\s*\d+/i,
-      /^x\s*=\s*\d+\.?$/i,
-      /^therefore,?\s*x\s*=\s*\d+/i,
-      /^so,?\s*x\s*=\s*\d+\.?$/i,
-      /^the final answer is/i,
-      /^the result is\s*\d+/i,
-      /we get\s*x\s*=\s*\d+\.?$/i,
-      /this gives us\s*x\s*=\s*\d+/i
+    return base;
+  }
+
+  // Detect step-by-step instructional phrasing that gives away methods
+  private looksInstructional(response: string): boolean {
+    const patterns = [
+      /(then|next|first|second|finally)\s+(add|subtract|multiply|divide|plug|apply|use|factor|expand|simplify)/i,
+      /(solve|compute|calculate|substitute)\b.*\b(x|y|value|number)/i,
+      /(use|apply)\s+(theorem|formula|method)/i
     ];
-    
-    return directAnswerPatterns.some(pattern => pattern.test(response.trim()));
+    return patterns.some(p => p.test(response));
+  }
+
+  // Reframe any direct or instructional answers into Socratic questions
+  private sanitizeToSocraticQuestion(
+    response: string,
+    assessment: SocraticAssessment,
+    questionType: SocraticQuestionType,
+    studentInput: string
+  ): string {
+    let text = (response || '').trim();
+
+    const violates = this.looksInstructional(text) || this.containsInstructionalPhrasing(text);
+    if (violates) {
+      const reframed = this.reframeInstructionalToGoal(text, assessment, questionType, studentInput);
+      text = (reframed || 'What is this problem asking us to find or show?').trim();
+    }
+
+    // Ensure the response ends with a varied, concise question
+    if (!text.endsWith('?')) {
+      const closing = this.getVariedClosing(questionType);
+      text = text.replace(/[.!]*$/, '') + ' ' + closing;
+    }
+
+    // Limit to at most two sentences for brevity
+    const parts = text.split(/(?<=[?!.])\s+/);
+    if (parts.length > 2) {
+      text = parts.slice(0, 2).join(' ');
+      if (!text.endsWith('?')) {
+        text = text.replace(/[.!]*$/, '') + '?';
+      }
+    }
+
+    return text;
   }
 
   // Confidence Calibration Methods
@@ -1599,29 +1653,18 @@ Now, begin with your first Socratic question to start this student's journey of 
    */
   async scoreReasoningChain(explanation: string, concept: string): Promise<number> {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: `You are evaluating a student's explanation of the concept "${concept}". Score the explanation from 0-4 based on this rubric:
-- 1 point if the explanation identifies assumptions made
-- 1 point if the explanation states evidence or reasoning
-- 1 point if the explanation makes logical connections
-- 1 point if the explanation acknowledges limitations or uncertainties
+      const content = await chatCompletion([
+        {
+          role: 'system',
+          content: `You are evaluating a student's explanation of the concept "${concept}". Score the explanation from 0-4 based on this rubric:\n- 1 point if the explanation identifies assumptions made\n- 1 point if the explanation states evidence or reasoning\n- 1 point if the explanation makes logical connections\n- 1 point if the explanation acknowledges limitations or uncertainties\n\nRespond with ONLY a single integer from 0-4, nothing else.`
+        },
+        {
+          role: 'user',
+          content: `Student explanation: "${explanation}"`
+        }
+      ], { temperature: 0.3, max_tokens: 10, retryContext: 'Score reasoning' });
 
-Respond with ONLY a single integer from 0-4, nothing else.`
-          },
-          {
-            role: 'user',
-            content: `Student explanation: "${explanation}"`
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 10
-      });
-
-      const scoreText = response.choices[0]?.message?.content?.trim() || '0';
+      const scoreText = (content || '0').trim();
       const score = parseInt(scoreText, 10);
       return Math.max(0, Math.min(4, isNaN(score) ? 0 : score));
     } catch (error) {
@@ -1726,25 +1769,18 @@ Respond with ONLY a single integer from 0-4, nothing else.`
    */
   async assessTransferResponse(response: string, expectedApproach: string): Promise<boolean> {
     try {
-      const assessment = await this.openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: `You are evaluating if a student's response demonstrates the expected approach to solving a problem. The expected approach is: "${expectedApproach}"
+      const content = await chatCompletion([
+        {
+          role: 'system',
+          content: `You are evaluating if a student's response demonstrates the expected approach to solving a problem. The expected approach is: "${expectedApproach}"\n\nRespond with ONLY "yes" if the response matches the expected approach, or "no" if it does not.`
+        },
+        {
+          role: 'user',
+          content: `Student response: "${response}"`
+        }
+      ], { temperature: 0.2, max_tokens: 10, retryContext: 'Assess transfer' });
 
-Respond with ONLY "yes" if the response matches the expected approach, or "no" if it does not.`
-          },
-          {
-            role: 'user',
-            content: `Student response: "${response}"`
-          }
-        ],
-        temperature: 0.2,
-        max_tokens: 10
-      });
-
-      const result = assessment.choices[0]?.message?.content?.trim().toLowerCase() || 'no';
+      const result = (content || 'no').trim().toLowerCase();
       return result.startsWith('yes');
     } catch (error) {
       console.error('Error assessing transfer response:', error);
@@ -1791,30 +1827,18 @@ Respond with ONLY "yes" if the response matches the expected approach, or "no" i
    */
   async assessStudentQuestionQuality(question: string, concept: string): Promise<number> {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: `You are evaluating the quality of a student's question about "${concept}". Score from 1-5:
-- 1: Basic recall question ("What is X?")
-- 2: Simple application question ("How do I use X?")
-- 3: Analysis question ("Why does X work?")
-- 4: Synthesis question ("How does X relate to Y?")
-- 5: Evaluation/connection question ("How does X connect to Y in different contexts?")
+      const content = await chatCompletion([
+        {
+          role: 'system',
+          content: `You are evaluating the quality of a student's question about "${concept}". Score from 1-5:\n- 1: Basic recall question ("What is X?")\n- 2: Simple application question ("How do I use X?")\n- 3: Analysis question ("Why does X work?")\n- 4: Synthesis question ("How does X relate to Y?")\n- 5: Evaluation/connection question ("How does X connect to Y in different contexts?")\n\nRespond with ONLY a single integer from 1-5, nothing else.`
+        },
+        {
+          role: 'user',
+          content: `Student question: "${question}"`
+        }
+      ], { temperature: 0.3, max_tokens: 10, retryContext: 'Assess question quality' });
 
-Respond with ONLY a single integer from 1-5, nothing else.`
-          },
-          {
-            role: 'user',
-            content: `Student question: "${question}"`
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 10
-      });
-
-      const scoreText = response.choices[0]?.message?.content?.trim() || '1';
+      const scoreText = (content || '1').trim();
       const score = parseInt(scoreText, 10);
       return Math.max(1, Math.min(5, isNaN(score) ? 1 : score));
     } catch (error) {
@@ -2017,5 +2041,40 @@ Respond with ONLY a single integer from 1-5, nothing else.`
         this.sessionPhase = 'working'; // Return to working after hint
         break;
     }
+  }
+
+  /**
+   * Check if a response contains a direct answer (violates Socratic method)
+   */
+  containsDirectAnswer(response: string): boolean {
+    if (!response || typeof response !== 'string') {
+      return false;
+    }
+
+    const text = response.toLowerCase().trim();
+    
+    // Patterns that indicate direct answers
+    const directAnswerPatterns = [
+      /^(the answer is|the solution is|the result is|therefore|so,?|thus)/i,
+      /^(x\s*=\s*\d+|y\s*=\s*\d+)/i, // Direct equation solutions like "x = 4"
+      /^(it's\s+\d+|it is \d+)/i,
+      /^(you get \d+|we get \d+)/i,
+      /^(the final answer is|the correct answer is)/i,
+    ];
+
+    // Check for direct answer patterns
+    for (const pattern of directAnswerPatterns) {
+      if (pattern.test(text)) {
+        return true;
+      }
+    }
+
+    // Check for standalone numeric answers at the start
+    const startsWithNumber = /^\d+\.?\s*$/.test(text.split(/[.!?]/)[0]);
+    if (startsWithNumber && text.length < 50) {
+      return true;
+    }
+
+    return false;
   }
 }
