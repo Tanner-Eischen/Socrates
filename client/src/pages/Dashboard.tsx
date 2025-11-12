@@ -36,8 +36,20 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/analytics/dashboard'),
-      api.get('/sessions?limit=5')
+      api.get('/analytics/dashboard').catch(err => {
+        // Handle 401 gracefully - user not authenticated
+        if (err.response?.status === 401) {
+          return { data: { data: {} } }; // Return empty data
+        }
+        throw err;
+      }),
+      api.get('/sessions?limit=5').catch(err => {
+        // Handle 401 gracefully - user not authenticated
+        if (err.response?.status === 401) {
+          return { data: [] }; // Return empty array
+        }
+        throw err;
+      })
     ])
       .then(([statsRes, sessionsRes]) => {
         const analyticsPayload = statsRes.data?.data;
