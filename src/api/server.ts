@@ -44,9 +44,17 @@ class SocratesServer {
   constructor() {
     this.app = express();
     this.server = createServer(this.app);
+    // Configure Socket.IO CORS
+    const socketOrigin = (config.CORS_ORIGIN === '*')
+      // Echo back the request origin when credentials are used
+      ? ((origin: string, callback: (err: Error | null, allow: boolean | string) => void) => {
+          callback(null, origin || '*');
+        })
+      : config.CORS_ORIGIN;
+
     this.io = new SocketIOServer(this.server, {
       cors: {
-        origin: config.CORS_ORIGIN,
+        origin: socketOrigin as any,
         credentials: config.CORS_CREDENTIALS,
       },
       pingTimeout: config.WS_CONNECTION_TIMEOUT,
@@ -104,8 +112,22 @@ class SocratesServer {
     }));
 
     // CORS
+    // When credentials are enabled, browsers disallow '*' for Access-Control-Allow-Origin.
+    // Use dynamic origin echoing to keep credentials working with local dev.
+    let expressCorsOrigin: any;
+    if (config.CORS_ORIGIN === '*' || (Array.isArray(config.CORS_ORIGIN) && config.CORS_ORIGIN.length === 0)) {
+      // Allow all origins in development, or reflect request origin
+      expressCorsOrigin = isDevelopment() ? true : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        callback(null, true); // Allow all origins
+      };
+    } else if (Array.isArray(config.CORS_ORIGIN)) {
+      expressCorsOrigin = config.CORS_ORIGIN;
+    } else {
+      expressCorsOrigin = config.CORS_ORIGIN;
+    }
+
     this.app.use(cors({
-      origin: config.CORS_ORIGIN,
+      origin: expressCorsOrigin,
       credentials: config.CORS_CREDENTIALS,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
