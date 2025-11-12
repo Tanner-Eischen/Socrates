@@ -116,7 +116,13 @@ export default function SubmitProblem() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-400">{user?.name || user?.email}</span>
-            <button onClick={logout} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5">
+            <button 
+              onClick={() => {
+                logout();
+                navigate('/dashboard', { replace: true });
+              }} 
+              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
+            >
               Logout
             </button>
           </div>

@@ -46,12 +46,7 @@ export interface TimelineEntry {
   breakthrough: boolean;
 }
 
-export interface ComplianceMetrics {
-  directAnswerViolations: number;
-  complianceScore: number;
-  lastViolationTurn: number;
-  examples: string[];
-}
+// Removed ComplianceMetrics; strict Socratic mode no longer calculates direct-answer compliance
 
 export interface SessionReport {
   transferSuccessRate: number;
@@ -68,10 +63,7 @@ export const getSessionJourney = async (sessionId: string): Promise<TimelineEntr
   return response.data.data;
 };
 
-export const getSessionCompliance = async (sessionId: string): Promise<ComplianceMetrics> => {
-  const response = await api.get(`/sessions/${sessionId}/compliance`);
-  return response.data.data;
-};
+// Removed getSessionCompliance API; server compliance endpoint no longer exists
 
 export const getSessionReport = async (sessionId: string): Promise<SessionReport> => {
   const response = await api.get(`/analytics/session/${sessionId}/report`);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../AuthContext';
 import api from '../api';
@@ -22,6 +22,7 @@ interface SystemMetrics {
 
 export default function Admin() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,7 +79,13 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-400">{user?.name}</span>
-            <button onClick={logout} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5">
+            <button 
+              onClick={() => {
+                logout();
+                navigate('/dashboard', { replace: true });
+              }} 
+              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
+            >
               Logout
             </button>
           </div>

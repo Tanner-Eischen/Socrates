@@ -101,8 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('hasLoggedOut', 'true');
     localStorage.removeItem('token');
     setUser(null);
-    // Redirect to dashboard (which will show login if needed)
-    window.location.href = '/dashboard';
+    // Navigation will be handled by the component calling logout
   };
 
   return (

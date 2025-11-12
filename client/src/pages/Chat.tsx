@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api, { submitProblemImage } from '../api';
 import MathRenderer from '../components/MathRenderer';
@@ -23,6 +24,7 @@ interface Message {
 
 export default function Chat() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -195,7 +197,10 @@ export default function Chat() {
           <div className="flex items-center gap-3">
             <span className="text-sm text-yellow-100">{user?.name || user?.email}</span>
             <button
-              onClick={logout}
+              onClick={() => {
+                logout();
+                navigate('/dashboard', { replace: true });
+              }}
               className="px-3 py-1.5 text-sm text-yellow-200 hover:text-white transition-colors border border-yellow-200/30 rounded"
             >
               Logout

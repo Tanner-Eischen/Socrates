@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { 
   LayoutDashboard, 
@@ -18,6 +18,7 @@ import {
 export default function Navigation() {
   const { user, logout, loading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isActive = (path: string) => {
@@ -140,12 +141,13 @@ export default function Navigation() {
                 e.preventDefault();
                 try {
                   logout();
+                  navigate('/dashboard', { replace: true });
                 } catch (error) {
                   console.error('Logout error:', error);
                   // Force logout even if there's an error
                   localStorage.setItem('hasLoggedOut', 'true');
                   localStorage.removeItem('token');
-                  window.location.href = '/dashboard';
+                  navigate('/dashboard', { replace: true });
                 }
               }}
               className={`

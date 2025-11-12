@@ -191,9 +191,9 @@ export default function LearningAssessments() {
               
               <div className="grid gap-4">
                 {(() => {
+                  // Only show recommended assessment or completed ones
                   const filteredProblems = problemsByCategory[category]
                     .filter((problem) => {
-                      // Only show recommended assessment OR completed ones
                       const isRecommended = recommendation?.assessmentId === problem.id;
                       const completed = isCompleted(problem.id);
                       return isRecommended || completed;
@@ -288,4 +288,3 @@ export default function LearningAssessments() {
     </div>
   );
 }
-
