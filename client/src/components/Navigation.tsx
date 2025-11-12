@@ -136,7 +136,18 @@ export default function Navigation() {
             
             {/* Logout Button */}
             <button
-              onClick={logout}
+              onClick={(e) => {
+                e.preventDefault();
+                try {
+                  logout();
+                } catch (error) {
+                  console.error('Logout error:', error);
+                  // Force logout even if there's an error
+                  localStorage.setItem('hasLoggedOut', 'true');
+                  localStorage.removeItem('token');
+                  window.location.href = '/dashboard';
+                }
+              }}
               className={`
                 mt-3 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl 
                 bg-amber-50 hover:bg-red-50 text-gray-700 hover:text-red-600 

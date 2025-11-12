@@ -106,12 +106,7 @@ class SocratesServer {
 
   // Setup middleware
   private setupMiddleware(): void {
-    // Security middleware
-    this.app.use(helmet({
-      contentSecurityPolicy: isDevelopment() ? false : undefined,
-    }));
-
-    // CORS
+    // CORS - must be before other middleware
     // Configure CORS to allow requests from frontend
     // When credentials are enabled, browsers require the actual origin (not '*')
     let expressCorsOrigin: any;
@@ -134,6 +129,12 @@ class SocratesServer {
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
       preflightContinue: false,
       optionsSuccessStatus: 204,
+    }));
+
+    // Security middleware (after CORS)
+    this.app.use(helmet({
+      contentSecurityPolicy: isDevelopment() ? false : undefined,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
     }));
 
     // Compression
