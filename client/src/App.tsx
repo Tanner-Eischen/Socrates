@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './AuthContext';
 import Navigation from './components/Navigation';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 import LearningAssessments from './pages/LearningAssessments';
 import Problems from './pages/Problems';
 import ProblemInput from './components/ProblemInput';
@@ -18,7 +19,7 @@ import SocraticDemo from './pages/SocraticDemo';
 
 function AppContent() {
   const location = useLocation();
-  const hideNavPaths = ['/tutor', '/chat', '/demo'];
+  const hideNavPaths = ['/tutor', '/chat', '/demo', '/login'];
   const hideNavOnSession = location.pathname.startsWith('/session/');
   const showNav = !hideNavPaths.includes(location.pathname) && !hideNavOnSession;
 
@@ -28,6 +29,7 @@ function AppContent() {
       <div className={showNav ? 'ml-72' : ''}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessments" element={<LearningAssessments />} />
           <Route path="/problems" element={<Problems />} />

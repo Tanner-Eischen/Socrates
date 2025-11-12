@@ -82,7 +82,7 @@ export default function Admin() {
             <button 
               onClick={() => {
                 logout();
-                navigate('/dashboard', { replace: true });
+                navigate('/login', { replace: true });
               }} 
               className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
             >

@@ -199,7 +199,7 @@ export default function Chat() {
             <button
               onClick={() => {
                 logout();
-                navigate('/dashboard', { replace: true });
+                navigate('/login', { replace: true });
               }}
               className="px-3 py-1.5 text-sm text-yellow-200 hover:text-white transition-colors border border-yellow-200/30 rounded"
             >

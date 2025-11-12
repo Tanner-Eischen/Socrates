@@ -141,13 +141,13 @@ export default function Navigation() {
                 e.preventDefault();
                 try {
                   logout();
-                  navigate('/dashboard', { replace: true });
+                  navigate('/login', { replace: true });
                 } catch (error) {
                   console.error('Logout error:', error);
                   // Force logout even if there's an error
                   localStorage.setItem('hasLoggedOut', 'true');
                   localStorage.removeItem('token');
-                  navigate('/dashboard', { replace: true });
+                  navigate('/login', { replace: true });
                 }
               }}
               className={`

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import api from '../api';
 import { DashboardStatSkeleton, SessionCardSkeleton } from '../components/SkeletonLoader';
@@ -24,10 +24,15 @@ interface RecentSession {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Redirect to login if not authenticated
+  if (!authLoading && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   useEffect(() => {
     Promise.all([
