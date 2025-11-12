@@ -1,6 +1,7 @@
 /**
  * Question Selector Module
  * Handles selection of appropriate Socratic question types based on context
+ * Updated: 2025-01-12 - Added recentQuestionTypes parameter
  */
 
 import type { SocraticQuestionType, SocraticAssessment } from './types';
