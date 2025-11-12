@@ -5,6 +5,7 @@ import OpenAI from 'openai';
 import { handleOpenAIError, retryWithBackoff } from './lib/error-utils';
 import { LLMServiceError } from './api/middleware/errorHandler';
 import { BehavioralAssessment } from './types';
+import { chatCompletion } from './engine/openai-client';
 
 // Enhanced Types (can also be added to types.ts)
 export enum SocraticQuestionType {
@@ -16,6 +17,21 @@ export enum SocraticQuestionType {
   META_QUESTIONING = "meta_questioning"   // "Why is this question important?"
 }
 
+// New: Dialogue Level and Socratic Cycle tracking
+export enum DialogueLevel {
+  DIALOGUE = "dialogue",               // Level 1: reciprocal questioning
+  STRATEGIC_DISCOURSE = "strategic_discourse", // Level 2: shaping, probing, refining
+  META_DISCOURSE = "meta_discourse"     // Level 3: rules, collaboration, reflection
+}
+
+export enum CycleStage {
+  WONDER_RECEIVE = "wonder_receive",          // Listen to premise/view
+  REFLECT = "reflect",                        // Identify areas for inquiry
+  REFINE_CROSS_EXAMINE = "refine_cross_examine", // Challenge assumptions/test logic
+  RESTATE = "restate",                        // Student articulates updated understanding
+  REPEAT = "repeat"                           // Iterate to deepen understanding
+}
+
 export interface ConversationDepthTracker {
   currentDepth: number;
   maxDepthReached: number;
@@ -23,6 +39,8 @@ export interface ConversationDepthTracker {
   shouldDeepenInquiry: boolean;
   suggestedNextLevel: number;
   questionType: SocraticQuestionType;
+  dialogueLevel: DialogueLevel;
+  cycleStage: CycleStage;
 }
 
 export interface SocraticAssessment {
@@ -43,6 +61,8 @@ export interface EnhancedMessage {
   targetedConcepts?: string[];
   studentConfidence?: number;
   isUnderstandingCheck?: boolean;
+  dialogueLevel?: DialogueLevel;
+  cycleStage?: CycleStage;
   // Behavioral assessment fields
   confidenceDelta?: number;
   reasoningScore?: number;
@@ -112,7 +132,7 @@ export interface SessionPerformance {
 
 // Complete Socratic Engine Implementation
 export class SocraticEngine {
-  private openai: OpenAI;
+  // OpenAI client removed; using centralized chatCompletion wrapper
   private conversation: EnhancedMessage[] = [];
   private problem: string = '';
   private sessionId: string = '';
@@ -160,7 +180,9 @@ export class SocraticEngine {
       conceptualConnections: [],
       shouldDeepenInquiry: false,
       suggestedNextLevel: 1,
-      questionType: SocraticQuestionType.CLARIFICATION
+      questionType: SocraticQuestionType.CLARIFICATION,
+      dialogueLevel: DialogueLevel.DIALOGUE,
+      cycleStage: CycleStage.WONDER_RECEIVE
     };
   }
 
@@ -187,6 +209,42 @@ export class SocraticEngine {
         "What could help you avoid this error next time?"
       ]]
     ]);
+  }
+
+  // Determine dialogue level from question type and context
+  private computeDialogueLevel(qt: SocraticQuestionType, isUnderstandingCheck?: boolean): DialogueLevel {
+    if (qt === SocraticQuestionType.META_QUESTIONING || isUnderstandingCheck) {
+      return DialogueLevel.META_DISCOURSE;
+    }
+    if (
+      qt === SocraticQuestionType.CLARIFICATION ||
+      qt === SocraticQuestionType.ASSUMPTIONS ||
+      qt === SocraticQuestionType.EVIDENCE ||
+      qt === SocraticQuestionType.PERSPECTIVE ||
+      qt === SocraticQuestionType.IMPLICATIONS
+    ) {
+      return DialogueLevel.STRATEGIC_DISCOURSE;
+    }
+    return DialogueLevel.DIALOGUE;
+  }
+
+  // Determine Socratic cycle stage for the tutor's current turn
+  private computeCycleStage(qt: SocraticQuestionType, isUnderstandingCheck?: boolean, initial?: boolean): CycleStage {
+    if (initial) return CycleStage.WONDER_RECEIVE;
+    if (isUnderstandingCheck) return CycleStage.RESTATE;
+    if (
+      qt === SocraticQuestionType.CLARIFICATION ||
+      qt === SocraticQuestionType.ASSUMPTIONS ||
+      qt === SocraticQuestionType.EVIDENCE ||
+      qt === SocraticQuestionType.PERSPECTIVE ||
+      qt === SocraticQuestionType.IMPLICATIONS
+    ) {
+      return CycleStage.REFINE_CROSS_EXAMINE;
+    }
+    if (qt === SocraticQuestionType.META_QUESTIONING) {
+      return CycleStage.REFLECT;
+    }
+    return CycleStage.REPEAT;
   }
 
   private initializeConceptualFramework(): void {
@@ -219,7 +277,7 @@ export class SocraticEngine {
     }
   }
 
-  async startProblem(problem: string): Promise<string> {
+  async startProblem(problem: string, options?: { studentFirst?: boolean }): Promise<string> {
     this.problem = problem;
     
     // Build enhanced system prompt
@@ -232,46 +290,53 @@ export class SocraticEngine {
     // Determine initial question type
     const initialQuestionType = this.selectInitialQuestionType(problem);
     
-    const response = await handleOpenAIError(
-      () => retryWithBackoff(
-        () => this.openai.chat.completions.create({
-          model: 'gpt-4',
-          messages: [
+    // Student-first mode: do not generate an initial assistant question.
+    if (options?.studentFirst) {
+      // Initialize tracker minimally for a fresh dialogue.
+      this.depthTracker.questionType = initialQuestionType;
+      this.depthTracker.dialogueLevel = DialogueLevel.DIALOGUE;
+      this.depthTracker.cycleStage = this.computeCycleStage(initialQuestionType, false, true);
+      // Do not push assistant message; let the student speak first.
+      return '';
+    }
+
+    let baseResponse: string;
+    const llmContent = await chatCompletion([
             ...this.conversation.map(msg => ({ role: msg.role, content: msg.content })),
             { role: 'system', content: `Use ${initialQuestionType} questioning approach. Keep response to 1-2 sentences maximum. Ask an indirect, exploratory question rather than a direct one.` }
-          ],
-          temperature: 0.8,
-          max_tokens: 150  // Increased to allow more thoughtful opening questions
-        }),
-        2, // max retries
-        1000, // initial delay
-        'Starting problem'
-      ),
-      'Tutoring service'
-    );
+    ], { temperature: 0.8, max_tokens: 150, retryContext: 'Starting problem' });
+    if (!llmContent) {
+      throw new Error('LLM failed to generate an opening question');
+    }
+    baseResponse = this.adaptQuestionToProblem(llmContent);
 
-    const tutorResponse = response.choices[0]?.message?.content || 
-      "I'm excited to explore this problem with you! What's your initial understanding of what we're looking for?";
+    // Sanitize the very first question to avoid directive phrasing
+    const initialAssessment = this.assessStudentResponse('');
+    const sanitizedResponse = this.sanitizeToSocraticQuestion(
+      baseResponse,
+      initialAssessment,
+      initialQuestionType,
+      problem
+    );
     
     const enhancedMessage: EnhancedMessage = {
       role: 'assistant',
-      content: tutorResponse,
+      content: '',
       timestamp: new Date(),
       questionType: initialQuestionType,
       depthLevel: 1,
-      targetedConcepts: this.extractConcepts(problem)
+      targetedConcepts: this.extractConcepts(problem),
+      dialogueLevel: DialogueLevel.DIALOGUE,
+      cycleStage: this.computeCycleStage(initialQuestionType, false, true)
     };
-   const polishedResponse = tutorResponse
-  .replace(/assumption/gi, "idea")
-  .replace(/clarify/gi, "explain")
-  .replace(/evidence/gi, "reasoning")
-  .replace(/concept/gi, "idea")
-  .replace(/\.\s*$/, '?'); // Ensure it ends with a question
-
-// Use `polishedResponse` instead of `tutorResponse`
+    const polishedResponse = sanitizedResponse;
+    enhancedMessage.content = polishedResponse;
 
     this.conversation.push(enhancedMessage);
     this.questionTypeSequence.push(initialQuestionType);
+    // Reflect initial metadata into tracker
+    this.depthTracker.dialogueLevel = enhancedMessage.dialogueLevel!;
+    this.depthTracker.cycleStage = enhancedMessage.cycleStage!;
     
     return polishedResponse;
   }
@@ -322,8 +387,11 @@ Start by asking for their answer in a warm, encouraging way.`;
     this.conversation = [
       { role: 'system', content: assessmentPrompt, timestamp: new Date() }
     ];
-
-    return "What's your answer to this problem? Take your time and show your work if needed.";
+    // Apply the same goal-framing principle used in tutoring mode
+    const goalOpening = this.buildGoalFramingOpening(problem);
+    // Combine goal clarification with assessment-mode direct answer request
+    const opening = `${goalOpening} Then, what's your direct answer? Take your time and show your work if needed.`;
+    return opening;
   }
 
   /**
@@ -456,21 +524,56 @@ Start by asking for their answer in a warm, encouraging way.`;
       nextQuestionType, 
       studentInput
     );
+    const systemGuidance = `${contextualGuidance}\n\nStyle guide: vary phrasing, avoid templates and repetitive stems; ask one adaptive Socratic question; avoid stock endings like "What do you think?"; keep it conversational and specific to the student's response.`;
     
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        ...this.conversation.map(msg => ({ role: msg.role, content: msg.content })),
-        { role: 'system', content: contextualGuidance }
-      ],
-      temperature: 0.75, // Balanced for following instructions while staying exploratory
-      max_tokens: 100,
-      presence_penalty: 0.7, // Strong encouragement for variety
-      frequency_penalty: 0.4 // Reduce repetition
-    });
+    // If the student asks for the final solution directly, craft a gentle redirect
+    if (this.detectFinalSolutionRequest(studentInput)) {
+      const redirect = this.adaptQuestionToProblem(
+        'I won’t jump to the final solution. Could you share what steps you’ve already tried and exactly where you feel stuck? Looking at this problem, what does finding the goal actually mean here?'
+      );
+      const reframed = this.sanitizeToSocraticQuestion(redirect, assessment, nextQuestionType, studentInput);
+      const enhancedMessage: EnhancedMessage = {
+        role: 'assistant',
+        content: reframed,
+        timestamp: new Date(),
+        questionType: nextQuestionType,
+        depthLevel: this.depthTracker.currentDepth,
+        studentConfidence: assessment.confidenceLevel,
+        targetedConcepts: this.depthTracker.conceptualConnections.slice(-2)
+      };
+      this.conversation.push(enhancedMessage);
+      this.questionTypeSequence.push(nextQuestionType);
+      const responseTime = Date.now() - responseStartTime;
+      this.updateStudentProfile(nextQuestionType, assessment, responseTime);
+      this.lastResponseTime = Date.now();
+      return reframed;
+    }
 
-    let tutorResponse = response.choices[0]?.message?.content || 
-      "That's interesting thinking! Can you tell me more about your reasoning?";
+    let tutorResponse: string;
+    let llmResponse: string | null = null;
+    try {
+      llmResponse = await chatCompletion([
+        { role: 'system', content: systemGuidance },
+        ...this.conversation.map(msg => ({ role: msg.role, content: msg.content }))
+      ], {
+        temperature: 0.9,
+        max_tokens: 160,
+        presence_penalty: 0.8,
+        frequency_penalty: 0.5,
+        retryContext: 'Enhanced interaction'
+      });
+    } catch (_err) {
+      llmResponse = null;
+    }
+    // Graceful fallback if LLM fails or returns empty
+    tutorResponse = llmResponse && llmResponse.trim().length > 0
+      ? llmResponse
+      : this.sanitizeToSocraticQuestion(
+          'Let’s zoom in on one small step. What is the goal here, and what’s the next tiny move you could try toward it?',
+          assessment,
+          nextQuestionType,
+          studentInput
+        );
     
     // Ensure response ends with question
     if (!tutorResponse.trim().endsWith('?')) {
@@ -1720,46 +1823,7 @@ Respond with ONLY a single integer from 1-5, nothing else.`
     }
   }
 
-  /**
-   * Gets Socratic compliance metrics
-   */
-  getSocraticComplianceMetrics(): {
-    directAnswerViolations: number;
-    complianceScore: number;
-    lastViolationTurn: number;
-    examples: string[];
-  } {
-    const assistantMessages = this.conversation.filter(msg => msg.role === 'assistant');
-    const violations: { turn: number; content: string }[] = [];
-    
-    assistantMessages.forEach((msg, index) => {
-      if (this.containsDirectAnswer(msg.content)) {
-        violations.push({
-          turn: Math.floor(index / 2) + 1, // Approximate turn number
-          content: msg.content
-        });
-      }
-    });
-    
-    const totalMessages = assistantMessages.length;
-    const violationCount = violations.length;
-    const complianceScore = totalMessages > 0
-      ? ((totalMessages - violationCount) / totalMessages) * 100
-      : 100;
-    
-    const lastViolationTurn = violations.length > 0
-      ? violations[violations.length - 1].turn
-      : 0;
-    
-    const examples = violations.slice(0, 3).map(v => v.content);
-    
-    return {
-      directAnswerViolations: violationCount,
-      complianceScore,
-      lastViolationTurn,
-      examples
-    };
-  }
+  
 
   /**
    * Computes session-level learning gains from behavioral assessments

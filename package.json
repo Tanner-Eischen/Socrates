@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/cli-tester.js",
+    "start": "node dist/api/index.js",
     "dev": "ts-node src/api/index.ts",
     "dev:backend": "npm run api:dev",
     "dev:frontend": "npm --prefix client run dev",
