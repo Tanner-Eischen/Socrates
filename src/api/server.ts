@@ -106,6 +106,19 @@ class SocratesServer {
 
   // Setup middleware
   private setupMiddleware(): void {
+    // CRITICAL: Handle OPTIONS requests FIRST, before ANY other middleware
+    this.app.options('*', (req, res) => {
+      const origin = req.headers.origin;
+      const allowedOrigin = origin || '*';
+      logger.debug('OPTIONS preflight request', { origin, allowedOrigin });
+      res.header('Access-Control-Allow-Origin', allowedOrigin);
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Max-Age', '86400'); // 24 hours
+      res.sendStatus(204);
+    });
+
     // CORS - must be before other middleware
     // Configure CORS to allow requests from frontend
     // When credentials are enabled, browsers require the actual origin (not '*')
@@ -140,17 +153,6 @@ class SocratesServer {
     };
     
     this.app.use(cors(corsOptions));
-    
-    // Explicitly handle OPTIONS requests for all routes (before other middleware)
-    this.app.options('*', (req, res) => {
-      const origin = req.headers.origin;
-      const allowedOrigin = origin || '*';
-      res.header('Access-Control-Allow-Origin', allowedOrigin);
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.sendStatus(204);
-    });
 
     // Security middleware (after CORS)
     this.app.use(helmet({
