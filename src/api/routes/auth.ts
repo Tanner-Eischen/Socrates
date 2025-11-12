@@ -17,6 +17,17 @@ import { UserService, User } from '../services/UserService';
 
 const router = express.Router();
 
+// Explicit OPTIONS handler for all auth routes (backup CORS handling)
+router.options('*', (req: Request, res: Response) => {
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.status(204).end();
+});
+
 // In-memory user store for development (when database is unavailable)
 const inMemoryUsers: Map<string, User> = new Map();
 
