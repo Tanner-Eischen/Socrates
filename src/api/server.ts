@@ -141,13 +141,11 @@ class SocratesServer {
     
     this.app.use(cors(corsOptions));
     
-    // Explicitly handle OPTIONS requests for all routes
-    this.app.options('*', cors(corsOptions));
-    
-    // Additional OPTIONS handler as fallback
+    // Explicitly handle OPTIONS requests for all routes (before other middleware)
     this.app.options('*', (req, res) => {
       const origin = req.headers.origin;
-      res.header('Access-Control-Allow-Origin', origin || '*');
+      const allowedOrigin = origin || '*';
+      res.header('Access-Control-Allow-Origin', allowedOrigin);
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
       res.header('Access-Control-Allow-Credentials', 'true');
