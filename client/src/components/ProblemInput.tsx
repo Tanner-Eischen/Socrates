@@ -117,8 +117,8 @@ export default function ProblemInput() {
         const res = await submitProblemImage(image);
         setUploadProgress(70);
         
-        if (!res.success || !res.data?.id) {
-          throw new Error(res.message || 'Failed to process image');
+        if (!res.data?.id) {
+          throw new Error('Failed to process image');
         }
         
         submittedProblemId = res.data.id;
@@ -127,8 +127,8 @@ export default function ProblemInput() {
         setUploadProgress(50);
         const res = await submitProblemText(text);
         
-        if (!res.success || !res.data?.id) {
-          throw new Error(res.message || 'Failed to process problem');
+        if (!res.data?.id) {
+          throw new Error('Failed to process problem');
         }
         
         submittedProblemId = res.data.id;

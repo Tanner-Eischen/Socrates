@@ -109,7 +109,7 @@ export default function Chat() {
         try {
           const result = await submitProblemImage(imageToProcess);
           extractedProblemId = result.data.id;
-          problemText = result.data.parsedProblem?.content || result.data.parsedProblem?.originalText || messageText || 'Problem from image';
+          problemText = result.data.problemText || messageText || 'Problem from image';
         } catch (error) {
           console.error('Image processing error:', error);
           toast.error('Failed to process image. Please try again.');

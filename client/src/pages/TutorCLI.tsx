@@ -122,13 +122,13 @@ export default function TutorCLI() {
         try {
           const result = await submitProblemImage(imageFile);
           
-          // Check if the response is successful and has data
-          if (!result.success || !result.data) {
-            throw new Error(result.message || 'Failed to process image');
+          // Check if the response has data
+          if (!result.data?.id) {
+            throw new Error('Failed to process image');
           }
           
           extractedProblemId = result.data.id;
-          problemText = result.data.description || result.data.originalText || text || 'Problem from image';
+          problemText = result.data.problemText || text || 'Problem from image';
         } catch (error) {
           console.error('Image processing error:', error);
           const errorMessage = error instanceof Error ? error.message : 'Failed to process image. Please try again.';
