@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: socrateach-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    buildCommand: npm ci --no-cache && npm run build
+    startCommand: node dist/api/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: *
+      - key: CORS_CREDENTIALS
+        value: "true"
+    # Note: Add other environment variables (OPENAI_API_KEY, JWT_SECRET, etc.) via Render dashboard
+    # Render sets PORT automatically - do not set it manually
+

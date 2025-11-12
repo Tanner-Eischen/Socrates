@@ -14,9 +14,9 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
-# Railway sets PORT automatically via environment variable
+# Platform (Railway/Render/Cloud Run) sets PORT automatically via environment variable
 # Our server reads PORT from process.env, so no need to expose
 
-# Start server - Railway will set PORT automatically
+# Start server - Platform will set PORT automatically
 CMD ["node", "dist/api/index.js"]
 
