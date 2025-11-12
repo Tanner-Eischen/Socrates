@@ -69,10 +69,15 @@ export class QuestionSelector {
    */
   selectContextualQuestionType(
     assessment: SocraticAssessment,
-    previousQuestionType: SocraticQuestionType
+    previousQuestionType: SocraticQuestionType,
+    recentQuestionTypes?: SocraticQuestionType[]
   ): SocraticQuestionType {
     // If struggling, return to clarification
     if (assessment.confidenceLevel < 0.2) {
+      // Avoid repeating clarification if we just asked it
+      if (previousQuestionType === SQT.CLARIFICATION && recentQuestionTypes?.slice(-2).every(qt => qt === SQT.CLARIFICATION)) {
+        return SQT.ASSUMPTIONS; // Try assumptions instead
+      }
       return SQT.CLARIFICATION;
     }
     
@@ -81,8 +86,37 @@ export class QuestionSelector {
       return this.selectNextQuestionType(assessment);
     }
     
-    // Otherwise, continue with similar or slightly advanced question
-    return previousQuestionType;
+    // Avoid repeating the same question type immediately
+    // Check if we've asked the same type in the last 2 questions
+    if (recentQuestionTypes && recentQuestionTypes.length >= 2) {
+      const lastTwo = recentQuestionTypes.slice(-2);
+      if (lastTwo.every(qt => qt === previousQuestionType)) {
+        // We've repeated this type twice - try a different approach
+        if (previousQuestionType === SQT.CLARIFICATION) {
+          return SQT.EVIDENCE;
+        } else if (previousQuestionType === SQT.EVIDENCE) {
+          return SQT.ASSUMPTIONS;
+        } else {
+          return SQT.CLARIFICATION; // Return to basics
+        }
+      }
+    }
+    
+    // Progress through question types systematically
+    const typeOrder = [
+      SQT.CLARIFICATION,
+      SQT.ASSUMPTIONS,
+      SQT.EVIDENCE,
+      SQT.PERSPECTIVE,
+      SQT.IMPLICATIONS,
+      SQT.META_QUESTIONING
+    ];
+    
+    const currentIndex = typeOrder.indexOf(previousQuestionType);
+    const nextIndex = (currentIndex + 1) % typeOrder.length;
+    
+    // Don't jump too far ahead - only advance one step at a time
+    return typeOrder[nextIndex];
   }
 }
 
