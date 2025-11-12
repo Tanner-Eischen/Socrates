@@ -44,6 +44,25 @@ class SocratesServer {
   constructor() {
     this.app = express();
     this.server = createServer(this.app);
+    
+    // CRITICAL: Register OPTIONS handler FIRST, before ANYTHING else
+    this.app.options('*', (req, res, next) => {
+      try {
+        const origin = req.headers.origin;
+        const allowedOrigin = origin || '*';
+        logger.debug('OPTIONS preflight request (constructor)', { origin, allowedOrigin, path: req.path });
+        res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Max-Age', '86400');
+        return res.status(204).end();
+      } catch (error) {
+        logger.error('OPTIONS handler error (constructor)', { error });
+        return res.status(204).end();
+      }
+    });
+    
     // Configure Socket.IO CORS
     const socketOrigin = (config.CORS_ORIGIN === '*')
       // Echo back the request origin when credentials are used
