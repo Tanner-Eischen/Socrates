@@ -113,14 +113,21 @@ class SocratesServer {
     if (config.CORS_ORIGIN === '*' || (Array.isArray(config.CORS_ORIGIN) && config.CORS_ORIGIN.length === 0)) {
       // Allow all origins - return the requesting origin when credentials are used
       expressCorsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
-        // When credentials are enabled, return the actual origin, not '*'
-        callback(null, origin || '*');
+        // Always allow the origin - return it for credentials, or '*' if no origin
+        const allowedOrigin = origin || '*';
+        logger.debug('CORS: Allowing origin', { origin, allowedOrigin });
+        callback(null, allowedOrigin);
       };
     } else if (Array.isArray(config.CORS_ORIGIN)) {
       expressCorsOrigin = config.CORS_ORIGIN;
     } else {
       expressCorsOrigin = config.CORS_ORIGIN;
     }
+
+    logger.info('CORS configuration', { 
+      CORS_ORIGIN: config.CORS_ORIGIN, 
+      CORS_CREDENTIALS: config.CORS_CREDENTIALS 
+    });
 
     // CORS configuration
     const corsOptions = {
@@ -136,6 +143,16 @@ class SocratesServer {
     
     // Explicitly handle OPTIONS requests for all routes
     this.app.options('*', cors(corsOptions));
+    
+    // Additional OPTIONS handler as fallback
+    this.app.options('*', (req, res) => {
+      const origin = req.headers.origin;
+      res.header('Access-Control-Allow-Origin', origin || '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.sendStatus(204);
+    });
 
     // Security middleware (after CORS)
     this.app.use(helmet({
