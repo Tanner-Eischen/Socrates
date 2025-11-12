@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import api, { getSessionJourney, getSessionCompliance, getSessionReport } from '../api';
-import type { TimelineEntry, ComplianceMetrics, SessionReport } from '../api';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import api, { getSessionJourney, getSessionReport } from '../api';
+import type { TimelineEntry, SessionReport } from '../api';
 import EndSessionModal from '../components/EndSessionModal';
 import MathRenderer from '../components/MathRenderer';
 import JourneyReplay from '../components/JourneyReplay';
@@ -9,7 +9,7 @@ import ConceptMap from '../components/ConceptMap';
 import ReasoningScoreCard from '../components/ReasoningScoreCard';
 import TransferGauge from '../components/TransferGauge';
 import CalibrationCard from '../components/CalibrationCard';
-import ComplianceScoreCard from '../components/ComplianceScoreCard';
+// ComplianceScoreCard removed in strict mode
 import { MessageCircle, Play, BarChart3, ArrowLeft, X, Send, Loader2 } from 'lucide-react';
 
 interface EnhancedMessage {
@@ -43,6 +43,8 @@ interface Problem {
   tags?: string[];
   category?: string;
 }
+
+// Removed client-side fallback generation; strict Socratic mode relies on engine
 
 // Socratic Insights Panel Component (integrated)
 function SocraticInsights({ 
@@ -226,6 +228,7 @@ function SocraticInsights({
 export default function Session() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [problem, setProblem] = useState<Problem | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -244,22 +247,74 @@ export default function Session() {
   
   // Behavioral learning data
   const [journeyData, setJourneyData] = useState<TimelineEntry[]>([]);
-  const [complianceData, setComplianceData] = useState<ComplianceMetrics | null>(null);
+  // Compliance data removed
   const [reportData, setReportData] = useState<SessionReport | null>(null);
   const [loadingBehavioralData, setLoadingBehavioralData] = useState(false);
+  const sessionInitRef = useRef(false);
+
+  
 
   useEffect(() => {
     const submittedProblemId = searchParams.get('submittedProblemId');
+    interface SubmittedProblemState {
+      submittedProblem?: {
+        problemText?: string;
+        problemType?: string;
+        difficultyLevel?: number;
+      };
+    }
+    const state = location.state as SubmittedProblemState | null;
+    const submittedProblem = state?.submittedProblem;
     
     console.log('[Session] useEffect triggered', { id, submittedProblemId, useEnhancedMode });
     
     if (submittedProblemId) {
+      if (sessionInitRef.current) {
+        console.log('[Session] Skipping duplicate init under StrictMode');
+        return;
+      }
+      sessionInitRef.current = true;
       console.log('[Session] Creating session from submitted problem:', submittedProblemId);
       // Handle submitted problem (from problem submission)
-      api.post('/sessions', {
-        submittedProblemId: submittedProblemId,
-        useEnhancedEngine: useEnhancedMode
-      }).then(res => {
+      (async () => {
+        const cleanedId = (submittedProblemId || '').trim();
+        const idLooksValid = cleanedId.length > 0 && cleanedId.toLowerCase() !== 'null';
+        let fallback = submittedProblem;
+        if (!fallback) {
+          try {
+            const fetched = await api.get(`/problems/submitted/${cleanedId}`);
+            const d = fetched.data?.data;
+            fallback = {
+              problemText: d?.description,
+              problemType: d?.type,
+              difficultyLevel: typeof d?.difficulty === 'number' ? d.difficulty : 1,
+            };
+            console.log('[Session] Fetched submitted problem details:', d);
+          } catch {
+            console.warn('[Session] Could not fetch submitted problem details; proceeding without fallback');
+          }
+        }
+
+        if (idLooksValid) {
+          try {
+            // Attempt session creation using submittedProblemId only when valid
+            return await api.post('/sessions', {
+              submittedProblemId: cleanedId,
+              useEnhancedEngine: true
+            });
+          } catch (err) {
+            console.warn('[Session] submittedProblemId rejected; creating session without it');
+          }
+        }
+
+        // Create session without submittedProblemId using available details
+        return api.post('/sessions', {
+          problemText: fallback?.problemText || 'General Socratic learning session',
+          problemType: fallback?.problemType || 'math',
+          difficultyLevel: typeof fallback?.difficultyLevel === 'number' ? (fallback as any).difficultyLevel : 5,
+          useEnhancedEngine: true
+        });
+      })().then(res => {
         console.log('[Session] Session created successfully:', res.data);
         const sessionData = res.data.data;
         setSessionId(sessionData.id);
@@ -268,23 +323,33 @@ export default function Session() {
           type: sessionData.problemType,
           difficultyLevel: sessionData.difficultyLevel,
         });
-        
-        // Add initial enhanced message
-        setMessages([{
+
+        const initial = sessionData.initialResponse || res.data.openingTutorResponse;
+        const preview = (sessionData.problemText || '').trim();
+        const short = preview.length > 220 ? `${preview.slice(0, 220)}…` : preview;
+        const fallbackGreeting = `Hi! I’m your Socratic tutor. I see we’re working on: "${short}". Let’s tackle this together—what are we trying to find or show, and what’s a small first step you might try?`;
+        const opening = initial || fallbackGreeting;
+        setMessages([{ 
           role: 'assistant',
-          content: `I'm excited to explore this problem with you! What's your initial understanding of what we're looking for?`,
+          content: opening,
           timestamp: new Date(),
           questionType: useEnhancedMode ? 'clarification' : undefined,
           depthLevel: useEnhancedMode ? 1 : undefined
         }]);
       }).catch(err => {
         console.error('[Session] Failed to create session:', err.response?.data || err.message);
-        navigate('/dashboard');
+        // Keep user on the session page without injecting fallback tutor messages
+        setProblem({ description: 'Custom Socratic session', type: 'math', difficultyLevel: 1 });
       });
     } else if (id && id !== 'new') {
+      if (sessionInitRef.current) {
+        console.log('[Session] Skipping duplicate init under StrictMode');
+        return;
+      }
+      sessionInitRef.current = true;
       console.log('[Session] Loading problem by ID:', id);
       // Handle regular problem (from problem bank)
-      let loadedProblemData: any; // Store problem data for later use
+      let loadedProblemData: Problem; // Store problem data for later use
       
       api.get(`/problems/${id}`).then(res => {
         console.log('[Session] Problem loaded:', res.data);
@@ -298,30 +363,34 @@ export default function Session() {
           problemText: loadedProblemData.description,
           problemType: loadedProblemData.type,
           difficultyLevel: loadedProblemData.difficultyLevel,
-          useEnhancedEngine: useEnhancedMode
+          useEnhancedEngine: true
         });
       }).then(res => {
         console.log('[Session] Session created successfully:', res.data);
         const newSessionId = res.data.data.id;
         setSessionId(newSessionId);
-        
-        // Problem Bank sessions are always normal tutoring sessions (not assessments)
-        setMessages([{
+
+        const initial = res.data.data.initialResponse || res.data.openingTutorResponse;
+        const preview = (loadedProblemData.description || '').trim();
+        const short = preview.length > 220 ? `${preview.slice(0, 220)}…` : preview;
+        const fallbackGreeting = `Hi! I’m your Socratic tutor. I see we’re working on: "${short}". Let’s tackle this together—what are we trying to find or show, and what’s a small first step you might try?`;
+        const opening = initial || fallbackGreeting;
+        setMessages([{ 
           role: 'assistant',
-          content: "I'm here to help you think through this problem. What's your first thought?",
+          content: opening,
           timestamp: new Date(),
           questionType: 'clarification',
           depthLevel: 1
         }]);
       }).catch(err => {
         console.error('[Session] Failed to load problem or create session:', err.response?.data || err.message);
-        // If loading a problem or creating a session fails, return user to New Session flow
-        navigate('/new');
+        // Keep user on the session page without injecting fallback tutor messages
+        setProblem({ description: 'Custom Socratic session', type: 'math', difficultyLevel: 1 });
       });
     } else {
       console.log('[Session] No valid ID or submittedProblemId, staying on loading...');
     }
-  }, [id, searchParams, navigate, useEnhancedMode]);
+  }, [id, searchParams, navigate, useEnhancedMode, location]);
 
   useEffect(() => {
     if (messagesEndRef.current && typeof messagesEndRef.current.scrollIntoView === 'function') {
@@ -330,33 +399,29 @@ export default function Session() {
   }, [messages]);
 
   // Fetch behavioral learning data when sessionId is available
-  const fetchBehavioralData = async () => {
+  const fetchBehavioralData = useCallback(async () => {
     if (!sessionId) return;
-    
     setLoadingBehavioralData(true);
     try {
-      const [journey, compliance, report] = await Promise.all([
+      const [journey, report] = await Promise.all([
         getSessionJourney(sessionId).catch(() => []),
-        getSessionCompliance(sessionId).catch(() => null),
         getSessionReport(sessionId).catch(() => null),
       ]);
-      
       setJourneyData(journey);
-      setComplianceData(compliance);
       setReportData(report);
     } catch (err) {
       console.error('Failed to load behavioral data:', err);
     } finally {
       setLoadingBehavioralData(false);
     }
-  };
+  }, [sessionId]);
 
   // Fetch behavioral data when switching to Replay or Insights tab
   useEffect(() => {
     if ((activeTab === 'replay' || activeTab === 'insights') && sessionId && journeyData.length === 0) {
       fetchBehavioralData();
     }
-  }, [activeTab, sessionId]);
+  }, [activeTab, sessionId, journeyData, fetchBehavioralData]);
 
   const sendMessage = async () => {
     if (!input.trim() || !sessionId) return;
@@ -404,28 +469,24 @@ export default function Session() {
           setAnalytics(enhancedResponse.analytics);
         }
       } else {
-        // Use basic endpoint
+        // Use basic endpoint (still Socratic; no fallback)
         await api.post(`/sessions/${sessionId}/interactions`, {
           type: 'question',
           content: input,
         });
 
-        // Basic response (you'd implement actual Socratic response here)
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: 'Great question! Let me guide you... What do you think the next step should be?',
+          content: 'Can you explain what you tried and where your thinking hit a snag? What do you think the problem is asking you to find?',
           timestamp: new Date(),
+          questionType: 'clarification',
+          depthLevel: 1
         }]);
       }
 
     } catch (err) {
       console.error('Failed to send message:', err);
-      // Fallback response
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'I understand your thinking. Can you tell me more about your approach?',
-        timestamp: new Date(),
-      }]);
+      // Do not inject fallback tutor messages; keep conversation state unchanged
     } finally {
       setLoading(false);
     }
@@ -439,7 +500,8 @@ export default function Session() {
       setShowEndModal(true);
     } catch (err) {
       console.error(err);
-      navigate('/dashboard');
+      // Keep user in the session and still allow ending without redirect
+      setShowEndModal(true);
     }
   };
 
@@ -693,7 +755,7 @@ export default function Session() {
                   {reportData && <ReasoningScoreCard report={reportData} />}
                   {reportData && <TransferGauge report={reportData} />}
                   {reportData && <CalibrationCard report={reportData} />}
-                  {complianceData && <ComplianceScoreCard compliance={complianceData} />}
+                  {/* Compliance card removed; strict Socratic mode without direct-answer compliance */}
                 </div>
 
                 {/* Concept Map */}
@@ -705,7 +767,7 @@ export default function Session() {
                 )}
 
                 {/* Empty State */}
-                {!reportData && !complianceData && (
+                {!reportData && (
                   <div className="flex items-center justify-center min-h-[400px]">
                     <div className="bg-white/80 backdrop-blur rounded-2xl p-12 text-center max-w-md border-2 border-amber-200 shadow-lg">
                       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">

@@ -20,7 +20,7 @@ interface RoomMessage {
 }
 
 export default function Collaboration() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const token = localStorage.getItem('token');
   const { socket, connected } = useSocket(token);
   

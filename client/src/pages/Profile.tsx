@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../AuthContext';
 import api from '../api';
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [success, setSuccess] = useState('');

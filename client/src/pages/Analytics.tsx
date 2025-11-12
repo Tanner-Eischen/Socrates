@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
 import api from '../api';
 import {
   LineChart,
@@ -11,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { TrendingUp, Target, Clock, Award, Brain, Zap } from 'lucide-react';
@@ -58,7 +55,6 @@ interface AdaptiveLearningData {
 }
 
 export default function Analytics() {
-  const { user, logout } = useAuth();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [adaptiveData, setAdaptiveData] = useState<AdaptiveLearningData | null>(null);
   const [loading, setLoading] = useState(true);

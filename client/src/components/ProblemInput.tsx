@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { submitProblemImage, submitProblemText } from '../api';
+import { submitProblemImage, submitProblemText } from '../api';
 import { Upload, BookOpen, Play, X, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
