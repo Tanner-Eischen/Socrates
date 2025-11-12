@@ -45,22 +45,22 @@ class SocratesServer {
     this.app = express();
     this.server = createServer(this.app);
     
-    // CRITICAL: Register OPTIONS handler FIRST, before ANYTHING else
-    this.app.options('*', (req, res, next) => {
-      try {
-        const origin = req.headers.origin;
-        const allowedOrigin = origin || '*';
-        logger.debug('OPTIONS preflight request (constructor)', { origin, allowedOrigin, path: req.path });
-        res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Max-Age', '86400');
-        return res.status(204).end();
-      } catch (error) {
-        logger.error('OPTIONS handler error (constructor)', { error });
+    // CRITICAL: Add CORS headers to ALL requests FIRST
+    this.app.use((req, res, next) => {
+      const origin = req.headers.origin;
+      const allowedOrigin = origin || '*';
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      
+      // Handle OPTIONS preflight immediately
+      if (req.method === 'OPTIONS') {
+        logger.info('OPTIONS preflight request', { origin, allowedOrigin, path: req.path });
         return res.status(204).end();
       }
+      next();
     });
     
     // Configure Socket.IO CORS
@@ -125,25 +125,7 @@ class SocratesServer {
 
   // Setup middleware
   private setupMiddleware(): void {
-    // CRITICAL: Handle OPTIONS requests FIRST, before ANY other middleware
-    this.app.options('*', (req, res, next) => {
-      try {
-        const origin = req.headers.origin;
-        const allowedOrigin = origin || '*';
-        logger.debug('OPTIONS preflight request', { origin, allowedOrigin, path: req.path });
-        res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-        return res.status(204).end();
-      } catch (error) {
-        logger.error('OPTIONS handler error', { error });
-        return res.status(204).end();
-      }
-    });
-
-    // CORS - must be before other middleware
+    // CORS middleware (already handled in constructor, but keep cors() for additional support)
     // Configure CORS to allow requests from frontend
     // When credentials are enabled, browsers require the actual origin (not '*')
     let expressCorsOrigin: any;
