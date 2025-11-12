@@ -65,18 +65,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('token', data.token);
       setUser(data.user);
       setLoading(false);
-    } catch (error) {
-      // If login fails, try to register a test user
-      try {
-        const { data } = await api.post('/auth/register', {
-          email: 'test@example.com',
-          password: 'password123',
-          name: 'Test User',
-        });
-        localStorage.setItem('token', data.token);
-        setUser(data.user);
-      } catch (registerError) {
-        // If both fail, use mock user (backend will bypass auth in dev mode)
+    } catch (error: any) {
+      // If login fails (401), try to register a test user
+      // This handles the case where user doesn't exist in production database
+      if (error?.response?.status === 401) {
+        try {
+          const { data } = await api.post('/auth/register', {
+            email: 'test@example.com',
+            password: 'password123',
+            name: 'Test User',
+          });
+          localStorage.setItem('token', data.token);
+          setUser(data.user);
+          setLoading(false);
+          return;
+        } catch (registerError: any) {
+          // If registration fails with 409 (user exists), try login again
+          // This handles race conditions or password mismatch
+          if (registerError?.response?.status === 409) {
+            console.warn('Test user already exists but login failed. Please register manually or check password.');
+            // Don't auto-login, let user register manually
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      
+      // If all else fails, use mock user only in development
+      if (import.meta.env.DEV) {
         console.warn('Auto-login failed, using mock user. Backend must be in development mode.');
         const devUser: User = {
           id: 'dev-user-123',
@@ -85,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: 'student',
         };
         setUser(devUser);
+      } else {
+        // In production, don't auto-login - require manual registration
+        console.info('Auto-login disabled in production. Please register or login manually.');
       }
       setLoading(false);
     }

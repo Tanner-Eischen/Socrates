@@ -11,6 +11,7 @@ import TransferGauge from '../components/TransferGauge';
 import CalibrationCard from '../components/CalibrationCard';
 // ComplianceScoreCard removed in strict mode
 import { MessageCircle, Play, BarChart3, ArrowLeft, X, Send, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface EnhancedMessage {
   role: 'user' | 'assistant';
@@ -451,22 +452,31 @@ export default function Session() {
           }
         });
 
-        const enhancedResponse = response.data;
+        // Backend returns: { success, message, tutorResponse, questionType, depthLevel, targetedConcepts, analytics, ... }
+        const responseData = response.data;
+        
+        // Extract tutor response - backend returns it directly at response.data.tutorResponse
+        const tutorResponse = responseData?.tutorResponse;
+        
+        if (!tutorResponse) {
+          console.error('No tutor response found in response:', responseData);
+          throw new Error('No tutor response received from server');
+        }
         
         const assistantMessage: EnhancedMessage = {
           role: 'assistant',
-          content: enhancedResponse.tutorResponse,
+          content: tutorResponse,
           timestamp: new Date(),
-          questionType: enhancedResponse.questionType,
-          depthLevel: enhancedResponse.depthLevel,
-          targetedConcepts: enhancedResponse.targetedConcepts
+          questionType: responseData?.questionType,
+          depthLevel: responseData?.depthLevel,
+          targetedConcepts: responseData?.targetedConcepts
         };
 
         setMessages(prev => [...prev, assistantMessage]);
         
-        // Update analytics
-        if (enhancedResponse.analytics) {
-          setAnalytics(enhancedResponse.analytics);
+        // Update analytics if provided
+        if (responseData?.analytics) {
+          setAnalytics(responseData.analytics);
         }
       } else {
         // Use basic endpoint (still Socratic; no fallback)
@@ -484,9 +494,27 @@ export default function Session() {
         }]);
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to send message:', err);
-      // Do not inject fallback tutor messages; keep conversation state unchanged
+      
+      // Show user-friendly error message
+      const errorMessage = err?.response?.data?.message || 
+                          err?.message || 
+                          'Failed to get tutor response. Please try again.';
+      
+      // Add error message to chat so user knows what happened
+      const errorAssistantMessage: EnhancedMessage = {
+        role: 'assistant',
+        content: `I'm having trouble processing that right now. ${errorMessage} Could you try rephrasing your question?`,
+        timestamp: new Date(),
+        questionType: 'clarification',
+        depthLevel: 1
+      };
+      
+      setMessages(prev => [...prev, errorAssistantMessage]);
+      
+      // Show toast notification
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

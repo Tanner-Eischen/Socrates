@@ -6,6 +6,7 @@ import { authenticate, requireOwnership, optionalAuthMiddleware, AuthenticatedRe
 import { rateLimiter } from '../middleware/rateLimiter';
 import { asyncHandler } from '../middleware/errorHandler';
 import { logger } from '../middleware/logger';
+import { isDevelopment } from '../config/environment';
 import Joi from 'joi';
 import { SocraticEngine } from '../../socratic-engine'; // ADDED FOR ENHANCED FEATURES
 
@@ -222,7 +223,7 @@ router.post('/',
       if (submittedProblemId) {
         const submittedProblem = ProblemProcessingServiceInstance.getSubmittedProblem(
           submittedProblemId,
-          req.user?.id || 'dev-user-123'
+          req.user?.id || 'demo-user'
         );
 
       if (!submittedProblem) {
@@ -246,20 +247,51 @@ router.post('/',
       sessionData.difficultyLevel = difficultyMap[submittedProblem.parsedProblem.difficulty] || 1;
 
       logger.info('Creating session from submitted problem', {
-        userId: req.user?.id || 'dev-user-123',
+        userId: req.user?.id || 'demo-user',
         submittedProblemId,
         problemType: sessionData.problemType,
       });
     }
 
     const session = await SessionService.create({
-      userId: req.user?.id || 'dev-user-123',
+      userId: req.user?.id || 'demo-user',
       ...sessionData,
     });
 
+    // Build opening tutor greeting using SocraticEngine for ALL sessions.
+    // Assessment problems use assessment mode; all others use standard startProblem.
+    let openingTutorResponse = '';
+    try {
+      const problemText = session.problemText?.trim() || '';
+      const problemId = session.problemId || '';
+      const problem = problemId ? getProblemById(problemId) : undefined;
+
+      const engine = new SocraticEngine(undefined, true);
+      engine.initializeSession(session.id);
+
+      if (problem && problem.isAssessment) {
+        openingTutorResponse = await engine.startAssessmentProblem(problemText, problem.expectedAnswer);
+      } else {
+        // Use SocraticEngine to generate the opening prompt for non-assessment sessions
+        openingTutorResponse = await engine.startProblem(problemText, { studentFirst: false });
+      }
+
+      // Guard against empty responses
+      if (!openingTutorResponse || openingTutorResponse.trim().length === 0) {
+        throw new Error('Empty opening response from SocraticEngine');
+      }
+    } catch (e) {
+      // Fallback to a safe greeting if anything goes wrong
+      const preview = (session.problemText || '').trim();
+      const clipped = preview.length > 220 ? `${preview.slice(0, 220)}…` : preview;
+      openingTutorResponse = clipped
+        ? `Hi! I’m your Socratic tutor. I see we’re working on: "${clipped}". What are we trying to find or show, and what’s a small first step you might try?`
+        : 'Hi! I’m your Socratic tutor. Let’s confirm the problem and start with a small first step—what is this asking us to find or show?';
+    }
+
     // Track session creation (non-blocking)
     AnalyticsService.trackEvent({
-      userId: req.user?.id || 'dev-user-123',
+      userId: req.user?.id || 'demo-user',
       sessionId: session.id,
       eventType: 'session_created',
       eventData: {
@@ -281,7 +313,9 @@ router.post('/',
     return res.status(201).json({
       success: true,
       message: 'Session created successfully',
-      data: session,
+      data: { ...session, initialResponse: openingTutorResponse },
+      // Also include a top-level field to support current client reading patterns
+      openingTutorResponse,
     });
   })
 );
@@ -716,13 +750,14 @@ router.post('/:id/enhanced-interactions',
 
     try {
       // Initialize enhanced Socratic engine
-      // Check for strict mode header
-      const strictMode = req.headers['x-strict-socratic'] === 'true' || 
-                         process.env.STRICT_SOCRATIC_MODE === 'true';
-      const engine = new SocraticEngine(undefined, strictMode);
+      const engine = new SocraticEngine(undefined, true);
       
       // Initialize session with problem
       engine.initializeSession(id);
+      
+      // Get existing interactions to determine if this is a new session
+      const existingInteractions = await SessionService.getInteractions(id);
+      const hasExistingInteractions = existingInteractions.length > 0;
       
       // Check if this session is using an assessment problem
       let problem: Problem | undefined;
@@ -730,24 +765,25 @@ router.post('/:id/enhanced-interactions',
         problem = getProblemById(session.problemId);
       }
       
-      if (problem && problem.isAssessment) {
-        // Start in assessment mode with expected answer
-        await engine.startAssessmentProblem(session.problemText, problem.expectedAnswer);
-        logger.info('Started session in assessment mode', {
-          sessionId: id,
-          problemId: problem.id,
-          hasExpectedAnswer: !!problem.expectedAnswer
-        });
+      // Set the problem text in engine (needed for context even when restoring history)
+      (engine as any).problem = session.problemText;
+      
+      // Only start the problem if this is the first interaction
+      if (!hasExistingInteractions) {
+        // First interaction - initialize the problem
+        if (problem && problem.isAssessment) {
+          await engine.startAssessmentProblem(session.problemText, problem.expectedAnswer);
+          logger.info('Started session in assessment mode', {
+            sessionId: id,
+            problemId: problem.id,
+            hasExpectedAnswer: !!problem.expectedAnswer
+          });
+        } else {
+          // Start in normal tutoring mode with student-first start
+          await engine.startProblem(session.problemText, { studentFirst: true });
+        }
       } else {
-        // Start in normal tutoring mode
-        await engine.startProblem(session.problemText);
-      }
-      
-      // CRITICAL FIX: Restore conversation history from database
-      const existingInteractions = await SessionService.getInteractions(id);
-      
-      if (existingInteractions.length > 0) {
-        // Build conversation history from stored interactions
+        // Restore conversation history for existing session
         const conversationHistory = [];
         
         for (const interaction of existingInteractions) {
@@ -766,12 +802,29 @@ router.post('/:id/enhanced-interactions',
           }
         }
         
-        // Restore conversation into engine (no API calls, just rebuilding state)
-        engine.restoreConversationHistory(conversationHistory);
+        // Restore conversation into engine
+        if (conversationHistory.length > 0) {
+          engine.restoreConversationHistory(conversationHistory);
+          logger.info('Restored conversation history', {
+            sessionId: id,
+            messageCount: conversationHistory.length
+          });
+        }
       }
       
       // Get tutor response using enhanced engine with full context
-      const tutorResponse = await engine.respondToStudent(value.content);
+      let tutorResponse: string;
+      try {
+        tutorResponse = await engine.respondToStudent(value.content);
+      } catch (engineRespondError) {
+        logger.warn('Engine failed to respond, using safe fallback', {
+          sessionId: id,
+          error: engineRespondError
+        });
+        // Safe fallback: keep the conversation going without failing the request
+        const fallback = 'Let’s take a tiny step: what is the goal of this problem, and what’s one small move you could try toward it?';
+        tutorResponse = fallback;
+      }
       
       // Get enhanced metadata from engine
       const analytics = engine.generateAnalytics();
@@ -779,10 +832,9 @@ router.post('/:id/enhanced-interactions',
       const questionSequence = engine.getQuestionTypeSequence();
       const currentQuestionType = questionSequence[questionSequence.length - 1];
       
-      // Assess if student is struggling
+      // Assess if student is struggling (client-provided confidence only)
       const studentConfidence = value.confidenceLevel || 0.5;
       const isStruggling = studentConfidence < 0.3;
-      const hasDirectAnswer = engine.containsDirectAnswer(tutorResponse);
       const isUnderstandingCheck = engine.getConversationHistory().slice(-1)[0]?.isUnderstandingCheck || false;
 
       // Save student interaction
@@ -852,10 +904,9 @@ router.post('/:id/enhanced-interactions',
         isAssessmentMode: engine.isInAssessmentMode(),
         assessmentComplete,
         assessmentCorrect,
-        // Flags - only show when relevant
+        // Flags - only show relevant learning state (no direct-answer detection)
         flags: {
           struggling: isStruggling,
-          directAnswer: hasDirectAnswer,
           understandingCheck: isUnderstandingCheck,
         },
         analytics: {
@@ -873,17 +924,24 @@ router.post('/:id/enhanced-interactions',
         },
       });
 
-    } catch (engineError) {
+    } catch (engineError: any) {
+      const errorMessage = engineError?.message || 'Unknown error';
+      const errorStack = engineError?.stack;
+      
       logger.error('Enhanced interaction failed', {
         userId: req.user?.id || 'demo-user',
         sessionId: id,
-        error: engineError,
+        error: errorMessage,
+        stack: errorStack,
+        errorDetails: engineError,
       });
 
+      // Return a helpful error response
       return res.status(500).json({
         success: false,
         message: 'Failed to process enhanced interaction',
-        error: process.env.NODE_ENV === 'development' ? engineError : undefined,
+        error: isDevelopment() ? errorMessage : 'Internal server error',
+        ...(isDevelopment() && { stack: errorStack }),
       });
     }
   })

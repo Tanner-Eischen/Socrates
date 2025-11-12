@@ -1,131 +1,37 @@
-// Complete Socratic Engine - Standalone Implementation
-// Replaces the existing socratic-engine.ts with all enhancements built-in
+/**
+ * Socratic Engine - Main Implementation
+ * 
+ * This file maintains backward compatibility while using modular components.
+ * Types and utilities have been extracted to separate modules but are re-exported here.
+ */
 
 import { BehavioralAssessment } from './types';
 import { chatCompletion } from './engine/openai-client';
 
-// Enhanced Types (can also be added to types.ts)
-export enum SocraticQuestionType {
-  CLARIFICATION = "clarification",        // "What do you mean by...?"
-  ASSUMPTIONS = "assumptions",            // "What assumptions are you making?"
-  EVIDENCE = "evidence",                  // "What evidence supports this?"
-  PERSPECTIVE = "perspective",            // "How might someone disagree?"
-  IMPLICATIONS = "implications",          // "What might happen if...?"
-  META_QUESTIONING = "meta_questioning"   // "Why is this question important?"
-}
+// Import types explicitly
+import type {
+  ConversationDepthTracker,
+  SocraticAssessment,
+  EnhancedMessage,
+  EnhancedStudentProfile,
+  SessionPerformance,
+} from './engine/types';
+import {
+  SocraticQuestionType,
+  DialogueLevel,
+  CycleStage,
+  DifficultyLevel,
+} from './engine/types';
 
-// New: Dialogue Level and Socratic Cycle tracking
-export enum DialogueLevel {
-  DIALOGUE = "dialogue",               // Level 1: reciprocal questioning
-  STRATEGIC_DISCOURSE = "strategic_discourse", // Level 2: shaping, probing, refining
-  META_DISCOURSE = "meta_discourse"     // Level 3: rules, collaboration, reflection
-}
+// Re-export types from centralized location (for backward compatibility)
+export * from './engine/types';
 
-export enum CycleStage {
-  WONDER_RECEIVE = "wonder_receive",          // Listen to premise/view
-  REFLECT = "reflect",                        // Identify areas for inquiry
-  REFINE_CROSS_EXAMINE = "refine_cross_examine", // Challenge assumptions/test logic
-  RESTATE = "restate",                        // Student articulates updated understanding
-  REPEAT = "repeat"                           // Iterate to deepen understanding
-}
-
-export interface ConversationDepthTracker {
-  currentDepth: number;
-  maxDepthReached: number;
-  conceptualConnections: string[];
-  shouldDeepenInquiry: boolean;
-  suggestedNextLevel: number;
-  questionType: SocraticQuestionType;
-  dialogueLevel: DialogueLevel;
-  cycleStage: CycleStage;
-}
-
-export interface SocraticAssessment {
-  confidenceLevel: number;
-  misconceptions: string[];
-  readinessForAdvancement: boolean;
-  conceptualUnderstanding: number;
-  depthOfThinking: number;
-}
-
-export interface EnhancedMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  questionType?: SocraticQuestionType;
-  depthLevel?: number;
-  effectiveness?: number;
-  targetedConcepts?: string[];
-  studentConfidence?: number;
-  isUnderstandingCheck?: boolean;
-  dialogueLevel?: DialogueLevel;
-  cycleStage?: CycleStage;
-  // Behavioral assessment fields
-  confidenceDelta?: number;
-  reasoningScore?: number;
-  teachBackScore?: number;
-  transferAttempt?: { problemId: string; success: boolean };
-  predictedConfidence?: number;
-  breakthroughMoment?: boolean;
-}
-
-export interface EnhancedStudentProfile {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  performanceHistory: Array<{
-    sessionId: string;
-    masteryScore: number;
-    completionRate: number;
-    conceptsLearned: string[];
-    hintsUsed: number;
-    struggledConcepts: string[];
-  }>;
-  knowledgeGaps: string[];
-  learningStyle: 'visual' | 'auditory' | 'kinesthetic';
-  engagementMetrics?: {
-    averageResponseTime: number;
-    totalInteractions: number;
-    engagementScore: number;
-  };
-  // Enhanced properties
-  preferredQuestioningStyle: 'direct' | 'exploratory' | 'analogical';
-  conceptualConnections: Map<string, string[]>;
-  motivationalTriggers: string[];
-  cognitiveLoadPreference: 'low' | 'medium' | 'high';
-  questionResponseHistory: {
-    questionType: SocraticQuestionType;
-    effectiveness: number;
-    responseTime: number;
-    comprehensionLevel: number;
-    timestamp: Date;
-  }[];
-}
-
-export enum DifficultyLevel {
-  BEGINNER = "beginner",
-  INTERMEDIATE = "intermediate", 
-  ADVANCED = "advanced"
-}
-
-export interface SessionPerformance {
-  sessionId: string;
-  startTime: Date;
-  endTime: Date;
-  totalInteractions: number;
-  problemsSolved: number;
-  averageResponseTime: number;
-  strugglingTurns: number;
-  difficultyLevel: DifficultyLevel;
-  engagementScore: number;
-  completionRate: number;
-  conceptsExplored: string[];
-  masteryScore: number;
-  conceptsLearned: string[];
-  hintsUsed: number;
-  struggledConcepts: string[];
-}
+// Import modular utilities
+import { computeDialogueLevel, computeCycleStage } from './engine/dialogue-utils';
+import { PromptManager } from './engine/prompts';
+import { QuestionSelector } from './engine/question-selector';
+import { StudentAssessor } from './engine/student-assessor';
+import { DepthTrackerManager } from './engine/depth-tracker';
 
 // Complete Socratic Engine Implementation
 export class SocraticEngine {
@@ -139,12 +45,18 @@ export class SocraticEngine {
   private strugglingTurns: number = 0;
   private lastResponseTime: number = 0;
   
-  // Enhanced properties
-  private depthTracker!: ConversationDepthTracker;
+  // Enhanced properties - using modular components
+  private depthTrackerManager: DepthTrackerManager;
   private questionTypeSequence: SocraticQuestionType[] = [];
-  private metacognitivePrompts!: Map<string, string[]>;
-  private conceptualFramework!: Map<string, string[]>;
+  private promptManager: PromptManager;
+  private questionSelector: QuestionSelector;
+  private studentAssessor: StudentAssessor;
   private sessionManager?: any;
+  
+  // Keep depthTracker for backward compatibility
+  private get depthTracker(): ConversationDepthTracker {
+    return this.depthTrackerManager.getTracker();
+  }
   private lastUnderstandingCheckTurn: number = 0;
   private understandingCheckCount: number = 0;
   private probeType?: 'teachback' | 'transfer' | 'question';
@@ -161,95 +73,19 @@ export class SocraticEngine {
   constructor(sessionManager?: any, strictMode: boolean = false) {
     this.sessionManager = sessionManager;
     this.strictMode = strictMode;
-    this.initializeEnhancedFeatures();
+    this.promptManager = new PromptManager();
+    this.questionSelector = new QuestionSelector();
+    this.studentAssessor = new StudentAssessor();
+    this.depthTrackerManager = new DepthTrackerManager();
   }
 
-  // Initialize enhanced features
-  private initializeEnhancedFeatures(): void {
-    this.initializeMetacognitivePrompts();
-    this.initializeConceptualFramework();
-    this.depthTracker = {
-      currentDepth: 1,
-      maxDepthReached: 1,
-      conceptualConnections: [],
-      shouldDeepenInquiry: false,
-      suggestedNextLevel: 1,
-      questionType: SocraticQuestionType.CLARIFICATION,
-      dialogueLevel: DialogueLevel.DIALOGUE,
-      cycleStage: CycleStage.WONDER_RECEIVE
-    };
-  }
-
-  private initializeMetacognitivePrompts(): void {
-    this.metacognitivePrompts = new Map([
-      ['processReflection', [
-        "How did you decide to take that approach?",
-        "What was your thinking process here?",
-        "What made you choose this method?"
-      ]],
-      ['confidenceCheck', [
-        "How confident are you in this answer? What makes you feel that way?",
-        "On a scale of 1-10, how sure are you about this step?",
-        "What part of this solution feels most solid to you?"
-      ]],
-      ['strategyAwareness', [
-        "What strategy are you using here? Have you used it before?",
-        "Is this approach similar to problems you've solved before?",
-        "What other methods could work for this problem?"
-      ]],
-      ['errorAnalysis', [
-        "What do you think might have led to this mistake?",
-        "If you were to start over, what would you do differently?",
-        "What could help you avoid this error next time?"
-      ]]
-    ]);
-  }
-
-  // Determine dialogue level from question type and context
+  // Delegate to modular utilities
   private computeDialogueLevel(qt: SocraticQuestionType, isUnderstandingCheck?: boolean): DialogueLevel {
-    if (qt === SocraticQuestionType.META_QUESTIONING || isUnderstandingCheck) {
-      return DialogueLevel.META_DISCOURSE;
-    }
-    if (
-      qt === SocraticQuestionType.CLARIFICATION ||
-      qt === SocraticQuestionType.ASSUMPTIONS ||
-      qt === SocraticQuestionType.EVIDENCE ||
-      qt === SocraticQuestionType.PERSPECTIVE ||
-      qt === SocraticQuestionType.IMPLICATIONS
-    ) {
-      return DialogueLevel.STRATEGIC_DISCOURSE;
-    }
-    return DialogueLevel.DIALOGUE;
+    return computeDialogueLevel(qt, isUnderstandingCheck);
   }
 
-  // Determine Socratic cycle stage for the tutor's current turn
   private computeCycleStage(qt: SocraticQuestionType, isUnderstandingCheck?: boolean, initial?: boolean): CycleStage {
-    if (initial) return CycleStage.WONDER_RECEIVE;
-    if (isUnderstandingCheck) return CycleStage.RESTATE;
-    if (
-      qt === SocraticQuestionType.CLARIFICATION ||
-      qt === SocraticQuestionType.ASSUMPTIONS ||
-      qt === SocraticQuestionType.EVIDENCE ||
-      qt === SocraticQuestionType.PERSPECTIVE ||
-      qt === SocraticQuestionType.IMPLICATIONS
-    ) {
-      return CycleStage.REFINE_CROSS_EXAMINE;
-    }
-    if (qt === SocraticQuestionType.META_QUESTIONING) {
-      return CycleStage.REFLECT;
-    }
-    return CycleStage.REPEAT;
-  }
-
-  private initializeConceptualFramework(): void {
-    this.conceptualFramework = new Map([
-      ['algebra', ['variables', 'equations', 'solving', 'substitution', 'elimination']],
-      ['geometry', ['shapes', 'area', 'perimeter', 'angles', 'theorems']],
-      ['calculus', ['derivatives', 'integrals', 'limits', 'rates', 'optimization']],
-      ['statistics', ['mean', 'median', 'distribution', 'probability', 'correlation']],
-      ['arithmetic', ['addition', 'subtraction', 'multiplication', 'division']],
-      ['fractions', ['numerator', 'denominator', 'equivalent', 'simplify']]
-    ]);
+    return computeCycleStage(qt, isUnderstandingCheck, initial);
   }
 
   // Initialize session with enhanced features
@@ -287,9 +123,9 @@ export class SocraticEngine {
     // Student-first mode: do not generate an initial assistant question.
     if (options?.studentFirst) {
       // Initialize tracker minimally for a fresh dialogue.
-      this.depthTracker.questionType = initialQuestionType;
-      this.depthTracker.dialogueLevel = DialogueLevel.DIALOGUE;
-      this.depthTracker.cycleStage = this.computeCycleStage(initialQuestionType, false, true);
+      this.depthTrackerManager.updateQuestionType(initialQuestionType);
+      this.depthTrackerManager.updateDialogueLevel(DialogueLevel.DIALOGUE);
+      this.depthTrackerManager.updateCycleStage(this.computeCycleStage(initialQuestionType, false, true));
       // Do not push assistant message; let the student speak first.
       return '';
     }
@@ -329,8 +165,12 @@ export class SocraticEngine {
     this.conversation.push(enhancedMessage);
     this.questionTypeSequence.push(initialQuestionType);
     // Reflect initial metadata into tracker
-    this.depthTracker.dialogueLevel = enhancedMessage.dialogueLevel!;
-    this.depthTracker.cycleStage = enhancedMessage.cycleStage!;
+    if (enhancedMessage.dialogueLevel) {
+      this.depthTrackerManager.updateDialogueLevel(enhancedMessage.dialogueLevel);
+    }
+    if (enhancedMessage.cycleStage) {
+      this.depthTrackerManager.updateCycleStage(enhancedMessage.cycleStage);
+    }
     
     return polishedResponse;
   }
@@ -592,8 +432,12 @@ Start by asking for their answer in a warm, encouraging way.`;
     this.conversation.push(enhancedMessage);
     this.questionTypeSequence.push(nextQuestionType);
     // Update tracker with dialogue metadata
-    this.depthTracker.dialogueLevel = enhancedMessage.dialogueLevel!;
-    this.depthTracker.cycleStage = enhancedMessage.cycleStage!;
+    if (enhancedMessage.dialogueLevel) {
+      this.depthTrackerManager.updateDialogueLevel(enhancedMessage.dialogueLevel);
+    }
+    if (enhancedMessage.cycleStage) {
+      this.depthTrackerManager.updateCycleStage(enhancedMessage.cycleStage);
+    }
     
     const responseTime = Date.now() - responseStartTime;
     this.updateStudentProfile(nextQuestionType, assessment, responseTime);
@@ -790,108 +634,23 @@ RESPOND NOW:`;
   }  
 
   private selectInitialQuestionType(problem: string): SocraticQuestionType {
-    if (problem.includes('solve') || problem.includes('find')) {
-      return SocraticQuestionType.CLARIFICATION;
-    }
-    if (problem.includes('why') || problem.includes('explain')) {
-      return SocraticQuestionType.EVIDENCE;
-    }
-    if (problem.includes('compare') || problem.includes('evaluate')) {
-      return SocraticQuestionType.PERSPECTIVE;
-    }
-    return SocraticQuestionType.CLARIFICATION;
+    return this.questionSelector.selectInitialQuestionType(problem);
   }
 
   private assessStudentResponse(response: string): SocraticAssessment {
-    const uncertaintyIndicators = [
-      /i don't know/i, 
-      /not sure/i, 
-      /confused/i, 
-      /don't understand/i,
-      /i need help/i,
-      /help me/i,
-      /stuck/i,
-      /lost/i,
-      /no idea/i,
-      /can't figure/i,
-      /don't get it/i
-    ];
-    
-    const confidenceIndicators = [
-      /i'm sure/i, 
-      /definitely/i, 
-      /certainly/i, 
-      /obviously/i,
-      /i know/i,
-      /i think i got it/i,
-      /that makes sense/i
-    ];
-
-    const misconceptionIndicators = [
-      /always/i, /never/i, /every time/i // Overgeneralization
-    ];
-
-    let confidenceLevel = 0.5; // Default moderate confidence
-    
-    // Adjust confidence based on language
-    if (uncertaintyIndicators.some(pattern => pattern.test(response))) {
-      confidenceLevel = 0.2;
-    } else if (confidenceIndicators.some(pattern => pattern.test(response))) {
-      confidenceLevel = 0.9;
-    } else if (/maybe|perhaps|might|could|guess|think so/i.test(response)) {
-      confidenceLevel = 0.6;
-    }
-    
-    // Lower confidence if response is very short (likely struggling)
-    if (response.trim().length < 10 && !confidenceIndicators.some(pattern => pattern.test(response))) {
-      confidenceLevel = Math.min(confidenceLevel, 0.4);
-    }
-
-    const misconceptions = misconceptionIndicators
-      .filter(pattern => pattern.test(response))
-      .map(() => 'Potential overgeneralization detected');
-
-    return {
-      confidenceLevel,
-      misconceptions,
-      readinessForAdvancement: confidenceLevel > 0.6 && misconceptions.length === 0,
-      conceptualUnderstanding: this.assessConceptualUnderstanding(response),
-      depthOfThinking: this.assessThinkingDepth(response)
-    };
+    return this.studentAssessor.assessStudentResponse(response);
   }
 
   private selectNextQuestionType(assessment: SocraticAssessment): SocraticQuestionType {
     const lastQuestionType = this.questionTypeSequence[this.questionTypeSequence.length - 1];
     
-    // Strategy: Cycle through question types based on student state
-    if (assessment.confidenceLevel < 0.3) {
-      // Student struggling - use clarification or break down assumptions
-      return Math.random() < 0.7 ? SocraticQuestionType.CLARIFICATION : SocraticQuestionType.ASSUMPTIONS;
+    // Use contextual selection if we have a previous question type
+    if (lastQuestionType) {
+      return this.questionSelector.selectContextualQuestionType(assessment, lastQuestionType);
     }
     
-    if (assessment.misconceptions.length > 0) {
-      // Address misconceptions with evidence-seeking
-      return SocraticQuestionType.EVIDENCE;
-    }
-    
-    if (assessment.readinessForAdvancement && this.depthTracker.currentDepth >= 3) {
-      // Student ready for deeper thinking
-      const advancedTypes = [SocraticQuestionType.IMPLICATIONS, SocraticQuestionType.PERSPECTIVE, SocraticQuestionType.META_QUESTIONING];
-      return advancedTypes[Math.floor(Math.random() * advancedTypes.length)];
-    }
-    
-    // Default progression through question types
-    const typeOrder = [
-      SocraticQuestionType.CLARIFICATION,
-      SocraticQuestionType.ASSUMPTIONS,
-      SocraticQuestionType.EVIDENCE,
-      SocraticQuestionType.PERSPECTIVE,
-      SocraticQuestionType.IMPLICATIONS,
-      SocraticQuestionType.META_QUESTIONING
-    ];
-    
-    const currentIndex = typeOrder.indexOf(lastQuestionType);
-    return typeOrder[(currentIndex + 1) % typeOrder.length];
+    // Otherwise use standard selection
+    return this.questionSelector.selectNextQuestionType(assessment);
   }
 
   /**
@@ -1050,20 +809,11 @@ RESPOND NOW:`;
   }
 
   private updateDepthTracker(assessment: SocraticAssessment, studentInput: string): void {
-    // Increase depth if student shows good understanding
-    if (assessment.readinessForAdvancement && assessment.depthOfThinking >= 3) {
-      this.depthTracker.currentDepth = Math.min(this.depthTracker.currentDepth + 1, 5);
-      this.depthTracker.maxDepthReached = Math.max(this.depthTracker.maxDepthReached, this.depthTracker.currentDepth);
-    }
-    
-    // Track conceptual connections mentioned
-    const concepts = this.extractConcepts(studentInput);
-    this.depthTracker.conceptualConnections.push(...concepts);
-    
-    // Determine if we should deepen inquiry
-    this.depthTracker.shouldDeepenInquiry = 
-      this.depthTracker.currentDepth < 4 && 
-      assessment.conceptualUnderstanding > 0.7;
+    this.depthTrackerManager.updateDepthTracker(
+      assessment,
+      studentInput,
+      (text: string) => this.extractConcepts(text)
+    );
   }
 
   private updateStruggling(assessment: SocraticAssessment): void {
@@ -1166,54 +916,24 @@ RESPOND NOW:`;
    * Select appropriate question type for understanding check
    */
   private selectUnderstandingCheckQuestionType(assessment: SocraticAssessment): SocraticQuestionType {
-    // Understanding checks should probe for deep comprehension
-    if (assessment.misconceptions.length > 0) {
-      return SocraticQuestionType.EVIDENCE; // Test if they can support their understanding
-    }
-    
-    if (assessment.confidenceLevel < 0.4) {
-      return SocraticQuestionType.CLARIFICATION; // Check basic understanding
-    }
-    
-    if (assessment.depthOfThinking >= 3) {
-      return SocraticQuestionType.IMPLICATIONS; // Test deeper understanding
-    }
-    
-    // Default to evidence-based check
-    return SocraticQuestionType.EVIDENCE;
+    return this.questionSelector.selectUnderstandingCheckQuestionType(assessment);
   }
 
   private assessConceptualUnderstanding(response: string): number {
-    const mathematicalTerms = ['equation', 'variable', 'solve', 'isolate', 'substitute', 'eliminate', 'derivative', 'integral', 'area', 'perimeter'];
-    const correctTermUsage = mathematicalTerms.filter(term => 
-      new RegExp(`\\b${term}\\b`, 'i').test(response)
-    ).length;
-    
-    return Math.min(correctTermUsage / 3, 1.0);
+    return this.studentAssessor.assessConceptualUnderstanding(response);
   }
 
   private assessThinkingDepth(response: string): number {
-    let depth = 1;
-    
-    if (response.length > 50) depth++; // Detailed response
-    if (/because|since|therefore|so that/i.test(response)) depth++; // Reasoning
-    if (/if.*then|when.*then/i.test(response)) depth++; // Conditional thinking
-    if (/similar to|different from|like|unlike/i.test(response)) depth++; // Comparative thinking
-    if (/what if|suppose|imagine/i.test(response)) depth++; // Hypothetical thinking
-    
-    return Math.min(depth, 5);
+    return this.studentAssessor.assessThinkingDepth(response);
   }
 
   private extractConcepts(text: string): string[] {
-    const concepts: string[] = [];
-    
-    for (const [category, terms] of this.conceptualFramework.entries()) {
-      if (terms.some(term => new RegExp(`\\b${term}\\b`, 'i').test(text))) {
-        concepts.push(category);
-      }
+    // Create a conceptual framework map from prompt manager
+    const framework = new Map<string, string[]>();
+    for (const category of this.promptManager.getAllDomains()) {
+      framework.set(category, this.promptManager.getConceptualFramework(category));
     }
-    
-    return [...new Set(concepts)];
+    return this.studentAssessor.extractConcepts(text, framework);
   }
 
   /**
@@ -1431,7 +1151,7 @@ RESPOND NOW:`;
 
   // Enhanced public methods
   public getDepthTracker(): ConversationDepthTracker {
-    return this.depthTracker;
+    return this.depthTrackerManager.getTracker();
   }
 
   public getQuestionTypeSequence(): SocraticQuestionType[] {
@@ -1439,9 +1159,7 @@ RESPOND NOW:`;
   }
 
   public getMetacognitivePrompt(category: string): string {
-    const prompts = this.metacognitivePrompts.get(category);
-    if (!prompts || prompts.length === 0) return "How are you thinking about this problem?";
-    return prompts[Math.floor(Math.random() * prompts.length)];
+    return this.promptManager.getMetacognitivePrompt(category);
   }
 
   /**
@@ -1792,34 +1510,7 @@ RESPOND NOW:`;
    * Computes behavioral depth level (1-5) based on assessment evidence
    */
   computeBehavioralDepthLevel(assessment: BehavioralAssessment): number {
-    let level = 1;
-
-    // Level 2: coherent explanation (teachBackScore >= 2)
-    if (assessment.teachBackScore >= 2) {
-      level = Math.max(level, 2);
-    }
-
-    // Level 3: transfer success once (transferSuccess = true)
-    if (assessment.transferSuccess) {
-      level = Math.max(level, 3);
-    }
-
-    // Level 4: generates quality question (reasoningScore >= 3 indicates deeper thinking)
-    if (assessment.reasoningScore >= 3) {
-      level = Math.max(level, 4);
-    }
-
-    // Level 5: connects cross-domain (reasoningScore >= 3 + concept bridge detected)
-    // Concept bridge is indicated by depthLevelEvidence >= 4
-    if (assessment.reasoningScore >= 3 && assessment.depthLevelEvidence >= 4) {
-      level = Math.max(level, 5);
-    }
-
-    // Update depth tracker
-    this.depthTracker.currentDepth = Math.max(this.depthTracker.currentDepth, level);
-    this.depthTracker.maxDepthReached = Math.max(this.depthTracker.maxDepthReached, level);
-
-    return level;
+    return this.depthTrackerManager.computeBehavioralDepthLevel(assessment);
   }
 
   /**
