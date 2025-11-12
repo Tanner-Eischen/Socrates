@@ -189,6 +189,31 @@ class SocratesServer {
     });
     this.app.use(globalLimiter);
 
+    // CORS test endpoint (before auth) - to verify CORS headers are being sent
+    this.app.get('/cors-test', (req, res) => {
+      const origin = req.headers.origin || '*';
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.json({ 
+        message: 'CORS test successful',
+        origin,
+        headers: req.headers,
+        timestamp: new Date().toISOString()
+      });
+    });
+
+    this.app.options('/cors-test', (req, res) => {
+      const origin = req.headers.origin || '*';
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      res.status(204).end();
+    });
+
     // Health check endpoint (before auth)
     this.app.get('/health', async (req, res) => {
       try {
