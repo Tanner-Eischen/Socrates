@@ -847,56 +847,7 @@ router.get('/sessions/:id/journey',
  *       401:
  *         description: Unauthorized
  */
-router.get('/sessions/:id/compliance',
-  authenticate,
-  requireOwnership('session'),
-  analyticsRateLimiter,
-  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { id } = req.params;
-
-    const session = await SessionService.findById(id);
-    if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: 'Session not found',
-      });
-    }
-
-    const interactions = await SessionService.getInteractions(id);
-
-    try {
-      // Initialize engine and replay conversation
-      const engine = new SocraticEngine();
-      engine.initializeSession(id);
-      await engine.startProblem(session.problemText);
-
-      // Replay interactions to rebuild state
-      for (const interaction of interactions) {
-        if (interaction.type === 'enhanced_student_response' || interaction.type === 'question' || interaction.type === 'student_response') {
-          await engine.respondToStudent(interaction.content);
-        }
-      }
-
-      // Get compliance metrics
-      const complianceMetrics = engine.getSocraticComplianceMetrics();
-
-      return res.json({
-        success: true,
-        data: complianceMetrics,
-      });
-    } catch (error) {
-      logger.error('Failed to generate compliance metrics', {
-        userId: req.user?.id,
-        sessionId: id,
-        error,
-      });
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to generate compliance metrics',
-      });
-    }
-  })
-);
+// Removed: Socratic compliance endpoint (no direct-answer detection in strict mode)
 
 /**
  * @swagger
