@@ -794,20 +794,27 @@ router.post('/:id/enhanced-interactions',
               timestamp: interaction.timestamp
             });
           } else if (interaction.type === 'enhanced_tutor_response' || interaction.type === 'answer') {
+            // Extract questionType and depthLevel from metadata
+            const questionType = interaction.metadata?.questionType;
+            const depthLevel = interaction.metadata?.depthLevel;
+            
             conversationHistory.push({
               role: 'assistant' as const,
               content: interaction.content,
-              timestamp: interaction.timestamp
+              timestamp: interaction.timestamp,
+              questionType: questionType,
+              depthLevel: depthLevel
             });
           }
         }
         
-        // Restore conversation into engine
+        // Restore conversation into engine (this will also restore questionTypeSequence)
         if (conversationHistory.length > 0) {
           engine.restoreConversationHistory(conversationHistory);
           logger.info('Restored conversation history', {
             sessionId: id,
-            messageCount: conversationHistory.length
+            messageCount: conversationHistory.length,
+            questionTypesRestored: conversationHistory.filter(m => m.questionType).length
           });
         }
       }
@@ -816,14 +823,22 @@ router.post('/:id/enhanced-interactions',
       let tutorResponse: string;
       try {
         tutorResponse = await engine.respondToStudent(value.content);
-      } catch (engineRespondError) {
-        logger.warn('Engine failed to respond, using safe fallback', {
+      } catch (engineRespondError: any) {
+        // Log the full error details to understand why LLM is failing
+        logger.error('Engine failed to respond', {
           sessionId: id,
-          error: engineRespondError
+          error: engineRespondError?.message || String(engineRespondError),
+          stack: engineRespondError?.stack,
+          hasApiKey: !!process.env.OPENAI_API_KEY,
+          apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7) || 'none'
         });
-        // Safe fallback: keep the conversation going without failing the request
-        const fallback = 'Let’s take a tiny step: what is the goal of this problem, and what’s one small move you could try toward it?';
-        tutorResponse = fallback;
+        
+        // Re-throw the error so the client knows what went wrong
+        // Don't silently fallback - we need to fix the root cause
+        throw new Error(
+          `Failed to generate tutor response: ${engineRespondError?.message || 'Unknown error'}. ` +
+          `Please check your OpenAI API key configuration.`
+        );
       }
       
       // Get enhanced metadata from engine

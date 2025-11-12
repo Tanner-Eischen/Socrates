@@ -542,6 +542,75 @@ router.get('/',
 
 /**
  * @swagger
+ * /api/v1/problems/submitted/{id}:
+ *   get:
+ *     summary: Get a submitted problem by ID
+ *     tags: [Problems]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Submitted problem retrieved successfully
+ *       404:
+ *         description: Submitted problem not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/submitted/:id',
+  optionalAuthMiddleware,
+  rateLimiter,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const submittedProblemId = req.params.id;
+    const userId = req.user?.id || 'demo-user';
+
+    try {
+      const submittedProblem = ProblemProcessingServiceInstance.getSubmittedProblem(
+        submittedProblemId,
+        userId
+      );
+
+      if (!submittedProblem) {
+        return res.status(404).json({
+          success: false,
+          message: 'Submitted problem not found or access denied',
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          id: submittedProblem.id,
+          type: submittedProblem.parsedProblem.problemType,
+          difficulty: submittedProblem.parsedProblem.difficulty,
+          description: submittedProblem.parsedProblem.content,
+          originalText: submittedProblem.parsedProblem.originalText,
+          mathConcepts: submittedProblem.parsedProblem.mathConcepts,
+          metadata: submittedProblem.parsedProblem.metadata,
+        },
+      });
+    } catch (error: any) {
+      logger.error('Error fetching submitted problem', {
+        error: error.message,
+        submittedProblemId,
+        userId,
+      });
+      
+      return res.status(404).json({
+        success: false,
+        message: 'Submitted problem not found',
+      });
+    }
+  })
+);
+
+/**
+ * @swagger
  * /api/problems/{id}:
  *   get:
  *     summary: Get a specific problem

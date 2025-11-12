@@ -39,8 +39,33 @@ export default function Login() {
         navigate('/dashboard', { replace: true });
       }
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 
-        (isRegistering ? 'Registration failed. Please try again.' : 'Login failed. Please try again.');
+      console.error('Login/Register error:', error);
+      
+      // Extract error message from various possible formats
+      let errorMessage = 'An unexpected error occurred';
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.status === 401) {
+        errorMessage = 'Invalid email or password';
+      } else if (error?.response?.status === 409) {
+        errorMessage = 'User with this email already exists';
+      } else if (error?.response?.status === 400) {
+        errorMessage = 'Invalid input. Please check your information and try again.';
+      } else if (error?.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (!error?.response) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else {
+        errorMessage = isRegistering 
+          ? 'Registration failed. Please try again.' 
+          : 'Login failed. Please try again.';
+      }
+      
       toast.error(errorMessage);
     } finally {
       setLoading(false);

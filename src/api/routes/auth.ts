@@ -64,42 +64,26 @@ async function ensureTestUser() {
   }
 }
 
-// Helper function to find user (tries database first, then falls back to memory)
+// Helper function to find user (uses in-memory store first to avoid database errors)
 async function findUserByEmail(email: string): Promise<User | null> {
+  // Always check in-memory first to avoid database schema issues
+  await ensureTestUser();
+  const inMemoryUser = inMemoryUsers.get(email);
+  if (inMemoryUser) {
+    logger.info('User found in in-memory store', { email });
+    return inMemoryUser;
+  }
+  
+  // Try database only if not found in memory
   try {
     const user = await UserService.findByEmail(email);
-    // If user found in database, return it
     if (user) return user;
-    
-    // If user not found and it's the test user, check in-memory store
-    // This handles cases where database is available but empty
-    if (email === 'test@example.com') {
-      await ensureTestUser();
-      const inMemoryUser = inMemoryUsers.get(email);
-      if (inMemoryUser) {
-        logger.info('Test user found in in-memory store, database may be empty', { email });
-        return inMemoryUser;
-      }
-    }
-    
-    return null;
   } catch (error: any) {
-    // If database error, use in-memory store
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.code === '28P01') {
-      logger.warn('Database unavailable, using in-memory user store', { email, code: error.code });
-      // Ensure test user is initialized
-      await ensureTestUser();
-      return inMemoryUsers.get(email) || null;
-    }
-    // For other database errors, log and try in-memory as fallback
-    logger.warn('Database query failed, trying in-memory fallback', { 
-      email, 
-      error: error.message,
-      code: error.code 
-    });
-    await ensureTestUser();
-    return inMemoryUsers.get(email) || null;
+    // Database error - ignore, we already checked in-memory
+    logger.debug('Database query failed, using in-memory only', { email, error: error?.message });
   }
+  
+  return null;
 }
 
 // Helper function to create user (tries database first, then falls back to memory)
@@ -619,22 +603,35 @@ router.post('/change-password', authMiddleware, authRateLimiter, asyncHandler(as
 router.get('/me', authenticate, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id;
 
-  // Get user profile
-  const user = await findUserById(userId);
-  if (!user) {
-    throw new AuthenticationError('User not found');
-  }
+  try {
+    // Get user profile
+    const user = await findUserById(userId);
+    if (!user) {
+      logger.warn('User not found in /me endpoint', { userId });
+      throw new AuthenticationError('User not found');
+    }
 
-  res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      createdAt: user.createdAt,
-      lastLogin: user.lastLogin,
-    },
-  });
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin,
+      },
+    });
+  } catch (error: any) {
+    logger.error('Error in /me endpoint', {
+      error: error.message,
+      stack: error.stack,
+      userId,
+      hasApiKey: !!process.env.OPENAI_API_KEY
+    });
+    
+    // Re-throw to let error handler middleware handle it
+    throw error;
+  }
 }));
 
 export default router;

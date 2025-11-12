@@ -17,8 +17,16 @@ export async function handleOpenAIError<T>(
   context: string = 'AI service'
 ): Promise<T> {
   try {
-    return await operation();
+    const result = await operation();
+    console.log(`[handleOpenAIError] ${context} succeeded`);
+    return result;
   } catch (error: any) {
+    console.error(`[handleOpenAIError] ${context} failed:`, {
+      error: error.message,
+      status: error.status || error.response?.status,
+      code: error.code,
+      type: error.constructor.name
+    });
     // Handle rate limiting
     if (error?.status === 429 || error?.response?.status === 429) {
       const retryAfter = error?.response?.headers?.['retry-after'] || 

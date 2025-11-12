@@ -293,6 +293,27 @@ Start by asking for their answer in a warm, encouraging way.`;
   async respondToStudent(studentInput: string): Promise<string> {
     const responseStartTime = Date.now();
     
+    // Validate API key is configured before attempting LLM call
+    // Reload dotenv to ensure fresh env vars
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    if (!apiKey || apiKey.length === 0) {
+      console.error('[SocraticEngine] API key check failed at start of respondToStudent', {
+        hasKey: !!process.env.OPENAI_API_KEY,
+        keyLength: process.env.OPENAI_API_KEY?.length || 0,
+        keyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7) || 'none'
+      });
+      throw new Error(
+        'OpenAI API key is not configured. Please set OPENAI_API_KEY in your environment variables. ' +
+        'The Socratic engine requires a valid OpenAI API key to generate responses.'
+      );
+    }
+    
+    console.log('[SocraticEngine] Starting LLM call', {
+      hasApiKey: true,
+      keyPrefix: apiKey.substring(0, 7),
+      conversationLength: this.conversation.length
+    });
+    
     const assessment = this.assessStudentResponse(studentInput);
     
     // ======================== ASSESSMENT MODE HANDLING ========================
@@ -358,7 +379,18 @@ Start by asking for their answer in a warm, encouraging way.`;
       nextQuestionType, 
       studentInput
     );
-    const systemGuidance = `${contextualGuidance}\n\nStyle guide: vary phrasing, avoid templates and repetitive stems; ask one adaptive Socratic question; avoid stock endings like "What do you think?"; keep it conversational and specific to the student's response.`;
+    
+    // Add recent responses to guidance to avoid repetition
+    const recentAssistantMessages = this.conversation
+      .filter(msg => msg.role === 'assistant')
+      .slice(-3)
+      .map(msg => msg.content);
+    
+    const repetitionWarning = recentAssistantMessages.length > 0
+      ? `\n\nCRITICAL: Avoid repeating similar questions. Recent questions asked: ${recentAssistantMessages.join(' | ')}. Your question must be DIFFERENT and varied. Use different words, different phrasing, and approach from a different angle.`
+      : '';
+    
+    const systemGuidance = `${contextualGuidance}${repetitionWarning}\n\nStyle guide: vary phrasing, avoid templates and repetitive stems; ask one adaptive Socratic question; avoid stock endings like "What do you think?"; keep it conversational and specific to the student's response. NEVER repeat questions you've already asked.`;
     
     // If the student asks for the final solution directly, craft a gentle redirect
     if (this.detectFinalSolutionRequest(studentInput)) {
@@ -385,6 +417,9 @@ Start by asking for their answer in a warm, encouraging way.`;
 
     let tutorResponse: string;
     let llmResponse: string | null = null;
+    let llmError: Error | null = null;
+    
+    // Try LLM call with proper error handling and retries
     try {
       llmResponse = await chatCompletion([
         { role: 'system', content: systemGuidance },
@@ -396,18 +431,109 @@ Start by asking for their answer in a warm, encouraging way.`;
         frequency_penalty: 0.5,
         retryContext: 'Enhanced interaction'
       });
-    } catch (_err) {
-      llmResponse = null;
-    }
-    // Graceful fallback if LLM fails or returns empty
-    tutorResponse = llmResponse && llmResponse.trim().length > 0
-      ? llmResponse
-      : this.sanitizeToSocraticQuestion(
-          'Let’s zoom in on one small step. What is the goal here, and what’s the next tiny move you could try toward it?',
-          assessment,
-          nextQuestionType,
-          studentInput
+      
+      // Validate response
+      if (!llmResponse || llmResponse.trim().length === 0) {
+        throw new Error('LLM returned empty response');
+      }
+    } catch (err: any) {
+      llmError = err instanceof Error ? err : new Error(String(err));
+      
+      // Log detailed error information
+      console.error('[SocraticEngine] LLM call failed:', {
+        error: llmError.message,
+        errorType: llmError.constructor.name,
+        stack: llmError.stack,
+        conversationLength: this.conversation.length,
+        hasApiKey: !!process.env.OPENAI_API_KEY,
+        apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7) || 'none',
+        apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+        systemGuidanceLength: systemGuidance.length,
+        lastUserMessage: studentInput.substring(0, 100)
+      });
+      
+      // Check for specific error types
+      if (llmError.message?.includes('API key')) {
+        throw new Error(
+          'OpenAI API key is missing or invalid. Please set OPENAI_API_KEY in your environment variables. ' +
+          'The Socratic engine requires a valid OpenAI API key to generate responses.'
         );
+      }
+      
+      if (llmError.message?.includes('rate limit') || llmError.message?.includes('429')) {
+        throw new Error(
+          'OpenAI API rate limit exceeded. Please wait a moment and try again. ' +
+          'If this persists, check your OpenAI account limits.'
+        );
+      }
+      
+      if (llmError.message?.includes('quota') || llmError.message?.includes('billing')) {
+        throw new Error(
+          'OpenAI API quota exceeded. Please check your OpenAI account billing and usage limits.'
+        );
+      }
+      
+      // Re-throw the error instead of silently falling back
+      // This ensures we know when LLM is failing
+      throw new Error(
+        `Failed to get LLM response: ${llmError.message}. ` +
+        `Please check your OpenAI API key configuration and account status. ` +
+        `Error details logged to console.`
+      );
+    }
+    
+    // If we get here, we have a valid LLM response
+    tutorResponse = llmResponse;
+
+    // Check if response is too similar to recent responses - retry with different approach if repetitive
+    let retryCount = 0;
+    const maxRetries = 3;
+    while (this.isResponseRepetitive(tutorResponse) && retryCount < maxRetries) {
+      retryCount++;
+      console.warn(`Detected repetitive response (attempt ${retryCount}/${maxRetries}), generating alternative...`);
+      
+      // Try a different question type to force variation
+      const alternativeQuestionType = this.getAlternativeQuestionType(nextQuestionType);
+      
+      // Generate a different response using contextual question bank with different question type
+      const contextualQuestion = this.selectContextualQuestion(assessment, alternativeQuestionType, studentInput);
+      tutorResponse = this.sanitizeToSocraticQuestion(
+        contextualQuestion,
+        assessment,
+        alternativeQuestionType,
+        studentInput
+      );
+      
+      // If still repetitive, try asking LLM again with explicit instruction to avoid repetition
+      if (this.isResponseRepetitive(tutorResponse) && retryCount < maxRetries) {
+        const recentResponses = this.conversation
+          .filter(msg => msg.role === 'assistant')
+          .slice(-3)
+          .map(msg => msg.content);
+        
+        const antiRepetitionGuidance = `${systemGuidance}\n\nCRITICAL: Your response must be COMPLETELY DIFFERENT from these recent questions: ${recentResponses.join(' | ')}. Use different words, different phrasing, and a different angle.`;
+        
+        try {
+          const retryResponse = await chatCompletion([
+            { role: 'system', content: antiRepetitionGuidance },
+            ...this.conversation.map(msg => ({ role: msg.role, content: msg.content }))
+          ], {
+            temperature: 0.95, // Higher temperature for more variation
+            max_tokens: 160,
+            presence_penalty: 1.0, // Higher presence penalty to avoid repetition
+            frequency_penalty: 0.8,
+            retryContext: 'Anti-repetition retry'
+          });
+          
+          if (retryResponse && retryResponse.trim().length > 0) {
+            tutorResponse = retryResponse;
+          }
+        } catch (retryErr) {
+          // If retry fails, continue with contextual question
+          console.warn('Retry LLM call failed, using contextual question', retryErr);
+        }
+      }
+    }
 
     // Enforce strict Socratic guardrails and reframe if needed
     tutorResponse = this.sanitizeToSocraticQuestion(
@@ -645,8 +771,13 @@ RESPOND NOW:`;
     const lastQuestionType = this.questionTypeSequence[this.questionTypeSequence.length - 1];
     
     // Use contextual selection if we have a previous question type
+    // Pass recent question types to avoid repetition
     if (lastQuestionType) {
-      return this.questionSelector.selectContextualQuestionType(assessment, lastQuestionType);
+      return this.questionSelector.selectContextualQuestionType(
+        assessment, 
+        lastQuestionType,
+        this.questionTypeSequence // Pass full sequence to check for repetition
+      );
     }
     
     // Otherwise use standard selection
@@ -1090,18 +1221,25 @@ RESPOND NOW:`;
    * Restore conversation history from database interactions
    * This allows the engine to maintain context across API calls
    */
-  restoreConversationHistory(interactions: Array<{ role: 'user' | 'assistant', content: string, timestamp?: Date }>): void {
-    // Add all historical messages to the conversation
+  restoreConversationHistory(interactions: Array<{ role: 'user' | 'assistant', content: string, timestamp?: Date, questionType?: SocraticQuestionType, depthLevel?: number }>): void {
+    // Add all historical messages to the conversation and restore question type sequence
     for (const interaction of interactions) {
       const enhancedMessage: EnhancedMessage = {
         role: interaction.role,
         content: interaction.content,
-        timestamp: interaction.timestamp || new Date()
+        timestamp: interaction.timestamp || new Date(),
+        questionType: interaction.questionType,
+        depthLevel: interaction.depthLevel
       };
       this.conversation.push(enhancedMessage);
+      
+      // Restore question type sequence from assistant messages
+      if (interaction.role === 'assistant' && interaction.questionType) {
+        this.questionTypeSequence.push(interaction.questionType);
+      }
     }
     
-    console.log(`[SocraticEngine] Restored ${interactions.length} messages from history`);
+    console.log(`[SocraticEngine] Restored ${interactions.length} messages and ${this.questionTypeSequence.length} question types from history`);
   }
 
   getCurrentDifficulty(): DifficultyLevel {
@@ -1767,5 +1905,99 @@ RESPOND NOW:`;
     }
 
     return false;
+  }
+
+  /**
+   * Check if a response is too similar to recent responses (repetitive)
+   * Returns true if the response is too similar to the last 2-3 responses
+   */
+  private isResponseRepetitive(response: string): boolean {
+    if (!response || response.trim().length === 0) {
+      return false;
+    }
+
+    // Get recent assistant responses (last 3)
+    const recentResponses = this.conversation
+      .filter(msg => msg.role === 'assistant')
+      .slice(-3)
+      .map(msg => msg.content.toLowerCase().trim());
+
+    if (recentResponses.length === 0) {
+      return false;
+    }
+
+    const normalizedResponse = response.toLowerCase().trim();
+    
+    // Check similarity using simple word overlap
+    for (const recentResponse of recentResponses) {
+      const similarity = this.calculateSimilarity(normalizedResponse, recentResponse);
+      // Lower threshold (60%) to catch more repetitive responses
+      if (similarity > 0.6) {
+        return true;
+      }
+    }
+
+    // Check for exact phrase repetition (first 10 words)
+    const responseWords = normalizedResponse.split(/\s+/).slice(0, 10).join(' ');
+    for (const recentResponse of recentResponses) {
+      const recentWords = recentResponse.split(/\s+/).slice(0, 10).join(' ');
+      if (responseWords === recentWords && responseWords.length > 20) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Calculate similarity between two strings using word overlap
+   * Returns a value between 0 and 1
+   */
+  private calculateSimilarity(str1: string, str2: string): number {
+    const words1 = new Set(str1.split(/\s+/).filter(w => w.length > 2));
+    const words2 = new Set(str2.split(/\s+/).filter(w => w.length > 2));
+    
+    if (words1.size === 0 || words2.size === 0) {
+      return 0;
+    }
+
+    let intersection = 0;
+    for (const word of words1) {
+      if (words2.has(word)) {
+        intersection++;
+      }
+    }
+
+    const union = words1.size + words2.size - intersection;
+    return union > 0 ? intersection / union : 0;
+  }
+
+  /**
+   * Get an alternative question type to avoid repetition
+   */
+  private getAlternativeQuestionType(currentType: SocraticQuestionType): SocraticQuestionType {
+    const allTypes = [
+      SocraticQuestionType.CLARIFICATION,
+      SocraticQuestionType.ASSUMPTIONS,
+      SocraticQuestionType.EVIDENCE,
+      SocraticQuestionType.PERSPECTIVE,
+      SocraticQuestionType.IMPLICATIONS,
+      SocraticQuestionType.META_QUESTIONING
+    ];
+    
+    // Get recently used question types
+    const recentTypes = this.questionTypeSequence.slice(-3);
+    
+    // Find types that haven't been used recently
+    const availableTypes = allTypes.filter(type => !recentTypes.includes(type));
+    
+    if (availableTypes.length > 0) {
+      // Return a random type from available ones
+      return availableTypes[Math.floor(Math.random() * availableTypes.length)];
+    }
+    
+    // If all types have been used, pick one that's different from current
+    const differentTypes = allTypes.filter(type => type !== currentType);
+    return differentTypes[Math.floor(Math.random() * differentTypes.length)];
   }
 }

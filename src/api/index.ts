@@ -8,6 +8,25 @@
  * middleware, routes, and services.
  */
 
+// Load environment variables FIRST before anything else
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
+
+// Log API key status (without exposing the full key)
+const apiKey = process.env.OPENAI_API_KEY?.trim();
+if (!apiKey || apiKey.length === 0) {
+  console.error('[Server Startup] ⚠️  WARNING: OPENAI_API_KEY is not set!');
+  console.error('[Server Startup] The Socratic engine will not work without a valid OpenAI API key.');
+  console.error('[Server Startup] Please set OPENAI_API_KEY in your .env file.');
+} else {
+  console.log('[Server Startup] ✅ OpenAI API key found:', {
+    keyLength: apiKey.length,
+    keyPrefix: apiKey.substring(0, 7),
+    isProjectKey: apiKey.startsWith('sk-proj'),
+    nodeEnv: process.env.NODE_ENV
+  });
+}
+
 import { logger } from './middleware/logger';
 import server from './server';
 

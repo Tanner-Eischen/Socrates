@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user explicitly logged out
@@ -36,15 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem('token');
     if (token) {
       api.get('/auth/me')
-        .then(res => setUser(res.data.user))
+        .then(res => {
+          setUser(res.data.user);
+          setLoading(false);
+        })
         .catch(() => {
           localStorage.removeItem('token');
           // Try to auto-login with test user only if not explicitly logged out
           if (!hasLoggedOut) {
             autoLoginDev();
+          } else {
+            setLoading(false);
           }
-        })
-        .finally(() => setLoading(false));
+        });
     } else {
       // Auto-login with test user in development only if not explicitly logged out
       if (!hasLoggedOut) {
@@ -110,10 +114,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', data.token);
-    localStorage.removeItem('hasLoggedOut'); // Clear logout flag on login
-    setUser(data.user);
+    try {
+      const { data } = await api.post('/auth/login', { email, password });
+      if (!data || !data.token || !data.user) {
+        throw new Error('Invalid response from server');
+      }
+      localStorage.setItem('token', data.token);
+      localStorage.removeItem('hasLoggedOut'); // Clear logout flag on login
+      setUser(data.user);
+    } catch (error: any) {
+      // Re-throw the error so it can be handled by the calling component
+      // but ensure it has a proper error structure
+      if (error?.response) {
+        throw error;
+      }
+      // If it's not an axios error, wrap it
+      throw new Error(error?.message || 'Login failed. Please try again.');
+    }
   };
 
   const logout = () => {

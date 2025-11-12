@@ -24,7 +24,7 @@ Start-Sleep -Seconds 2
 # Start backend in new window
 Write-Host "Starting backend server (port 3333)..." -ForegroundColor Cyan
 $backendPath = $PSScriptRoot
-Start-Process powershell -ArgumentList "-NoExit -Command `"cd '$backendPath'; node dist/api/index.js`""
+Start-Process powershell -ArgumentList "-NoExit -Command `"cd '$backendPath'; npm run api:dev`""
 
 # Wait for backend to initialize
 Start-Sleep -Seconds 3
