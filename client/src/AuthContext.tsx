@@ -23,6 +23,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Check if user explicitly logged out
+    const hasLoggedOut = localStorage.getItem('hasLoggedOut') === 'true';
+    
+    // Don't auto-login if user explicitly logged out
+    if (hasLoggedOut) {
+      setLoading(false);
+      return;
+    }
+
     // Check for existing token first
     const token = localStorage.getItem('token');
     if (token) {
@@ -30,13 +39,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then(res => setUser(res.data.user))
         .catch(() => {
           localStorage.removeItem('token');
-          // Try to auto-login with test user
-          autoLoginDev();
+          // Try to auto-login with test user only if not explicitly logged out
+          if (!hasLoggedOut) {
+            autoLoginDev();
+          }
         })
         .finally(() => setLoading(false));
     } else {
-      // Auto-login with test user in development
-      autoLoginDev();
+      // Auto-login with test user in development only if not explicitly logged out
+      if (!hasLoggedOut) {
+        autoLoginDev();
+      } else {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -78,12 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const { data } = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
+    localStorage.removeItem('hasLoggedOut'); // Clear logout flag on login
     setUser(data.user);
   };
 
   const logout = () => {
+    localStorage.setItem('hasLoggedOut', 'true');
     localStorage.removeItem('token');
     setUser(null);
+    // Redirect to dashboard (which will show login if needed)
+    window.location.href = '/dashboard';
   };
 
   return (
