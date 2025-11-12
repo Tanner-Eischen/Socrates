@@ -273,8 +273,25 @@ class SocratesServer {
     // Serve static files for uploads
     this.app.use('/uploads', express.static(config.UPLOAD_DIR));
 
+    // Catch-all OPTIONS handler (before 404) - handles any OPTIONS requests that reach here
+    this.app.options('*', (req, res) => {
+      const origin = req.headers.origin || '*';
+      logger.info('Catch-all OPTIONS handler', { origin, path: req.path, url: req.url });
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      res.status(204).end();
+    });
+
     // 404 handler
     this.app.use('*', (req, res) => {
+      // Add CORS headers even to 404 responses
+      const origin = req.headers.origin || '*';
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      
       res.status(404).json({
         error: 'Not Found',
         message: `Route ${req.originalUrl} not found`,

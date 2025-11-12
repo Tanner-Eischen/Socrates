@@ -14,9 +14,10 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
-# Expose port
-EXPOSE 8080
+# Railway sets PORT automatically - don't hardcode it
+# EXPOSE is just documentation, Railway will use its own port
 
 # Start server
+# Railway will set PORT environment variable automatically
 CMD ["node", "dist/api/index.js"]
 
