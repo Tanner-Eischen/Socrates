@@ -729,6 +729,13 @@ router.post('/:id/enhanced-interactions',
   rateLimiter,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Session ID is required',
+      });
+    }
+    
     const { error, value } = enhancedInteractionSchema.validate(req.body);
     
     if (error) {
@@ -830,15 +837,13 @@ router.post('/:id/enhanced-interactions',
           error: engineRespondError?.message || String(engineRespondError),
           stack: engineRespondError?.stack,
           hasApiKey: !!process.env.OPENAI_API_KEY,
-          apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7) || 'none'
+          apiKeyPrefix: process.env.OPENAI_API_KEY?.substring(0, 7) || 'none',
+          errorType: engineRespondError?.constructor?.name,
+          errorCode: engineRespondError?.code
         });
         
-        // Re-throw the error so the client knows what went wrong
-        // Don't silently fallback - we need to fix the root cause
-        throw new Error(
-          `Failed to generate tutor response: ${engineRespondError?.message || 'Unknown error'}. ` +
-          `Please check your OpenAI API key configuration.`
-        );
+        // Re-throw the error so it gets caught by the outer catch block
+        throw engineRespondError;
       }
       
       // Get enhanced metadata from engine
@@ -949,7 +954,19 @@ router.post('/:id/enhanced-interactions',
         error: errorMessage,
         stack: errorStack,
         errorDetails: engineError,
+        errorType: engineError?.constructor?.name,
+        errorCode: engineError?.code,
+        hasApiKey: !!process.env.OPENAI_API_KEY,
       });
+
+      // Check if it's an API key error
+      if (errorMessage.includes('API key') || errorMessage.includes('OPENAI')) {
+        return res.status(500).json({
+          success: false,
+          message: 'OpenAI API key is not configured. Please set OPENAI_API_KEY in your environment variables.',
+          error: isDevelopment() ? errorMessage : 'API configuration error',
+        });
+      }
 
       // Return a helpful error response
       return res.status(500).json({
