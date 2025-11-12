@@ -48,7 +48,25 @@ class SocratesServer {
     // CRITICAL: Add CORS headers to ALL requests FIRST
     this.app.use((req, res, next) => {
       const origin = req.headers.origin;
-      const allowedOrigin = origin || '*';
+      
+      // Determine allowed origin based on CORS_ORIGIN config
+      let allowedOrigin: string;
+      if (config.CORS_ORIGIN === '*' || 
+          (Array.isArray(config.CORS_ORIGIN) && (config.CORS_ORIGIN.length === 0 || config.CORS_ORIGIN.includes('*')))) {
+        // Allow all origins - use requesting origin when credentials are enabled
+        allowedOrigin = origin || '*';
+      } else if (Array.isArray(config.CORS_ORIGIN)) {
+        // Check if requesting origin is in allowed list
+        if (origin && config.CORS_ORIGIN.includes(origin)) {
+          allowedOrigin = origin;
+        } else {
+          allowedOrigin = config.CORS_ORIGIN[0] || '*'; // Use first allowed origin or fallback
+        }
+      } else {
+        // Single origin string
+        allowedOrigin = config.CORS_ORIGIN;
+      }
+      
       res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
@@ -57,7 +75,7 @@ class SocratesServer {
       
       // Handle OPTIONS preflight immediately
       if (req.method === 'OPTIONS') {
-        logger.info('OPTIONS preflight request', { origin, allowedOrigin, path: req.path });
+        logger.info('OPTIONS preflight request', { origin, allowedOrigin, path: req.path, configOrigin: config.CORS_ORIGIN });
         res.status(204).end();
         return;
       }
