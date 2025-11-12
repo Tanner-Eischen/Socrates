@@ -122,14 +122,20 @@ class SocratesServer {
       expressCorsOrigin = config.CORS_ORIGIN;
     }
 
-    this.app.use(cors({
+    // CORS configuration
+    const corsOptions = {
       origin: expressCorsOrigin,
       credentials: config.CORS_CREDENTIALS,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
       preflightContinue: false,
       optionsSuccessStatus: 204,
-    }));
+    };
+    
+    this.app.use(cors(corsOptions));
+    
+    // Explicitly handle OPTIONS requests for all routes
+    this.app.options('*', cors(corsOptions));
 
     // Security middleware (after CORS)
     this.app.use(helmet({
