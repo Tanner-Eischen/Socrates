@@ -58,7 +58,8 @@ class SocratesServer {
       // Handle OPTIONS preflight immediately
       if (req.method === 'OPTIONS') {
         logger.info('OPTIONS preflight request', { origin, allowedOrigin, path: req.path });
-        return res.status(204).end();
+        res.status(204).end();
+        return;
       }
       next();
     });
