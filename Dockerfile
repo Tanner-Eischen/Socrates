@@ -13,6 +13,7 @@ COPY . .
 
 # Build TypeScript
 RUN npm run build
+# Build timestamp: 2025-01-12
 
 # Platform (Railway/Render/Cloud Run) sets PORT automatically via environment variable
 # Our server reads PORT from process.env, so no need to expose
