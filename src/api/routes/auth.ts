@@ -133,17 +133,16 @@ async function findUserById(id: string): Promise<User | null> {
   }
 }
 
-// Helper function to update last login (tries database first, fails silently for memory fallback)
+// Helper function to update last login (tries database first, fails silently for any error)
 async function updateLastLogin(userId: string): Promise<void> {
   try {
     await UserService.updateLastLogin(userId);
   } catch (error: any) {
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      logger.warn('Database unavailable, skipping last login update');
-      // For in-memory store, just update the lastLogin locally if needed
-      return;
-    }
-    throw error;
+    // Log but don't throw - last_login update is not critical for auth flow
+    logger.warn('Could not update last_login, continuing', {
+      userId,
+      error: error?.message || error?.code || 'Unknown error'
+    });
   }
 }
 
