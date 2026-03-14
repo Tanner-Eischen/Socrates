@@ -18,59 +18,17 @@
 - ✅ Analytics charts and insights
 - ✅ Real-time collaboration rooms
 - ✅ Admin panel for user management
-- ✅ 31 passing tests with 95%+ coverage
+
+## Quick Demo
+
+Experience the Socratic learning flow in minutes:
+
+1. **Sign in** with the demo account or create a new account
+2. **Browse problems** with rich math rendering (KaTeX/LaTeX support)
+3. **Engage in Socratic dialogue** - the AI tutor asks guiding questions, never gives direct answers
+4. **View learning analytics** - track your progress, accuracy, and concept mastery
 
 ## Quick Start
-
-### CLI (Tutor) — Live Socratic Chat (Text + Image)
-
-```bash
-# 1) Ensure your OpenAI key is set (project-level .env or shell env)
-echo OPENAI_API_KEY=your-openai-api-key-here > .env
-
-# 2) Install dependencies
-npm install
-
-# 3A) Use the CLI locally without global link
-node ./bin/socrates --help
-
-# 3B) Or create a global alias (makes `tutor` available)
-npm link
-tutor --help
-```
-
-Common commands:
-
-```bash
-# Interactive chat (text)
-tutor chat --problem "Solve 2x + 5 = 13" --difficulty beginner
-
-# Interactive chat (image)
-tutor chat --image ./samples/linear1.png
-
-# One-shot run (first tutor response + compliance)
-tutor run --problem-id 0
-
-# Scripted demo (live tutor responses)
-tutor demo --scenario algebra-beginner
-
-# Problem bank utilities
-tutor problems list
-tutor problems show 0
-```
-
-In-chat commands during `tutor chat`:
-
-```text
-:attach <imagePath>            # Attach an image; extracts text and adds as context
-:difficulty <level>            # Switch difficulty: beginner|intermediate|advanced
-:quit                          # Exit the session
-```
-
-Notes:
-- The CLI uses live OpenAI calls (no mocks), so responses vary run-to-run.
-- `OPENAI_API_KEY` must be available in `.env` or the environment.
-- Windows PowerShell works out-of-the-box; no TTY tricks required.
 
 ### Backend Setup
 
@@ -233,29 +191,71 @@ Guidelines:
 - React Hot Toast (notifications)
 - Vitest + React Testing Library (testing)
 
-## Testing
+## CLI (Bonus Feature)
 
-### Frontend Tests
+The CLI provides terminal-based access to the Socratic tutor:
+
 ```bash
-cd client
+# 1) Ensure your OpenAI key is set (project-level .env or shell env)
+echo OPENAI_API_KEY=your-openai-api-key-here > .env
 
-# Run all tests
-npm test
+# 2) Install dependencies
+npm install
 
-# Run tests in watch mode
-npm test -- --watch
+# 3A) Use the CLI locally without global link
+node ./bin/socrates --help
 
-# Generate coverage report
-npm run test:coverage
-
-# Open test UI
-npm run test:ui
+# 3B) Or create a global alias (makes `tutor` available)
+npm link
+tutor --help
 ```
 
-**Test Coverage:**
-- 31 passing tests
-- ~95%+ coverage on core features
-- Components: Login, Problems, Session, AuthContext
+Common commands:
+
+```bash
+# Interactive chat (text)
+tutor chat --problem "Solve 2x + 5 = 13" --difficulty beginner
+
+# Interactive chat (image)
+tutor chat --image ./samples/linear1.png
+
+# One-shot run (first tutor response + compliance)
+tutor run --problem-id 0
+
+# Scripted demo (live tutor responses)
+tutor demo --scenario algebra-beginner
+
+# Problem bank utilities
+tutor problems list
+tutor problems show 0
+```
+
+In-chat commands during `tutor chat`:
+
+```text
+:attach <imagePath>            # Attach an image; extracts text and adds as context
+:difficulty <level>            # Switch difficulty: beginner|intermediate|advanced
+:quit                          # Exit the session
+```
+
+Notes:
+- The CLI uses live OpenAI calls (no mocks), so responses vary run-to-run.
+- `OPENAI_API_KEY` must be available in `.env` or the environment.
+- Windows PowerShell works out-of-the-box; no TTY tricks required.
+
+## Testing
+
+### Frontend (Vitest)
+- **MathRenderer:** 2 tests (plain text, KaTeX rendering)
+- **TypingText:** 1 test (progressive render)
+- **utils:** 2 tests (class merging, Tailwind conflicts)
+
+Run: `cd client && npm test`
+
+### Backend (Jest)
+- **Environment config:** 2 tests (test mode, port loading)
+
+Run: `npm run test:unit`
 
 ### Backend Validation
 ```bash

@@ -22,8 +22,10 @@ export interface JWTPayload {
 
 // JWT secret from environment
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+const DEV_AUTH_BYPASS = process.env.DEV_AUTH_BYPASS === 'true';
 
 // Generate JWT token
 export const generateToken = (payload: Omit<JWTPayload, 'iat' | 'exp'>): string => {
@@ -32,7 +34,7 @@ export const generateToken = (payload: Omit<JWTPayload, 'iat' | 'exp'>): string 
 
 // Generate refresh token
 export const generateRefreshToken = (payload: Omit<JWTPayload, 'iat' | 'exp'>): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN as any });
+  return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN as any });
 };
 
 // Verify JWT token
@@ -44,19 +46,28 @@ export const verifyToken = (token: string): JWTPayload => {
   }
 };
 
+// Verify refresh token
+export const verifyRefreshToken = (token: string): JWTPayload => {
+  try {
+    return jwt.verify(token, JWT_REFRESH_SECRET) as JWTPayload;
+  } catch (error) {
+    throw new Error('Invalid refresh token');
+  }
+};
+
 // Authentication middleware
 export const authMiddleware: RequestHandler = (req, res, next) => {
   const authReq = req as AuthenticatedRequest;
   try {
     // Development mode: Bypass authentication with mock user
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && DEV_AUTH_BYPASS) {
       authReq.user = {
         id: 'dev-user-123',
         email: 'dev@example.com',
         name: 'Dev User',
         role: 'student',
       };
-      logger.info('Development mode: Authentication bypassed', {
+      logger.warn('Development auth bypass is enabled', {
         url: authReq.url,
         method: authReq.method,
       });

@@ -29,12 +29,14 @@ export default function Dashboard() {
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Redirect to login if not authenticated
-  if (!authLoading && !user) {
-    return <Navigate to="/login" replace />;
-  }
-
   useEffect(() => {
+    if (authLoading || !user) {
+      if (!authLoading) {
+        setLoading(false);
+      }
+      return;
+    }
+
     Promise.all([
       api.get('/analytics/dashboard').catch(err => {
         // Handle 401 gracefully - user not authenticated
@@ -140,7 +142,12 @@ export default function Dashboard() {
         ]);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [authLoading, user]);
+
+  // Redirect to login if not authenticated
+  if (!authLoading && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const deriveTitle = (text: string) => {
     if (!text) return 'Untitled Problem';

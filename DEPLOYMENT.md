@@ -2,8 +2,6 @@
 
 Quick deployment guide for Render (backend) + Vercel (frontend).
 
-**Note:** This guide covers Render deployment. For Railway deployment (legacy), see `RAILWAY_DEPLOYMENT.md`.
-
 ## Prerequisites
 
 - GitHub repository with your code
@@ -42,15 +40,21 @@ Quick deployment guide for Render (backend) + Vercel (frontend).
 
 Go to Render Dashboard → Your Service → Environment
 
-**Required Variables:**
+**Required Variables (match `.env.production.example`):**
 ```bash
 NODE_ENV=production
 OPENAI_API_KEY=your-openai-api-key-here
 JWT_SECRET=your-super-secret-jwt-key-change-this
 JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-this
 SESSION_SECRET=your-super-secret-session-key-change-this
-CORS_ORIGIN=*
+DEV_AUTH_BYPASS=false
+CORS_ORIGIN=https://your-app.vercel.app
 CORS_CREDENTIALS=true
+DB_HOST=your-db-host
+DB_PORT=5432
+DB_NAME=your-db-name
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
 ```
 
 **DO NOT SET PORT** - Render sets this automatically
@@ -71,10 +75,14 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### 1.5 Test Backend
 
 ```bash
-# Health check
+# Health check (platform / liveness)
 curl https://your-app.onrender.com/health
 
-# Should return: {"status":"ok",...}
+# Readiness check (requires DB)
+curl https://your-app.onrender.com/ready
+
+# /health should return 200 (may be "degraded" if optional services are down)
+# /ready should return 200 only after DB is healthy
 ```
 
 **Note:** Free tier services sleep after 15 minutes. First request may take ~30 seconds to wake up.
@@ -104,6 +112,7 @@ Add in Vercel dashboard → Settings → Environment Variables:
 
 ```bash
 VITE_API_BASE_URL=https://your-render-url.onrender.com/api/v1
+VITE_ENABLE_DEV_AUTO_LOGIN=false
 ```
 
 **Important:** Replace `your-render-url.onrender.com` with your actual Render service URL!
@@ -116,8 +125,7 @@ VITE_API_BASE_URL=https://your-render-url.onrender.com/api/v1
 
 ### 2.4 Update Backend CORS (if needed)
 
-If you set `CORS_ORIGIN=*` in Render, CORS should work automatically.  
-If you want to restrict to specific origin, update in Render Dashboard → Environment:
+Set backend CORS to your exact Vercel origin in Render Dashboard → Environment:
 
 ```bash
 CORS_ORIGIN=https://your-app.vercel.app
@@ -136,8 +144,11 @@ Render will auto-redeploy on environment variable changes.
 
 ### Test Backend API
 ```bash
-# Health check
+# Health check (for platform liveness)
 curl https://your-render-url.onrender.com/health
+
+# Readiness check (for DB-dependent readiness)
+curl https://your-render-url.onrender.com/ready
 
 # API docs
 open https://your-render-url.onrender.com/api-docs
@@ -204,7 +215,7 @@ When ready for persistent storage:
 
 ### Frontend can't connect to backend
 - Verify `VITE_API_BASE_URL` is set correctly in Vercel
-- Check CORS_ORIGIN in Render (should be `*` or match Vercel URL)
+- Check CORS_ORIGIN in Render (must match Vercel URL)
 - Test backend health endpoint directly
 - Note: Free tier services sleep - first request may take 30 seconds
 
@@ -227,6 +238,7 @@ When ready for persistent storage:
 **Frontend URL:** `https://your-app.vercel.app`  
 **API Base:** `https://your-app.onrender.com/api/v1`  
 **Health Check:** `https://your-app.onrender.com/health`  
+**Readiness Check:** `https://your-app.onrender.com/ready`  
 **API Docs:** `https://your-app.onrender.com/api-docs`
 
 ---

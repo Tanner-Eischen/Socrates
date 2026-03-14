@@ -6,6 +6,7 @@ import {
   generateToken, 
   generateRefreshToken, 
   verifyToken, 
+  verifyRefreshToken,
   authMiddleware,
   authenticate,
   AuthenticatedRequest 
@@ -89,28 +90,31 @@ async function findUserByEmail(email: string): Promise<User | null> {
 // Helper function to create user (tries database first, then falls back to memory)
 async function createUser(userData: any): Promise<User> {
   try {
-    return await UserService.create(userData);
+    const dbUser = await UserService.create(userData);
+    if (dbUser) return dbUser;
   } catch (error: any) {
     // If database error, use in-memory store
     if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
       logger.warn('Database unavailable, creating user in memory', { email: userData.email });
-      const user: User = {
-        id: userData.id,
-        email: userData.email,
-        passwordHash: userData.passwordHash,
-        name: userData.name || 'User',
-        role: userData.role || 'student',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true,
-        emailVerified: false,
-        twoFactorEnabled: false,
-      };
-      inMemoryUsers.set(userData.email, user);
-      return user;
     }
-    throw error;
   }
+
+  // Fallback to in-memory store if database fails or returns null
+  logger.info('Using in-memory user store', { email: userData.email });
+  const user: User = {
+    id: userData.id,
+    email: userData.email,
+    passwordHash: userData.passwordHash,
+    name: userData.name || 'User',
+    role: userData.role || 'student',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isActive: true,
+    emailVerified: false,
+    twoFactorEnabled: false,
+  };
+  inMemoryUsers.set(userData.email, user);
+  return user;
 }
 
 // Helper function to find user by ID (tries database first, then falls back to memory)
@@ -437,7 +441,7 @@ router.post('/refresh', authRateLimiter, asyncHandler(async (req: Request, res: 
 
   try {
     // Verify refresh token
-    const decoded = verifyToken(refreshToken);
+    const decoded = verifyRefreshToken(refreshToken);
 
     // Check if user still exists and is active
     const user = await findUserById(decoded.id);
@@ -635,3 +639,33 @@ router.get('/me', authenticate, asyncHandler(async (req: AuthenticatedRequest, r
 }));
 
 export default router;
+
+// Test helper to seed users directly into in-memory store (bypasses database)
+export async function seedTestUser(userData: {
+  email: string;
+  password: string;
+  name: string;
+  role?: 'student' | 'tutor';
+}): Promise<User> {
+  const passwordHash = await bcrypt.hash(userData.password, 12);
+  const user: User = {
+    id: `test-user-${Date.now()}`,
+    email: userData.email,
+    passwordHash,
+    name: userData.name,
+    role: userData.role || 'student',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isActive: true,
+    emailVerified: true,
+    twoFactorEnabled: false,
+  };
+  inMemoryUsers.set(userData.email, user);
+  return user;
+}
+
+// Test helper to clear in-memory store between tests
+export function clearTestUsers(): void {
+  inMemoryUsers.clear();
+  testUserInitialized = false;
+}

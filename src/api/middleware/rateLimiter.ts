@@ -88,6 +88,11 @@ const getClientId = (req: Request): string => {
 // Generic rate limiter middleware factory
 const createRateLimiterMiddleware = (limiterType: keyof typeof rateLimiters) => {
   return async (req: Request, res: Response, next: NextFunction) => {
+    // Skip rate limiting in test environment
+    if (process.env.NODE_ENV === 'test') {
+      return next();
+    }
+
     try {
       const clientId = getClientId(req);
       const rateLimiter = rateLimiters[limiterType];
@@ -141,6 +146,11 @@ export const analyticsRateLimiter = createRateLimiterMiddleware('analytics');
 
 // Burst rate limiter for expensive operations
 export const burstRateLimiter = async (req: Request, res: Response, next: NextFunction) => {
+  // Skip rate limiting in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return next();
+  }
+
   try {
     const clientId = getClientId(req);
     
@@ -175,6 +185,11 @@ export const burstRateLimiter = async (req: Request, res: Response, next: NextFu
 // Progressive rate limiter (increases penalty for repeated violations)
 export const progressiveRateLimiter = (basePoints: number = 10) => {
   return async (req: Request, res: Response, next: NextFunction) => {
+    // Skip rate limiting in test environment
+    if (process.env.NODE_ENV === 'test') {
+      return next();
+    }
+
     try {
       const clientId = getClientId(req);
       

@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  PlusCircle, 
-  TrendingUp, 
-  Users, 
-  User, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  TrendingUp,
+  User,
   Settings,
   LogOut,
   ChevronLeft,
@@ -28,18 +26,21 @@ export default function Navigation() {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
+  // Primary navigation - core demo flow
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/assessments', label: 'Learning Assessments', icon: BookOpen },
-    { path: '/new', label: 'New Session', icon: PlusCircle },
+    { path: '/problems', label: 'Problems', icon: BookOpen },
     { path: '/analytics', label: 'Analytics', icon: TrendingUp },
-    { path: '/collaboration', label: 'Collaborate', icon: Users },
+  ];
+
+  // Secondary navigation - profile & admin
+  const secondaryLinks = [
     { path: '/profile', label: 'Profile', icon: User },
   ];
 
   // Add admin link if user is admin
   if (user?.role === 'admin') {
-    navLinks.push({ path: '/admin', label: 'Admin', icon: Settings });
+    secondaryLinks.push({ path: '/admin', label: 'Admin', icon: Settings });
   }
 
   return (
@@ -78,20 +79,20 @@ export default function Navigation() {
           </button>
         </div>
 
-        {/* Navigation Links */}
+        {/* Primary Navigation Links */}
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.path);
-            
+
             return (
               <Link
                 key={link.path}
                 to={link.path}
                 className={`
                   group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
-                  ${active 
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' 
+                  ${active
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md'
                     : 'text-gray-700 hover:bg-amber-50 hover:text-amber-900'
                   }
                 `}
@@ -109,6 +110,38 @@ export default function Navigation() {
               </Link>
             );
           })}
+
+          {/* Secondary Navigation */}
+          {secondaryLinks.length > 0 && (
+            <div className="pt-4 mt-4 border-t border-amber-100">
+              {secondaryLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isActive(link.path);
+
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`
+                      group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                      ${active
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md'
+                        : 'text-gray-600 hover:bg-amber-50 hover:text-amber-800'
+                      }
+                    `}
+                    title={isCollapsed ? link.label : ''}
+                  >
+                    <Icon className={`w-5 h-5 flex-shrink-0 ${active ? '' : 'group-hover:scale-110 transition-transform'}`} />
+                    {!isCollapsed && (
+                      <span className="font-medium text-sm">
+                        {link.label}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         {/* User Profile Section */}

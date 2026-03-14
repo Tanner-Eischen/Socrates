@@ -6,6 +6,7 @@ services:
     dockerContext: .
     buildCommand: npm ci --no-cache && npm run build
     startCommand: node dist/api/index.js
+    healthCheckPath: /health
     # Force rebuild by adding build args
     buildArgs:
       - key: BUILD_DATE
@@ -13,11 +14,31 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DEV_AUTH_BYPASS
+        value: "false"
       - key: CORS_ORIGIN
-        value: *
+        value: https://your-app.vercel.app
       - key: CORS_CREDENTIALS
         value: "true"
-    # Note: Add other environment variables (OPENAI_API_KEY, JWT_SECRET, etc.) via Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+    # Platform health should use /health. Use /ready for external readiness checks once DB is provisioned.
     # Render sets PORT automatically - do not set it manually
 
 

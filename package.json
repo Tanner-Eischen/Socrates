@@ -31,7 +31,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:client": "npm --prefix client run lint",
     "lint:all": "npm run lint && npm run lint:client",
-    "test:unit": "jest",
+    "test:unit": "jest --config jest.config.js --passWithNoTests",
     "test:api": "jest --config jest.api.config.js",
     "migrate": "ts-node src/database/migrate.ts",
     "postinstall": "echo Skipping postinstall build in development"

@@ -390,7 +390,8 @@ Start by asking for their answer in a warm, encouraging way.`;
       ? `\n\nCRITICAL: Avoid repeating similar questions. Recent questions asked: ${recentAssistantMessages.join(' | ')}. Your question must be DIFFERENT and varied. Use different words, different phrasing, and approach from a different angle.`
       : '';
     
-    const systemGuidance = `${contextualGuidance}${repetitionWarning}\n\nStyle guide: vary phrasing, avoid templates and repetitive stems; ask one adaptive Socratic question; avoid stock endings like "What do you think?"; keep it conversational and specific to the student's response. NEVER repeat questions you've already asked.`;
+    const tailoringContext = this.buildSessionTailoringContext(studentInput, assessment, nextQuestionType);
+    const systemGuidance = `${contextualGuidance}\n\n${tailoringContext}${repetitionWarning}\n\nStyle guide: vary phrasing, avoid templates and repetitive stems; ask one adaptive Socratic question; avoid stock endings like "What do you think?"; keep it conversational and specific to the student's response. Mirror some of the student's wording naturally. NEVER repeat questions you've already asked.`;
     
     // If the student asks for the final solution directly, craft a gentle redirect
     if (this.detectFinalSolutionRequest(studentInput)) {
@@ -542,6 +543,13 @@ Start by asking for their answer in a warm, encouraging way.`;
       nextQuestionType,
       studentInput
     );
+    if (this.isResponseRepetitive(tutorResponse)) {
+      tutorResponse = this.buildSessionTailoredQuestion(
+        assessment,
+        nextQuestionType,
+        studentInput
+      );
+    }
     
     const enhancedMessage: EnhancedMessage = {
       role: 'assistant',
@@ -719,42 +727,44 @@ RESPOND NOW:`;
     return guidance;
   }
 
-  private buildEnhancedSystemPrompt(_problem: string): string {
-    return `Role: You are a thoughtful and patient tutor whose goal is to help the student master concepts through independent problem solving. Your job is to encourage critical thinking, provide detailed feedback, and promote metacognitive awareness. 
+  private buildEnhancedSystemPrompt(problem: string): string {
+    return `Role: You are a thoughtful and patient tutor whose goal is to help the student master concepts through independent problem solving. Your job is to encourage critical thinking, provide detailed feedback, and promote metacognitive awareness.
 
- Guidelines: 
+PROBLEM: ${problem}
 
- 1.  Never immediately provide the answer to the student's question. 
- 2.  First, ask the student to clearly explain what steps they've already taken and precisely where they're getting stuck. 
- 3.  Provide incremental hints or small nudges, not complete steps. Guide the student to think critically about the next logical action. 
- 4.  Error Analysis and Feedback: 
-     -If the student makes a mistake, point out gently where and why the misunderstanding occurred. 
-     -Explain the underlying misconceptions and provide clear, concise explanations. 
-     -Provide the student with resources that can help them understand the problem better. 
- 5.  Metacognitive Prompts: 
-     -Frequently prompt students to summarize their current understanding before moving forward. 
-     -Ask students to reflect on their learning process and identify their strengths and weaknesses. 
-     -Ask questions that promote self-evaluation, such as: 
-         -"What strategies did you use to solve this problem?" 
-         -"What could you have done differently?" 
-         -"How confident are you in your understanding of this concept?" 
-         -"What are some areas where you feel you need more practice?" 
- 6.  Adaptive Questioning: 
-     -Adapt the difficulty of your questions based on the student's responses. 
-     -If the student demonstrates a strong understanding, introduce more challenging questions. 
-     -If the student is struggling, provide simpler questions and additional support. 
- 7.  If the student directly asks for the final solution, respectfully decline and instead redirect them by providing another hint or asking guiding questions. 
- 8.  Be encouraging and supportive throughout your interactions. Reinforce effort, progress, and persistence. 
+ Guidelines:
 
- Example phrases you can use: 
+ 1.  Never immediately provide the answer to the student's question.
+ 2.  First, ask the student to clearly explain what steps they've already taken and precisely where they're getting stuck.
+ 3.  Provide incremental hints or small nudges, not complete steps. Guide the student to think critically about the next logical action.
+ 4.  Error Analysis and Feedback:
+     -If the student makes a mistake, point out gently where and why the misunderstanding occurred.
+     -Explain the underlying misconceptions and provide clear, concise explanations.
+     -Provide the student with resources that can help them understand the problem better.
+ 5.  Metacognitive Prompts:
+     -Frequently prompt students to summarize their current understanding before moving forward.
+     -Ask students to reflect on their learning process and identify their strengths and weaknesses.
+     -Ask questions that promote self-evaluation, such as:
+         -"What strategies did you use to solve this problem?"
+         -"What could you have done differently?"
+         -"How confident are you in your understanding of this concept?"
+         -"What are some areas where you feel you need more practice?"
+ 6.  Adaptive Questioning:
+     -Adapt the difficulty of your questions based on the student's responses.
+     -If the student demonstrates a strong understanding, introduce more challenging questions.
+     -If the student is struggling, provide simpler questions and additional support.
+ 7.  If the student directly asks for the final solution, respectfully decline and instead redirect them by providing another hint or asking guiding questions.
+ 8.  Be encouraging and supportive throughout your interactions. Reinforce effort, progress, and persistence.
 
- -   "Can you explain your thinking so far?" 
- -   "That's an interesting approach; what might you try next?" 
- -   "You're on the right track, but check your previous step carefully, do you see anything unusual?" 
- -   "Let's slow down here. What information from the problem haven't you used yet?" 
- -   "What are some strategies you used to come to that conclusion?" 
- -   "Where do you think your understanding is breaking down?" 
- -   "Explain this concept as if you were teaching it to a friend." 
+ Example phrases you can use:
+
+ -   "Can you explain your thinking so far?"
+ -   "That's an interesting approach; what might you try next?"
+ -   "You're on the right track, but check your previous step carefully, do you see anything unusual?"
+ -   "Let's slow down here. What information from the problem haven't you used yet?"
+ -   "What are some strategies you used to come to that conclusion?"
+ -   "Where do you think your understanding is breaking down?"
+ -   "Explain this concept as if you were teaching it to a friend."
 
  Remember: your primary goal is to help the student develop problem-solving skills, confidence, and a deeper understanding, rather than simply providing solutions.`;
   }  
@@ -1040,8 +1050,34 @@ RESPOND NOW:`;
     if (this.depthTracker.shouldDeepenInquiry && turnsSinceLastCheck >= 3) {
       return true;
     }
-    
+
     return false;
+  }
+
+  /**
+   * Determine if a teach-back verification should be requested.
+   * Teach-back asks students to explain concepts in their own words to verify understanding.
+   * Triggers when: depth >= 3 and at least 3 assistant messages have been exchanged.
+   */
+  private shouldRequestTeachBack(): boolean {
+    // Check minimum depth threshold
+    if (this.depthTracker.currentDepth < 3) {
+      return false;
+    }
+
+    // Count assistant messages to ensure enough dialogue has occurred
+    const assistantMessageCount = this.conversation.filter(m => m.role === 'assistant').length;
+    if (assistantMessageCount < 3) {
+      return false;
+    }
+
+    // Don't request teach-back too frequently (at least 3 turns since last probe)
+    const turnsSinceLastProbe = this.conversation.length - this.lastProbeTurn;
+    if (turnsSinceLastProbe < 3) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -1386,10 +1422,189 @@ RESPOND NOW:`;
     return patterns.some(p => p.test(t));
   }
 
+  private getDomainFocusLabel(
+    domain: 'algebra' | 'geometry' | 'calculus' | 'statistics' | 'fractions' | 'arithmetic' | 'general'
+  ): string {
+    switch (domain) {
+      case 'algebra':
+        return 'equation';
+      case 'geometry':
+        return 'figure';
+      case 'calculus':
+        return 'function';
+      case 'statistics':
+        return 'data setup';
+      case 'fractions':
+        return 'fraction relationship';
+      case 'arithmetic':
+        return 'number relationship';
+      default:
+        return 'problem';
+    }
+  }
+
+  private getRecentMessage(role: 'user' | 'assistant'): string {
+    const recent = [...this.conversation].reverse().find(msg => msg.role === role)?.content || '';
+    return recent.replace(/\s+/g, ' ').trim();
+  }
+
+  private extractStudentIdea(studentInput: string): string {
+    const clean = (studentInput || '').replace(/\s+/g, ' ').trim();
+    if (!clean) return 'your latest idea';
+
+    const firstClause = clean.split(/[.?!;]+/)[0].trim();
+    if (firstClause.length === 0) return 'your latest idea';
+    return firstClause.length > 90 ? `${firstClause.slice(0, 87)}...` : firstClause;
+  }
+
+  private pickVariant(options: string[], seedText: string): string {
+    if (!options.length) return '';
+    let seed = this.conversation.length + (this.strugglingTurns * 11);
+    for (let i = 0; i < seedText.length; i++) {
+      seed = (seed + seedText.charCodeAt(i) * (i + 1)) % 2147483647;
+    }
+    return options[seed % options.length];
+  }
+
+  private buildSessionTailoringContext(
+    studentInput: string,
+    assessment: SocraticAssessment,
+    questionType: SocraticQuestionType
+  ): string {
+    const domain = this.getPrimaryDomain();
+    const conceptTrail = this.depthTracker.conceptualConnections.slice(-3);
+    const conceptContext = conceptTrail.length > 0 ? conceptTrail.join(', ') : 'none yet';
+    const latestStudent = this.extractStudentIdea(studentInput);
+    const latestTutor = this.getRecentMessage('assistant');
+    const tutorSnippet = latestTutor ? latestTutor.slice(0, 120) : 'none yet';
+    const confidenceBand = assessment.confidenceLevel < 0.3
+      ? 'low'
+      : assessment.confidenceLevel > 0.8
+        ? 'high'
+        : 'medium';
+
+    return `SESSION TAILORING:
+- Student confidence band: ${confidenceBand}
+- Question type target: ${questionType}
+- Domain focus: ${domain}
+- Concepts recently discussed: ${conceptContext}
+- Student's latest reasoning snippet: "${latestStudent}"
+- Last tutor question to avoid repeating: "${tutorSnippet}"
+- Ask one question that clearly references the student's latest reasoning and this session's concept trail.`;
+  }
+
+  private buildSessionTailoredQuestion(
+    assessment: SocraticAssessment,
+    questionType: SocraticQuestionType,
+    studentInput: string
+  ): string {
+    const domain = this.getPrimaryDomain();
+    const focusLabel = this.getDomainFocusLabel(domain);
+    const studentIdea = this.extractStudentIdea(studentInput);
+    const concepts = this.depthTracker.conceptualConnections.slice(-2);
+    const conceptContext = concepts.length > 0 ? concepts.join(' and ') : focusLabel;
+
+    const lowConfidenceTemplates: Record<SocraticQuestionType, string[]> = {
+      [SocraticQuestionType.CLARIFICATION]: [
+        `From what you said ("${studentIdea}"), what is this ${focusLabel} asking us to find, and which given detail feels most reliable to start from?`,
+        `You mentioned "${studentIdea}" - what are we trying to determine in this ${focusLabel}, and what information do we already trust?`
+      ],
+      [SocraticQuestionType.ASSUMPTIONS]: [
+        `When you say "${studentIdea}", what assumption are we making about ${conceptContext}, and how could we check if that assumption is safe?`,
+        `Your idea "${studentIdea}" is useful - what are we assuming right now, and what in the prompt could confirm it?`
+      ],
+      [SocraticQuestionType.EVIDENCE]: [
+        `What part of the prompt supports your thought "${studentIdea}", and what part still needs evidence?`,
+        `For your idea "${studentIdea}", what evidence in this ${focusLabel} backs it up most clearly?`
+      ],
+      [SocraticQuestionType.PERSPECTIVE]: [
+        `If a classmate read this ${focusLabel} differently than "${studentIdea}", what alternate reading might they suggest?`,
+        `What is another way to interpret this setup if "${studentIdea}" does not fully fit?`
+      ],
+      [SocraticQuestionType.IMPLICATIONS]: [
+        `If your idea "${studentIdea}" is right, what should we expect to be true next in this ${focusLabel}?`,
+        `Following "${studentIdea}", what consequence should appear if we are on the right track?`
+      ],
+      [SocraticQuestionType.META_QUESTIONING]: [
+        `What made "${studentIdea}" your current strategy, and how will you decide whether it is helping?`,
+        `How did you choose "${studentIdea}" as your move, and what would make you revise it?`
+      ]
+    };
+
+    const mediumConfidenceTemplates: Record<SocraticQuestionType, string[]> = {
+      [SocraticQuestionType.CLARIFICATION]: [
+        `Given "${studentIdea}", what is the exact goal of this ${focusLabel} in your own words?`,
+        `How would you restate this ${focusLabel}'s goal after your step "${studentIdea}"?`
+      ],
+      [SocraticQuestionType.ASSUMPTIONS]: [
+        `What assumption sits underneath "${studentIdea}", and is that assumption always valid in ${conceptContext}?`,
+        `In "${studentIdea}", what are you taking for granted, and how could you test it quickly?`
+      ],
+      [SocraticQuestionType.EVIDENCE]: [
+        `What evidence from the problem text most strongly supports "${studentIdea}"?`,
+        `Which part of the given information directly justifies your step "${studentIdea}"?`
+      ],
+      [SocraticQuestionType.PERSPECTIVE]: [
+        `What other perspective on this ${focusLabel} could lead to a different next move than "${studentIdea}"?`,
+        `How might someone else read this setup differently from "${studentIdea}"?`
+      ],
+      [SocraticQuestionType.IMPLICATIONS]: [
+        `If "${studentIdea}" is correct, what does that imply about the next checkpoint in the reasoning?`,
+        `What should logically follow from "${studentIdea}" before we move on?`
+      ],
+      [SocraticQuestionType.META_QUESTIONING]: [
+        `Why is "${studentIdea}" a useful strategic move for this ${focusLabel}?`,
+        `How does your choice "${studentIdea}" fit the bigger strategy in this session?`
+      ]
+    };
+
+    const highConfidenceTemplates: Record<SocraticQuestionType, string[]> = {
+      [SocraticQuestionType.CLARIFICATION]: [
+        `Can you state the goal condition for this ${focusLabel} with precision, based on "${studentIdea}"?`,
+        `How would you define success here, given your step "${studentIdea}"?`
+      ],
+      [SocraticQuestionType.ASSUMPTIONS]: [
+        `Which hidden assumption in "${studentIdea}" might fail in a different case, and why?`,
+        `What assumption in your reasoning "${studentIdea}" deserves stress-testing now?`
+      ],
+      [SocraticQuestionType.EVIDENCE]: [
+        `What is your strongest piece of evidence that "${studentIdea}" is structurally valid for this ${focusLabel}?`,
+        `How would you justify "${studentIdea}" to someone who doubts it?`
+      ],
+      [SocraticQuestionType.PERSPECTIVE]: [
+        `What alternate method would still honor the same constraints as "${studentIdea}" in this ${focusLabel}?`,
+        `If you had to attack this from a different angle than "${studentIdea}", what angle would you choose?`
+      ],
+      [SocraticQuestionType.IMPLICATIONS]: [
+        `What broader principle does "${studentIdea}" imply about problems of this kind?`,
+        `If "${studentIdea}" holds, what general rule can you infer for similar ${focusLabel}s?`
+      ],
+      [SocraticQuestionType.META_QUESTIONING]: [
+        `How has your strategy evolved this session from earlier turns to "${studentIdea}"?`,
+        `What decision criterion are you using now that differs from the start of this session?`
+      ]
+    };
+
+    const templatePool = assessment.confidenceLevel < 0.3
+      ? lowConfidenceTemplates
+      : assessment.confidenceLevel > 0.8
+        ? highConfidenceTemplates
+        : mediumConfidenceTemplates;
+
+    const choices = templatePool[questionType] || mediumConfidenceTemplates[SocraticQuestionType.CLARIFICATION];
+    const question = this.pickVariant(choices, `${studentInput}|${questionType}|${conceptContext}`);
+    return question.endsWith('?') ? question : `${question}?`;
+  }
+
   // Helper to reframe instructional phrasing into goal-oriented metacognitive questions
   private reframeInstructionalToGoal(input: string, assessment: SocraticAssessment, questionType: SocraticQuestionType, studentInput: string): string {
-    const prompt = `Let’s stay focused on the goal. What is this problem asking us to find or show, and what would be a good first move toward that?`;
-    return this.sanitizeToSocraticQuestion(prompt, assessment, questionType, studentInput);
+    const tailoredQuestion = this.buildSessionTailoredQuestion(assessment, questionType, studentInput);
+    const openings = [
+      `Let's stay with your reasoning: ${tailoredQuestion}`,
+      `Sticking with your approach so far: ${tailoredQuestion}`,
+      `Using what you've already tried: ${tailoredQuestion}`
+    ];
+    return this.pickVariant(openings, studentInput || input);
   }
 
   // Build the opening prompt in a less-direct, goal-framing style
@@ -2006,3 +2221,4 @@ RESPOND NOW:`;
     return differentTypes[Math.floor(Math.random() * differentTypes.length)];
   }
 }
+

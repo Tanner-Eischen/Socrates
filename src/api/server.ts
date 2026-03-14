@@ -27,6 +27,52 @@ import collaborationRoutes from './routes/collaboration';
 import voiceRoutes from './routes/voice';
 import monitoringRoutes from './routes/monitoring';
 
+interface CorsPolicy {
+  allowAll: boolean;
+  allowedOrigins: string[];
+}
+
+const getCorsPolicy = (): CorsPolicy => {
+  if (config.CORS_ORIGIN === '*') {
+    return { allowAll: true, allowedOrigins: [] };
+  }
+
+  if (Array.isArray(config.CORS_ORIGIN)) {
+    const origins = config.CORS_ORIGIN
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0);
+    return {
+      allowAll: origins.includes('*'),
+      allowedOrigins: origins.filter((origin) => origin !== '*'),
+    };
+  }
+
+  return {
+    allowAll: false,
+    allowedOrigins: [config.CORS_ORIGIN],
+  };
+};
+
+const createCorsOriginHandler = () => {
+  const policy = getCorsPolicy();
+
+  return (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void): void => {
+    // Allow non-browser requests (e.g. curl, health checks).
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (policy.allowAll || policy.allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    logger.warn('Blocked CORS origin', { origin, allowedOrigins: policy.allowedOrigins });
+    callback(new Error(`Origin ${origin} is not allowed by CORS policy`));
+  };
+};
+
 // Global services
 export let dbPool: any;
 export let redisClient: any;
@@ -44,55 +90,12 @@ class SocratesServer {
   constructor() {
     this.app = express();
     this.server = createServer(this.app);
-    
-    // CRITICAL: Add CORS headers to ALL requests FIRST
-    this.app.use((req, res, next) => {
-      const origin = req.headers.origin;
-      
-      // Determine allowed origin based on CORS_ORIGIN config
-      let allowedOrigin: string;
-      if (config.CORS_ORIGIN === '*' || 
-          (Array.isArray(config.CORS_ORIGIN) && (config.CORS_ORIGIN.length === 0 || config.CORS_ORIGIN.includes('*')))) {
-        // Allow all origins - use requesting origin when credentials are enabled
-        allowedOrigin = origin || '*';
-      } else if (Array.isArray(config.CORS_ORIGIN)) {
-        // Check if requesting origin is in allowed list
-        if (origin && config.CORS_ORIGIN.includes(origin)) {
-          allowedOrigin = origin;
-        } else {
-          allowedOrigin = config.CORS_ORIGIN[0] || '*'; // Use first allowed origin or fallback
-        }
-      } else {
-        // Single origin string
-        allowedOrigin = config.CORS_ORIGIN;
-      }
-      
-      res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Max-Age', '86400');
-      
-      // Handle OPTIONS preflight immediately
-      if (req.method === 'OPTIONS') {
-        logger.info('OPTIONS preflight request', { origin, allowedOrigin, path: req.path, configOrigin: config.CORS_ORIGIN });
-        res.status(204).end();
-        return;
-      }
-      next();
-    });
-    
-    // Configure Socket.IO CORS
-    const socketOrigin = (config.CORS_ORIGIN === '*')
-      // Echo back the request origin when credentials are used
-      ? ((origin: string, callback: (err: Error | null, allow: boolean | string) => void) => {
-          callback(null, origin || '*');
-        })
-      : config.CORS_ORIGIN;
+
+    const corsOriginHandler = createCorsOriginHandler();
 
     this.io = new SocketIOServer(this.server, {
       cors: {
-        origin: socketOrigin as any,
+        origin: corsOriginHandler as any,
         credentials: config.CORS_CREDENTIALS,
       },
       pingTimeout: config.WS_CONNECTION_TIMEOUT,
@@ -129,11 +132,17 @@ class SocratesServer {
     try {
       logger.info('Connecting to Redis...');
       redisClient = createRedisClient();
+      await redisClient.ping();
       cacheService = new CacheService(redisClient);
       sessionService = new SessionService(redisClient);
       logger.info('Redis initialized successfully');
     } catch (error) {
       logger.error('Redis initialization failed. Continuing without cache/session services.', { error });
+      try {
+        redisClient?.disconnect();
+      } catch {
+        // Ignore disconnect errors during degraded startup.
+      }
       redisClient = null;
       cacheService = null;
       sessionService = null;
@@ -144,32 +153,18 @@ class SocratesServer {
 
   // Setup middleware
   private setupMiddleware(): void {
-    // CORS middleware (already handled in constructor, but keep cors() for additional support)
-    // Configure CORS to allow requests from frontend
-    // When credentials are enabled, browsers require the actual origin (not '*')
-    let expressCorsOrigin: any;
-    if (config.CORS_ORIGIN === '*' || (Array.isArray(config.CORS_ORIGIN) && config.CORS_ORIGIN.length === 0)) {
-      // Allow all origins - return the requesting origin when credentials are used
-      expressCorsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
-        // Always allow the origin - return it for credentials, or '*' if no origin
-        const allowedOrigin = origin || '*';
-        logger.debug('CORS: Allowing origin', { origin, allowedOrigin });
-        callback(null, allowedOrigin);
-      };
-    } else if (Array.isArray(config.CORS_ORIGIN)) {
-      expressCorsOrigin = config.CORS_ORIGIN;
-    } else {
-      expressCorsOrigin = config.CORS_ORIGIN;
-    }
+    const corsPolicy = getCorsPolicy();
+    const corsOriginHandler = createCorsOriginHandler();
 
     logger.info('CORS configuration', { 
-      CORS_ORIGIN: config.CORS_ORIGIN, 
-      CORS_CREDENTIALS: config.CORS_CREDENTIALS 
+      allowAll: corsPolicy.allowAll,
+      allowedOrigins: corsPolicy.allowedOrigins,
+      credentials: config.CORS_CREDENTIALS,
     });
 
     // CORS configuration
     const corsOptions = {
-      origin: expressCorsOrigin,
+      origin: corsOriginHandler as any,
       credentials: config.CORS_CREDENTIALS,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -209,56 +204,78 @@ class SocratesServer {
 
     // CORS test endpoint (before auth) - to verify CORS headers are being sent
     this.app.get('/cors-test', (req, res) => {
-      const origin = req.headers.origin || '*';
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.json({ 
         message: 'CORS test successful',
-        origin,
-        headers: req.headers,
+        origin: req.headers.origin || null,
         timestamp: new Date().toISOString()
       });
     });
 
-    this.app.options('/cors-test', (req, res) => {
-      const origin = req.headers.origin || '*';
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Max-Age', '86400');
-      res.status(204).end();
-    });
-
     // Health check endpoint (before auth)
-    this.app.get('/health', async (req, res) => {
+    this.app.get('/health', async (_req, res) => {
       try {
-        const dbHealth = dbPool ? await checkDatabaseHealth(dbPool) : { isHealthy: false } as any;
-        const redisHealth = redisClient?.ping ? (await redisClient.ping()) === 'PONG' : false;
-        
+        const dbHealth = dbPool ? await checkDatabaseHealth(dbPool) : null;
+        const databaseStatus = !dbPool
+          ? 'unavailable'
+          : dbHealth?.isHealthy
+            ? 'healthy'
+            : 'unhealthy';
+
+        let redisStatus: 'healthy' | 'unhealthy' | 'unavailable' = 'unavailable';
+        if (redisClient?.ping) {
+          try {
+            redisStatus = (await redisClient.ping()) === 'PONG' ? 'healthy' : 'unhealthy';
+          } catch {
+            redisStatus = 'unhealthy';
+          }
+        }
+
+        const isReady = databaseStatus === 'healthy';
         const health = {
-          status: 'ok',
+          status: isReady ? 'ok' : 'degraded',
+          readiness: isReady ? 'ready' : 'not_ready',
           timestamp: new Date().toISOString(),
           uptime: process.uptime(),
           version: process.env.npm_package_version || '1.0.0',
           environment: config.NODE_ENV,
           services: {
-            database: dbHealth.isHealthy ? 'healthy' : 'unhealthy',
-            redis: redisHealth ? 'healthy' : 'unhealthy',
+            database: databaseStatus,
+            redis: redisStatus,
             api: 'healthy',
           },
         };
 
-        const isHealthy = dbHealth.isHealthy && redisHealth;
-        res.status(isHealthy ? 200 : 503).json(health);
+        res.status(200).json(health);
       } catch (error) {
         logger.error('Health check failed', { error });
         res.status(503).json({
           status: 'error',
           timestamp: new Date().toISOString(),
           error: 'Health check failed',
+        });
+      }
+    });
+
+    // Readiness check endpoint (strict: requires database availability)
+    this.app.get('/ready', async (_req, res) => {
+      try {
+        const dbHealth = dbPool ? await checkDatabaseHealth(dbPool) : null;
+        const isReady = !!dbHealth?.isHealthy;
+
+        res.status(isReady ? 200 : 503).json({
+          status: isReady ? 'ready' : 'not_ready',
+          timestamp: new Date().toISOString(),
+          services: {
+            database: isReady ? 'healthy' : 'unavailable',
+            api: 'healthy',
+          },
+        });
+      } catch (error) {
+        logger.error('Readiness check failed', { error });
+        res.status(503).json({
+          status: 'not_ready',
+          timestamp: new Date().toISOString(),
+          error: 'Readiness check failed',
         });
       }
     });
@@ -291,25 +308,8 @@ class SocratesServer {
     // Serve static files for uploads
     this.app.use('/uploads', express.static(config.UPLOAD_DIR));
 
-    // Catch-all OPTIONS handler (before 404) - handles any OPTIONS requests that reach here
-    this.app.options('*', (req, res) => {
-      const origin = req.headers.origin || '*';
-      logger.info('Catch-all OPTIONS handler', { origin, path: req.path, url: req.url });
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Max-Age', '86400');
-      res.status(204).end();
-    });
-
     // 404 handler
     this.app.use('*', (req, res) => {
-      // Add CORS headers even to 404 responses
-      const origin = req.headers.origin || '*';
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      
       res.status(404).json({
         error: 'Not Found',
         message: `Route ${req.originalUrl} not found`,

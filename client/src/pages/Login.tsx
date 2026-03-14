@@ -175,18 +175,18 @@ export default function Login() {
           </p>
           
           {!isRegistering && (
-            <p className="text-xs text-gray-500">
-              Or{' '}
-              <button
-                onClick={() => {
-                  setEmail('test@example.com');
-                  setPassword('password123');
-                }}
-                className="text-amber-600 hover:text-amber-700 font-medium"
-              >
-                use test account
-              </button>
-            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setEmail('test@example.com');
+                setPassword('password123');
+              }}
+              className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Quick Demo - Use Test Account
+            </Button>
           )}
         </div>
       </Card>

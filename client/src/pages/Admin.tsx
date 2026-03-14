@@ -27,12 +27,12 @@ export default function Admin() {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Redirect if not admin
-  if (user?.role !== 'admin') {
-    return <Navigate to="/dashboard" />;
-  }
-
   useEffect(() => {
+    if (user?.role !== 'admin') {
+      setLoading(false);
+      return;
+    }
+
     Promise.all([
       api.get('/users'),
       api.get('/analytics/system')
@@ -46,17 +46,22 @@ export default function Admin() {
         toast.error('Failed to load admin data');
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.role]);
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
       await api.patch(`/users/${userId}`, { isActive: !currentStatus });
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, isActive: !currentStatus } : u));
       toast.success('User status updated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to update user status');
     }
   };
+
+  // Redirect if not admin
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" />;
+  }
 
   if (loading) {
     return (

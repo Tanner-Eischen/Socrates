@@ -32,20 +32,40 @@ export default function TypingText({
     // Split by words but keep spaces - more natural typing
     const tokens = text.match(/(\S+|\s+)/g) || [];
     let currentIndex = 0;
+    let isActive = true;
+    let timer: ReturnType<typeof setTimeout>;
 
-    const typeNextToken = () => {
-      if (currentIndex < tokens.length) {
-        setDisplayedText(prev => prev + tokens[currentIndex]);
-        currentIndex++;
-        setTimeout(typeNextToken, speed);
-      } else {
-        setIsComplete(true);
-        onComplete?.();
-      }
+    const completeTyping = () => {
+      if (!isActive) return;
+      setIsComplete(true);
+      onComplete?.();
     };
 
-    const timer = setTimeout(typeNextToken, speed);
-    return () => clearTimeout(timer);
+    const typeNextToken = () => {
+      if (!isActive) return;
+
+      const nextToken = tokens[currentIndex];
+      if (nextToken === undefined) {
+        completeTyping();
+        return;
+      }
+
+      setDisplayedText(prev => prev + nextToken);
+      currentIndex++;
+
+      if (currentIndex < tokens.length) {
+        timer = setTimeout(typeNextToken, speed);
+        return;
+      }
+
+      completeTyping();
+    };
+
+    timer = setTimeout(typeNextToken, speed);
+    return () => {
+      isActive = false;
+      clearTimeout(timer);
+    };
   }, [text, speed, onComplete]);
 
   // Chalk colors based on role

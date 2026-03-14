@@ -303,7 +303,7 @@ export default function Session() {
               submittedProblemId: cleanedId,
               useEnhancedEngine: true
             });
-          } catch (err) {
+          } catch {
             console.warn('[Session] submittedProblemId rejected; creating session without it');
           }
         }
