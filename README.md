@@ -1,542 +1,168 @@
-# Socrates — AI-Powered Socratic Learning Platform
+# Socrates
 
-🎓 Full-stack Socratic AI tutoring platform with adaptive learning, real-time collaboration, and comprehensive analytics.
+A Socratic tutoring application that asks guiding questions instead of giving answers.
 
 ---
 
-## 🚀 For Portfolio Reviewers
+## For Reviewers
 
-**TL;DR — See it in action:**
-1. **Live Demo:** [socrates.up.railway.app](https://socrates.up.railway.app) (or run locally in 2 min)
-2. **Demo Login:** `demo@socrates.ai` / `password123`
-3. **Key Features:** Socratic dialogue engine, real-time collaboration, learning analytics
+**Try it:**
+- **Live:** [socrates.up.railway.app](https://socrates.up.railway.app)
+- **Demo login:** `demo@socrates.ai` / `password123`
 
-**Quick Local Setup:**
+**Run locally:**
 ```bash
 # Terminal 1: Backend
 cp .env.example .env && npm install && npm run api:dev
 
 # Terminal 2: Frontend
 cd client && npm install && npm run dev
-# Open http://localhost:5173 → login with demo credentials
+# Open http://localhost:5173
 ```
 
-**Portfolio Highlights:**
-| Feature | Location | Key Files |
-|---------|----------|-----------|
-| Socratic Engine | `src/core/` | `socratic-engine.ts`, `adaptive-controller.ts` |
-| REST API | `src/api/routes/` | `auth.ts`, `sessions.ts`, `analytics.ts` |
-| React Frontend | `client/src/` | `pages/Session.tsx`, `components/MathRenderer.tsx` |
-| Real-time | `src/api/websocket/` | `handlers.ts` + `client/src/hooks/useSocket.ts` |
-| CLI Tool | `src/cli/` | `bin/socrates`, `commands/chat.ts` |
+**Key files to review:**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────┤
-│  Browser (React)          CLI (Node)                        │
-│  ┌─────────────────┐      ┌─────────────┐                  │
-│  │  Dashboard      │      │  tutor chat │                  │
-│  │  Session Chat   │      │  tutor demo │                  │
-│  │  Analytics      │      │  tutor run  │                  │
-│  └────────┬────────┘      └──────┬──────┘                  │
-│           │ HTTP/WS              │ OpenAI API              │
-│           ▼                      ▼                          │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │              Express API Server                     │   │
-│  │  /api/v1/auth  /api/v1/sessions  /api/v1/analytics │   │
-│  │  Socket.IO    JWT Auth        Socratic Engine      │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-```
+| What | Where |
+|------|-------|
+| Socratic dialogue logic | `src/socratic-engine.ts`, `src/engine/prompts.ts` |
+| REST API | `src/api/routes/` (auth.ts, sessions.ts, analytics.ts) |
+| React frontend | `client/src/pages/Session.tsx`, `client/src/components/` |
+| WebSocket handlers | `src/api/websocket/handlers.ts` |
+| CLI tool | `src/cli/` (chat.ts, run.ts, demo.ts) |
 
 ---
 
-## Current Status
+## How It Works
 
-**Backend (Complete):**
-- ✅ Core Socratic dialogue engine
-- ✅ RESTful API with JWT authentication
-- ✅ Problem management & classification
-- ✅ Session tracking & analytics
-- ✅ WebSocket support for real-time features
-
-**Frontend (Phase 2 Complete):**
-- ✅ React + TypeScript + TailwindCSS
-- ✅ Dashboard with stats and progress tracking
-- ✅ Math rendering (KaTeX/LaTeX support)
-- ✅ Analytics charts and insights
-- ✅ Real-time collaboration rooms
-- ✅ Admin panel for user management
-
-## Quick Demo
-
-Experience the Socratic learning flow in minutes:
-
-1. **Sign in** with the demo account or create a new account
-2. **Browse problems** with rich math rendering (KaTeX/LaTeX support)
-3. **Engage in Socratic dialogue** - the AI tutor asks guiding questions, never gives direct answers
-4. **View learning analytics** - track your progress, accuracy, and concept mastery
-
-## Quick Start
-
-### Backend Setup
-
-```bash
-# 1. Copy environment template
-cp .env.example .env
-
-# 2. Add your OpenAI API key and configuration
-# Edit .env with your actual values
-
-# 3. Install backend dependencies
-npm install
-
-# 4. Run backend API server (port 3000)
-npm run api:dev
+```
+┌──────────────────┐     ┌──────────────────┐
+│   React Client   │     │    CLI Tool      │
+│  (Vite + TS)     │     │   (Node.js)      │
+└────────┬─────────┘     └────────┬─────────┘
+         │ HTTP/WS                │
+         ▼                        ▼
+┌─────────────────────────────────────────────┐
+│           Express API Server                │
+│  ┌─────────────────────────────────────┐   │
+│  │  Socratic Engine (OpenAI-powered)   │   │
+│  │  - Asks guiding questions           │   │
+│  │  - Tracks conversation depth        │   │
+│  │  - Adapts to student responses      │   │
+│  └─────────────────────────────────────┘   │
+│  Routes: auth, sessions, analytics, etc.   │
+└─────────────────────────────────────────────┘
 ```
 
-### Frontend Setup
+The tutor never gives direct answers. Instead, it:
+1. **Clarifies** the student's understanding
+2. **Probes assumptions** and evidence
+3. **Explores implications** of their reasoning
+4. **Guides discovery** through follow-up questions
 
-```bash
-# 1. Navigate to client directory
-cd client
+---
 
-# 2. Install frontend dependencies
-npm install
+## Features
 
-# 3. Run frontend dev server (port 5173)
-npm run dev
+**Backend (Express + TypeScript)**
+- JWT authentication with refresh tokens
+- Session tracking and interaction logging
+- Analytics endpoints for learning metrics
+- WebSocket support for real-time features
 
-# 4. Open browser to http://localhost:5173
-```
+**Frontend (React + Vite)**
+- Dashboard with session history
+- Interactive Socratic chat with LaTeX rendering
+- Analytics visualizations
+- Real-time collaboration rooms
 
-### Full Stack Development
+**CLI Tool**
+- `tutor chat` — Interactive Socratic dialogue
+- `tutor demo` — Scripted demo scenarios
+- `tutor run` — One-shot tutoring session
 
-```bash
-# Terminal 1: Backend API
-npm run api:dev
-
-# Terminal 2: Frontend
-cd client && npm run dev
-
-# Terminal 3: Run tests (optional)
-cd client && npm test
-```
+---
 
 ## Project Structure
 
 ```
-Socrates/
-├── src/                           # Backend (Node.js + Express + TypeScript)
-│   ├── api/
-│   │   ├── routes/                # RESTful API endpoints
-│   │   │   ├── auth.ts           # Authentication (login, register, tokens)
-│   │   │   ├── problems.ts       # Problem CRUD + filtering
-│   │   │   ├── sessions.ts       # Session management + interactions
-│   │   │   └── analytics.ts      # User & system analytics
-│   │   ├── websocket/            # Real-time features
-│   │   │   └── handlers.ts       # Socket.IO event handlers
-│   │   └── middleware/           # Auth, validation, error handling
-│   ├── core/                      # Socratic engine & AI logic
-│   │   ├── socratic-engine.ts    # Core tutoring engine
-│   │   ├── adaptive-controller.ts # Adaptive difficulty
-│   │   ├── analytics-engine.ts   # Performance tracking
-│   │   └── session-manager.ts    # Session lifecycle
-│   ├── services/                  # Business logic layer
-│   └── types.ts                   # TypeScript type definitions
-│
-├── client/                        # Frontend (React + TypeScript + Vite)
-│   ├── src/
-│   │   ├── pages/                # Main application pages
-│   │   │   ├── Login.tsx         # Authentication
-│   │   │   ├── Register.tsx      # User registration
-│   │   │   ├── Dashboard.tsx     # Stats & recent sessions
-│   │   │   ├── Problems.tsx      # Browse problems
-│   │   │   ├── Session.tsx       # Socratic chat interface
-│   │   │   ├── Analytics.tsx     # Charts & insights
-│   │   │   ├── Profile.tsx       # User settings
-│   │   │   ├── Collaboration.tsx # Real-time rooms
-│   │   │   └── Admin.tsx         # User management (admin only)
-│   │   ├── components/           # Reusable UI components
-│   │   │   ├── MathRenderer.tsx  # KaTeX LaTeX rendering
-│   │   │   └── SkeletonLoader.tsx # Loading states
-│   │   ├── hooks/                # Custom React hooks
-│   │   │   └── useSocket.ts      # Socket.IO connection
-│   │   ├── lib/                  # Utilities
-│   │   │   └── socket.ts         # Socket.IO setup
-│   │   ├── test/                 # Test files + utilities
-│   │   ├── AuthContext.tsx       # Auth state management
-│   │   ├── api.ts                # Axios HTTP client
-│   │   └── App.tsx               # Router configuration
-│   ├── tailwind.config.js        # TailwindCSS config
-│   ├── vite.config.ts            # Vite + Vitest config
-│   └── package.json              # Frontend dependencies
-│
-├── .env.example                   # Environment template
-├── package.json                   # Backend dependencies
-└── README.md                      # This file
+src/
+├── socratic-engine.ts      # Core tutoring logic
+├── engine/                 # Dialogue utilities
+│   ├── prompts.ts          # Socratic prompt templates
+│   ├── question-selector.ts
+│   └── student-assessor.ts
+├── session-manager.ts      # Session lifecycle
+├── services/
+│   └── adaptive-learning.ts
+├── api/
+│   ├── routes/             # REST endpoints
+│   │   ├── auth.ts
+│   │   ├── sessions.ts
+│   │   └── analytics.ts
+│   ├── websocket/          # Socket.IO handlers
+│   └── middleware/         # Auth, logging, errors
+└── cli/                    # Terminal interface
+    ├── chat.ts
+    ├── demo.ts
+    └── run.ts
+
+client/
+└── src/
+    ├── pages/              # Route components
+    │   ├── Dashboard.tsx
+    │   ├── Session.tsx
+    │   └── Analytics.tsx
+    └── components/         # UI components
+        ├── MathRenderer.tsx
+        └── ChatMessage.tsx
 ```
 
-## Frontend vs Backend Separation
+---
 
-- Frontend:
-  - Location: `client/`
-  - Entry points: `client/src/main.tsx`, `client/src/App.tsx`
-  - Dev server: `npm --prefix client run dev` (http://localhost:5173 or 5174)
-  - Build output: `client/dist/`
-  - Lint: `npm --prefix client run lint`
+## Tech Stack
 
-- Backend (API + WebSocket + CLI):
-  - Location: `src/` (API under `src/api/`, CLI under `src/cli/`)
-  - Dev server: `npm run api:dev` (Express + Socket.IO)
-  - Build output: `dist/`
-  - CLI: `bin/socrates` and `bin/socrateach` launchers; commands registered via `src/cli/index.ts`
+| Layer | Technology |
+|-------|------------|
+| Backend | Node.js, Express, TypeScript |
+| Database | PostgreSQL (via pg) |
+| Auth | JWT with refresh tokens |
+| AI | OpenAI API |
+| Realtime | Socket.IO |
+| Frontend | React 19, Vite, TailwindCSS |
+| Charts | Recharts |
+| Math | KaTeX |
 
-<!-- Experimental UI (NewCSS) removed to reduce clutter. -->
-
-Guidelines:
-- Place all browser UI code under `client/` (pages, components, assets).
-- Keep server-only logic under `src/api/` and CLI under `src/cli/`.
-- Avoid adding frontend components at the repo root.
-
-## Features
-
-### Backend API
-- **Authentication:** JWT-based auth with refresh tokens, role-based access control
-- **Problem Management:** CRUD operations, filtering, tagging, difficulty levels
-- **Session Tracking:** Create sessions, log interactions, track progress
-- **Analytics:** User performance metrics, dashboard stats, system monitoring
-- **Real-time:** Socket.IO for collaboration and live updates
-- **Socratic Engine:** AI-powered tutoring with no direct answers
-
-### Frontend Features
-- **Dashboard:** Stats cards, recent sessions, quick actions
-- **Problem Browser:** Filter and search problems, math rendering (KaTeX)
-- **Learning Sessions:** Interactive Socratic chat with LaTeX support
-- **Analytics:** Line/bar charts for accuracy, time spent, topic mastery
-- **Profile Management:** Edit profile, change password
-- **Collaboration:** Real-time rooms with messaging and presence
-- **Admin Panel:** User management, system metrics (admin only)
-- **Toast Notifications:** Success/error feedback
-- **Skeleton Loaders:** Better loading UX
-
-### Tech Stack
-
-**Backend:**
-- Node.js + Express + TypeScript
-- JWT authentication
-- Socket.IO for WebSockets
-- OpenAI API for AI tutoring
-
-**Frontend:**
-- React 19 + TypeScript
-- Vite (build tool)
-- TailwindCSS (styling)
-- React Router (routing)
-- Axios (HTTP client)
-- Socket.IO client
-- KaTeX (math rendering)
-- Recharts (data visualization)
-- React Hot Toast (notifications)
-- Vitest + React Testing Library (testing)
-
-## CLI (Bonus Feature)
-
-The CLI provides terminal-based access to the Socratic tutor:
-
-```bash
-# 1) Ensure your OpenAI key is set (project-level .env or shell env)
-echo OPENAI_API_KEY=your-openai-api-key-here > .env
-
-# 2) Install dependencies
-npm install
-
-# 3A) Use the CLI locally without global link
-node ./bin/socrates --help
-
-# 3B) Or create a global alias (makes `tutor` available)
-npm link
-tutor --help
-```
-
-Common commands:
-
-```bash
-# Interactive chat (text)
-tutor chat --problem "Solve 2x + 5 = 13" --difficulty beginner
-
-# Interactive chat (image)
-tutor chat --image ./samples/linear1.png
-
-# One-shot run (first tutor response + compliance)
-tutor run --problem-id 0
-
-# Scripted demo (live tutor responses)
-tutor demo --scenario algebra-beginner
-
-# Problem bank utilities
-tutor problems list
-tutor problems show 0
-```
-
-In-chat commands during `tutor chat`:
-
-```text
-:attach <imagePath>            # Attach an image; extracts text and adds as context
-:difficulty <level>            # Switch difficulty: beginner|intermediate|advanced
-:quit                          # Exit the session
-```
-
-Notes:
-- The CLI uses live OpenAI calls (no mocks), so responses vary run-to-run.
-- `OPENAI_API_KEY` must be available in `.env` or the environment.
-- Windows PowerShell works out-of-the-box; no TTY tricks required.
+---
 
 ## Testing
 
-### Frontend (Vitest)
-- **MathRenderer:** 2 tests (plain text, KaTeX rendering)
-- **TypingText:** 1 test (progressive render)
-- **utils:** 2 tests (class merging, Tailwind conflicts)
-
-Run: `cd client && npm test`
-
-### Backend (Jest)
-- **Environment config:** 2 tests (test mode, port loading)
-
-Run: `npm run test:unit`
-
-### Backend Validation
 ```bash
-# CLI one-shot sanity test
-tutor run --problem "Solve 2x + 5 = 13"
+# Backend unit tests
+npm run test:unit
 
-# Interactive chat
-tutor chat --problem "Explain the slope of y = 2x + 1" --difficulty intermediate
+# Frontend tests
+cd client && npm test
 
-# Scripted demos (live)
-tutor demo --scenario algebra-beginner
-tutor demo --scenario geometry-intermediate
-tutor demo --scenario calculus-advanced
+# Frontend coverage
+cd client && npm run test:coverage
 ```
+
+---
 
 ## API Endpoints
 
-### Authentication
-- `POST /api/v1/auth/register` - Create new user account
-- `POST /api/v1/auth/login` - Login and get JWT token
-- `GET /api/v1/auth/me` - Get current user info
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `POST /api/v1/auth/change-password` - Update password
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/v1/auth/login` | Authenticate user |
+| `POST /api/v1/auth/register` | Create account |
+| `GET /api/v1/problems` | List problems |
+| `POST /api/v1/sessions` | Start learning session |
+| `POST /api/v1/sessions/:id/interactions` | Log chat interaction |
+| `GET /api/v1/analytics/user` | User performance metrics |
+| `GET /api/v1/analytics/dashboard` | Dashboard stats |
 
-### Problems
-- `GET /api/v1/problems` - List problems (with filters)
-- `GET /api/v1/problems/:id` - Get problem details
-- `POST /api/v1/problems` - Create problem (tutor/admin)
-- `PATCH /api/v1/problems/:id` - Update problem
-- `DELETE /api/v1/problems/:id` - Delete problem
-
-### Sessions
-- `POST /api/v1/sessions` - Start new learning session
-- `GET /api/v1/sessions/:id` - Get session details
-- `GET /api/v1/sessions` - List user sessions
-- `POST /api/v1/sessions/:id/interactions` - Log interaction
-- `PATCH /api/v1/sessions/:id/status` - Update session status
-
-### Analytics
-- `GET /api/v1/analytics/user` - User performance metrics
-- `GET /api/v1/analytics/dashboard` - Dashboard statistics
-- `GET /api/v1/analytics/system` - System metrics (admin)
-- `GET /api/v1/sessions/:id/journey` - Get learning journey timeline for a session
-- `GET /api/v1/sessions/:id/compliance` - Get Socratic compliance metrics for a session
-- `GET /api/v1/analytics/session/:id/report` - Get aggregated learning metrics report for a session
-
-## Development
-
-### Backend Scripts
-```bash
-npm run api:dev        # Start API server (dev mode with hot reload)
-npm run build          # Build TypeScript to JavaScript
-npm run start          # Run production build
-npm test               # Run CLI tester
-```
-
-### Frontend Scripts
-```bash
-cd client
-npm run dev            # Start Vite dev server
-npm run build          # Build for production
-npm run preview        # Preview production build
-npm test               # Run Vitest tests
-npm run test:coverage  # Generate coverage report
-```
-
-## Deployment
-
-### Backend
-- Set environment variables in production
-- Run `npm run build` to compile TypeScript
-- Start with `npm run start` or use PM2/Docker
-
-### Frontend
-- Build with `npm run build` in client directory
-- Deploy `client/dist/` folder to:
-  - Vercel (recommended)
-  - Netlify
-  - AWS S3 + CloudFront
-  - Any static hosting service
-
-## Environment Variables
-
-Required in `.env`:
-```bash
-# OpenAI
-OPENAI_API_KEY=your_key_here
-
-# Server
-PORT=3000
-NODE_ENV=development
-
-# JWT
-JWT_SECRET=your_secret_here
-JWT_EXPIRES_IN=15m
-REFRESH_TOKEN_SECRET=your_refresh_secret
-REFRESH_TOKEN_EXPIRES_IN=7d
-
-# Database (if using)
-DATABASE_URL=your_db_url
-
-# CORS
-CORS_ORIGIN=http://localhost:5173
-
-# Behavioral Learning Measurement (Optional)
-UNDERSTANDING_CHECK_INTERVAL=3          # Interval between understanding checks (default: 3)
-ENABLE_TRANSFER_PROBES=true             # Enable transfer challenge probes (default: true)
-ENABLE_TEACHBACK_PROBES=true            # Enable teach-back probes (default: true)
-STRICT_SOCRATIC_MODE=false              # Enable strict Socratic compliance mode (default: false)
-```
-
-## CLI Measurement & Analytics
-
-The CLI showcases the Socratic method and provides simple, interpretable measurements:
-
-- **Socratic compliance**: Detects direct answers via `containsDirectAnswer(response)`.
-  - Shown in `tutor run` and summarized in `tutor demo` as “Direct answers detected” and PASS/FAIL.
-- **Question type distribution**: Which Socratic question types were used (clarification, assumptions, evidence, perspective, implications, meta_questioning).
-- **Depth metrics**: Current and maximum depth reached in the inquiry (1–5 scale).
-- **Concepts explored**: Topics inferred from the conversation (algebra, geometry, calculus, etc.).
-- **Confidence progression**: Sequence of inferred student confidence values across turns.
-- **Engagement score**: Heuristic combining depth and response dynamics.
-
-Example `tutor demo` summary:
-
-```text
-=== Demo Summary ===
-Direct answers detected: 0
-Socratic compliance: PASSED
-Question types: clarification, assumptions, evidence, perspective
-Average depth: 3
-Concepts explored: algebra
-Total interactions: 10
-```
-
-Tips to improve compliance if failures occur:
-- Re-run (live model variability). 
-- Adjust problem phrasing to avoid prompting direct numeric solutions.
-- Lower difficulty (`:difficulty beginner`) to increase scaffolding when the student struggles.
-
-## CLI Scenarios & Images
-
-Scripted demo files live in `fixtures/scripts/`:
-- `algebra-beginner.json`
-- `geometry-intermediate.json`
-- `calculus-advanced.json`
-
-You can create your own by following the same JSON shape:
-
-```json
-{
-  "name": "my-scenario",
-  "problem": "Explain why the sum of two even numbers is even.",
-  "difficulty": "intermediate",
-  "turns": [
-    "I'm not sure where to start.",
-    "Even numbers are multiples of 2, right?"
-  ]
-}
-```
-
-Image intake is supported in `tutor chat` using `--image` at start or `:attach <path>` mid-session. The CLI will extract text with the available image/text processors and inject it as context for the next Socratic turn.
-
-## Example Walkthroughs (5+)
-
-These examples demonstrate text input, image upload, Socratic dialogue, and a stretch feature.
-
-- Linear equation (text):
-  - `tutor chat --problem "Solve 2x + 5 = 13"`
-  - Respond naturally; observe guiding questions, no direct answers.
-
-- Geometry reasoning (text):
-  - `tutor chat --problem "Explain why base angles of an isosceles triangle are equal"`
-  - Ask for definitions and evidence; note perspective and implications prompts.
-
-- Calculus concept (text):
-  - `tutor chat --problem "What does the derivative represent at a point?"`
-  - Explore intuition and examples; observe meta_questioning for reflection.
-
-- Image-based algebra (image upload):
-  - `tutor chat --image ./samples/linear1.png`
-  - Or in-session: `:attach ./samples/linear1.png` to inject extracted text/context.
-
-- Word problem decomposition (text):
-  - `tutor chat --problem "A runner completes 3 laps of a 400m track in 5 minutes. What is the average speed?"`
-  - Guide units, assumptions, and step-wise reasoning.
-
-- Stretch feature — Collaboration room:
-  - Frontend: go to `Collaboration` page, create/join a room, exchange messages.
-  - Observe real-time presence, typing indicators, and message flow.
-
-## Prompt Engineering Notes
-
-- Socratic persona:
-  - Tutor is instructed to ask guiding questions, probe assumptions, and avoid direct answers.
-  - Emphasizes clarification, evidence, perspective, implications, and meta_questioning.
-
-- Guardrails against direct answers:
-  - Responses are checked for direct-answer patterns; strict mode can auto-retry.
-  - Tips: adjust problem phrasing and difficulty to increase scaffolding.
-
-- Adaptive difficulty and tone:
-  - Engine adjusts challenge level based on inferred confidence and turn history.
-  - Encourages teach-back probes and reflection when the student struggles.
-
-- Image intake prompts:
-  - When images are attached, the system summarizes extracted text, asks for key features, and invites the student to describe what they notice before proceeding.
-
-- Collaboration prompts:
-  - In shared rooms, prompts nudge participants to articulate reasoning and respond to each other’s questions without converging prematurely on final answers.
-
-## Demo Video Guide (≈5 minutes)
-
-- Preparation:
-  - Ensure `OPENAI_API_KEY` is set and both servers are running (`npm run api:dev`, `cd client && npm run dev`).
-  - Open the app at `http://localhost:5173` and have `samples/linear1.png` available.
-
-- Record (screen + mic):
-  - Text input: Start a session with a simple algebra problem; show Q&A cadence.
-  - Image upload: Attach `linear1.png` via CLI (`--image` or `:attach`) or the frontend image input; show how context is incorporated.
-  - Socratic dialogue: Highlight question types and compliance (no direct answers).
-  - Stretch feature: Open Collaboration, create/join a room, send a few messages to show real-time updates.
-
-- Wrap-up:
-  - Briefly reference analytics or compliance metrics if available.
-  - End with how to reproduce locally from README.
+---
 
 ## License
 
 MIT
-
-## Contributing
-
-This is a learning platform built with pedagogical effectiveness in mind. Contributions welcome!
