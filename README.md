@@ -2,6 +2,56 @@
 
 🎓 Full-stack Socratic AI tutoring platform with adaptive learning, real-time collaboration, and comprehensive analytics.
 
+---
+
+## 🚀 For Portfolio Reviewers
+
+**TL;DR — See it in action:**
+1. **Live Demo:** [socrates.up.railway.app](https://socrates.up.railway.app) (or run locally in 2 min)
+2. **Demo Login:** `demo@socrates.ai` / `password123`
+3. **Key Features:** Socratic dialogue engine, real-time collaboration, learning analytics
+
+**Quick Local Setup:**
+```bash
+# Terminal 1: Backend
+cp .env.example .env && npm install && npm run api:dev
+
+# Terminal 2: Frontend
+cd client && npm install && npm run dev
+# Open http://localhost:5173 → login with demo credentials
+```
+
+**Portfolio Highlights:**
+| Feature | Location | Key Files |
+|---------|----------|-----------|
+| Socratic Engine | `src/core/` | `socratic-engine.ts`, `adaptive-controller.ts` |
+| REST API | `src/api/routes/` | `auth.ts`, `sessions.ts`, `analytics.ts` |
+| React Frontend | `client/src/` | `pages/Session.tsx`, `components/MathRenderer.tsx` |
+| Real-time | `src/api/websocket/` | `handlers.ts` + `client/src/hooks/useSocket.ts` |
+| CLI Tool | `src/cli/` | `bin/socrates`, `commands/chat.ts` |
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      ARCHITECTURE                           │
+├─────────────────────────────────────────────────────────────┤
+│  Browser (React)          CLI (Node)                        │
+│  ┌─────────────────┐      ┌─────────────┐                  │
+│  │  Dashboard      │      │  tutor chat │                  │
+│  │  Session Chat   │      │  tutor demo │                  │
+│  │  Analytics      │      │  tutor run  │                  │
+│  └────────┬────────┘      └──────┬──────┘                  │
+│           │ HTTP/WS              │ OpenAI API              │
+│           ▼                      ▼                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Express API Server                     │   │
+│  │  /api/v1/auth  /api/v1/sessions  /api/v1/analytics │   │
+│  │  Socket.IO    JWT Auth        Socratic Engine      │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Current Status
 
 **Backend (Complete):**
